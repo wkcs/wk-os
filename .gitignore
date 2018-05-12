@@ -3,6 +3,7 @@
 *.bin
 *.hex
 *.list
+*.size
 debug
 *~
 *.o

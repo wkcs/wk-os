@@ -5,3 +5,5 @@
 # 
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
+
+include $(TOP_DIR)/arch/arm/Makefile

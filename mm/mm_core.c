@@ -2,7 +2,7 @@
  * Copyright (C) 2018 胡启航<Hu Qihang>
  *
  * Author: wkcs
- * 
+ *
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
@@ -26,12 +26,12 @@ static struct mm_pool_data {
  * 返回值：0->内存池不符合要求，其他值为内存池大小
  */
 size_t check_mm_pool(void)
-{    
+{
     /*
      *检查内存池起始地址对齐是否符合要求，
      *如不符合，则修改起始地址使其符合要求
      */
-    if(&__mm_pool_start / MM_ALIGN == 0)
+    if (&__mm_pool_start / MM_ALIGN == 0)
         mm_pool_data->mm_pool_start = &__mm_pool_start;
     else {
         mm_pool_data->mm_pool_start = &__mm_pool_start;
