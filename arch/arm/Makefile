@@ -6,17 +6,17 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-FILE_DIR = $(TOP_DIR)/arch/arm
+DEBUG_DIR += $(TOP_DIR)/debug/arch/arm
 
-TEMP_C_SCRS = cpu_c.c
+include $(TOP_DIR)/arch/arm/boot/Makefile
+include $(TOP_DIR)/arch/arm/cmsis/Makefile
 
-TEMP_ASM_SCRS = cpu_s.S
+C_SRCS += $(TOP_DIR)/arch/arm/cpu_c.c
 
-OBJS += $(TEMP_C_SCRS:%.c:$(TOP_DIR)/debug/objs/%.o)
-OBJS += $(TEMP_ASM_SCRS:%.s:$(TOP_DIR)/debug/objs/%.o)
+ASM_SRCS += $(TOP_DIR)/arch/arm/cpu_s.S
+ASM_SRCS += $(TOP_DIR)/arch/arm/startup_stm32f10x_hd.S
 
-C_SCRS += $(TEMP_C_SCRS:%:$(FILE_DIR)/%)
-ASM_SCRS += $(TEMP_ASM_SCRS:%:$(FILE_DIR)/%)
+INC_DIR += -I $(TOP_DIR)/arch/arm/include
 
 
 

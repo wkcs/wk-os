@@ -45,9 +45,9 @@ GDB		    := $(PREFIX)-gdb
 
 # 架构相关编译指令
 #使用硬件fpu
-FP_FLAGS	= -mfloat-abi=hard -mfpu=fpv4-sp-d16
-#FP_FLAGS	= -msoft-float
-ARCH_FLAGS	= -mthumb -mcpu=cortex-m4
+#FP_FLAGS	= -mfloat-abi=hard -mfpu=fpv4-sp-d16
+FP_FLAGS	= -msoft-float
+ARCH_FLAGS	= -mthumb -mcpu=cortex-m3
 
 
 CCFLAGS = $(ARCH_FLAGS)

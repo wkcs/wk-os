@@ -11,6 +11,14 @@ TOP_DIR = .
 
 include config.mk
 
+# 宏定义
+DEFS = 
+
+#设定包含文件目录
+INC_DIR = -I $(TOP_DIR)/include
+
+DEBUG_DIR = $(TOP_DIR)/debug
+
 # 展开工作子目录
 include $(TOP_DIR)/arch/Makefile
 include $(TOP_DIR)/drivers/Makefile
@@ -21,9 +29,13 @@ include $(TOP_DIR)/lib/Makefile
 include $(TOP_DIR)/mm/Makefile
 include $(TOP_DIR)/net/Makefile
 include $(TOP_DIR)/scripts/Makefile
+include $(TOP_DIR)/test/Makefile
 
-# 宏定义
-DEFS		= -D STM32F40_41xxx -D USE_STDPERIPH_DRIVER -D __VFP_FP__ -D USE_USB_OTG_FS 
+C_OBJS = $(C_SRCS:./%.c=$(TOP_DIR)/debug/%.o)
+ASM_OBJS = $(ASM_SRCS:./%.S=$(TOP_DIR)/debug/%.o)
+OBJS = $(C_OBJS)
+OBJS += $(ASM_OBJS)
+DEPS = $(OBJS:%.o=%.d)
 
 #链接脚本
 LDSCRIPT    = $(TOP_DIR)/stm32_flash.ld
@@ -33,9 +45,7 @@ OOCD		:= openocd
 OOCD_INTERFACE	:= flossjtag
 OOCD_TARGET	:= stm32f4x
 OOCDFLAGS := -f openocd.cfg
-
-#设定包含文件目录
-INC_DIR += -I $(TOP_DIR)/include           
+           
 
 CCFLAGS += $(INC_DIR)
 CCFLAGS += $(DEFS)
@@ -47,8 +57,6 @@ ASFLAGS += $(DEFS)
 
 
 LDFLAGS += -T $(LDSCRIPT)
-
-DEPS = $(OBJS:%.o=%.d)
 
 SECONDARY_FLASH = $(TOP_DIR)/debug/$(TARGET).hex
 SECONDARY_SIZE = $(TOP_DIR)/debug/$(TARGET).size
@@ -76,7 +84,7 @@ $(TARGET).images: $(SECONDARY_BIN) $(SECONDARY_FLASH) $(SECONDARY_LIST)
 	$(Q)echo   images generated
 
 
-$(SECONDARY_ELF): $(OBJS) $(LDSCRIPT) libs
+$(SECONDARY_ELF): debug_dir $(OBJS) $(LDSCRIPT)
 	@echo   LD      $(SECONDARY_ELF)
 	$(Q)$(CC) $(LDFLAGS) -o "$(SECONDARY_ELF)" $(C_OBJS) $(ASM_OBJS)
 	@echo   SIZE    $(SECONDARY_ELF)\n\n
@@ -98,16 +106,16 @@ $(SECONDARY_LIST): $(SECONDARY_ELF)
 	$(Q)$(OBJDUMP) -S $(SECONDARY_ELF) > $(SECONDARY_LIST)
 
 
-$(C_OBJS):$(C_SRCS).c 
+$(C_OBJS):$(TOP_DIR)/debug/%.o:$(TOP_DIR)/%.c 
 	@echo   CC      $<
 	$(Q)$(CC) $(CCFLAGS) -o $@ $<
 
-$(ASM_OBJS):$(C_SRCS).S 
+$(ASM_OBJS):$(TOP_DIR)/debug/%.o:$(TOP_DIR)/%.S 
 	@echo   AS      $<
 	$(Q)$(CC) $(ASFLAGS) -o $@ $<
 
-libs:
-	$(MAKE) -C $(LIB_MAKE_DIR) $@
+#libs:
+#	$(MAKE) -C $(LIB_MAKE_DIR) $@
 
 # 使用stlink驱动下载bin程序
 stlink-flash: $(SECONDARY_BIN)
@@ -119,9 +127,9 @@ flash: $(SECONDARY_FLASH)
 	@echo   OPEN_OCD FLASH $<
 	$(Q)$(OOCD) $(OOCDFLAGS) -c "program $(SECONDARY_FLASH) verify reset exit" 
 
-debug_file:
-	mkdir $(TOP_DIR)/debug
-	mkdir $(TOP_DIR)/debug/objs
+debug_dir:
+	@echo   Create debug directory
+	$(Q)-mkdir $(DEBUG_DIR)
 
 # 使用GDB 通过sdtin/out管道与OpenOCD连接 并在main函数处打断点后运行
 debug: $(SECONDARY_ELF)

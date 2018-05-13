@@ -6,4 +6,6 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
+DEBUG_DIR += $(TOP_DIR)/debug/arch
+
 include $(TOP_DIR)/arch/arm/Makefile

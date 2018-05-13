@@ -1,13 +1,15 @@
-FILE_DIR = $(TOP_DIR)/mm
+##############################################
+# Copyright (C) 2018 胡启航<Hu Qihang>
+#
+# Author: wkcs
+# 
+# Email: hqh2030@gmail.com, huqihan@live.com
+##############################################
 
-TEMP_C_SCRS = mm_core.c
-TEMP_C_SCRS += mm_init.c
-TEMP_C_SCRS += mm.c
+DEBUG_DIR += $(TOP_DIR)/debug/mm
 
-TEMP_ASM_SCRS =
+C_SRCS += $(TOP_DIR)/mm/mm_core.c
+C_SRCS += $(TOP_DIR)/mm/mm_init.c
+C_SRCS += $(TOP_DIR)/mm/mm.c
 
-OBJS += $(TEMP_C_SCRS:%.c:$(TOP_DIR)/debug/objs/%.o)
-OBJS += $(TEMP_ASM_SCRS:%.s:$(TOP_DIR)/debug/objs/%.o)
-
-C_SCRS += $(TEMP_C_SCRS:%:$(FILE_DIR)/%)
-ASM_SCRS += $(TEMP_ASM_SCRS:%:$(FILE_DIR)/%)
+ASM_SRCS +=

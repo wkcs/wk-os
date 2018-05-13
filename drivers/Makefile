@@ -6,15 +6,12 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-FILE_DIR = $(TOP_DIR)/drivers
+DEBUG_DIR += $(TOP_DIR)/debug/drivers
 
-TEMP_C_SCRS = 
+include $(TOP_DIR)/drivers/src/Makefile
 
-TEMP_ASM_SCRS = 
+C_SRCS += 
 
-OBJS += $(TEMP_C_SCRS:%.c:$(TOP_DIR)/debug/objs/%.o)
-OBJS += $(TEMP_ASM_SCRS:%.s:$(TOP_DIR)/debug/objs/%.o)
+ASM_SRCS += 
 
-C_SCRS += $(TEMP_C_SCRS:%:$(FILE_DIR)/%)
-ASM_SCRS += $(TEMP_ASM_SCRS:%:$(FILE_DIR)/%)
-
+INC_DIR += -I $(TOP_DIR)/drivers/inc

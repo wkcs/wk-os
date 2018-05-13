@@ -6,15 +6,10 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-FILE_DIR = $(TOP_DIR)/kernel/printk
+DEBUG_DIR += $(TOP_DIR)/debug/kernel/printk
 
-TEMP_C_SCRS = printk.c
+C_SRCS += $(TOP_DIR)/kernel/printk/printk.c
 
-TEMP_ASM_SCRS =
+ASM_SRCS +=
 
-OBJS += $(TEMP_C_SCRS:%.c:$(TOP_DIR)/debug/objs/%.o)
-OBJS += $(TEMP_ASM_SCRS:%.s:$(TOP_DIR)/debug/objs/%.o)
-
-C_SCRS += $(TEMP_C_SCRS:%:$(FILE_DIR)/%)
-ASM_SCRS += $(TEMP_ASM_SCRS:%:$(FILE_DIR)/%)
 

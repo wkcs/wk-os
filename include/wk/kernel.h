@@ -11,7 +11,7 @@
 
 #include <asm/types.h>
 
-#define USHRT_MAX	((u16)(~0U))
+/*#define USHRT_MAX	((u16)(~0U))
 #define SHRT_MAX	((s16)(USHRT_MAX>>1))
 #define SHRT_MIN	((s16)(-SHRT_MAX - 1))
 #define INT_MAX		((int)(~0U>>1))
@@ -49,25 +49,28 @@
 #define WK_S32_MIN		((wk_s32_t)(-WK_S32_MAX - 1))
 #define WK_U64_MAX		((wk_u64_t)~0ULL)
 #define WK_S64_MAX		((wk_s64_t)(WK_U64_MAX>>1))
-#define WK_S64_MIN		((wk_s64_t)(-WK_S64_MAX - 1))
+#define WK_S64_MIN		((wk_s64_t)(-WK_S64_MAX - 1)) */
 
-#define NULL 0
+#undef NULL
+#define NULL ((void *)0)
 
-#define offsetof(type, member) (size_t)&(((type *)0)->member)
+enum {
+	false	= 0,
+	true	= 1
+};
+
+#define wk_offsetof(type, member) (size_t)&(((type *)0)->member)
 
 /**
- * container_of - cast a member of a structure out to the containing structure
+ * wk_container_of - cast a member of a structure out to the containing structure
  * @ptr:	the pointer to the member.
  * @type:	the type of the container struct this is embedded in.
  * @member:	the name of the member within the struct.
  *
  */
-#define container_of(ptr, type, member) ({				\
-	void *__mptr = (void *)(ptr);					\
-	BUILD_BUG_ON_MSG(!__same_type(*(ptr), ((type *)0)->member) &&	\
-			 !__same_type(*(ptr), void),			\
-			 "pointer type mismatch in container_of()");	\
-	((type *)(__mptr - offsetof(type, member))); })
+#define wk_container_of(ptr, type, member) ({				\
+	const typeof( ((type *)0)->member ) *__mptr = (ptr);   \
+	(type *)( (size_t)__mptr - wk_offsetof(type, member) );})
 
 
 #endif

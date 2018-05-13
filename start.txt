@@ -1,0 +1,43 @@
+
+start.o:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+	...
+
+Disassembly of section .text.reset_randler:
+
+00000000 <reset_randler>:
+   0:	2100      	movs	r1, #0
+   2:	e003      	b.n	c <LoopCopyDataInit>
+
+00000004 <CopyDataInit>:
+   4:	4b0b      	ldr	r3, [pc, #44]	; (34 <LoopFillZerobss+0x14>)
+   6:	585b      	ldr	r3, [r3, r1]
+   8:	5043      	str	r3, [r0, r1]
+   a:	3104      	adds	r1, #4
+
+0000000c <LoopCopyDataInit>:
+   c:	480a      	ldr	r0, [pc, #40]	; (38 <LoopFillZerobss+0x18>)
+   e:	4b0b      	ldr	r3, [pc, #44]	; (3c <LoopFillZerobss+0x1c>)
+  10:	1842      	adds	r2, r0, r1
+  12:	429a      	cmp	r2, r3
+  14:	d3f6      	bcc.n	4 <CopyDataInit>
+  16:	4a0a      	ldr	r2, [pc, #40]	; (40 <LoopFillZerobss+0x20>)
+  18:	e002      	b.n	20 <LoopFillZerobss>
+
+0000001a <FillZerobss>:
+  1a:	2300      	movs	r3, #0
+  1c:	f842 3b04 	str.w	r3, [r2], #4
+
+00000020 <LoopFillZerobss>:
+  20:	4b08      	ldr	r3, [pc, #32]	; (44 <LoopFillZerobss+0x24>)
+  22:	429a      	cmp	r2, r3
+  24:	d3f9      	bcc.n	1a <FillZerobss>
+  26:	f7ff fffe 	bl	0 <SystemInit>
+  2a:	f7ff fffe 	bl	0 <__libc_init_array>
+  2e:	f7ff fffe 	bl	0 <wk_os_start>
+  32:	4770      	bx	lr
+	...

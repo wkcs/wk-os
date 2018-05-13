@@ -6,18 +6,13 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
+DEBUG_DIR += $(TOP_DIR)/debug/kernel
+
 include $(TOP_DIR)/kernel/irq/Makefile
 include $(TOP_DIR)/kernel/printk/Makefile
 
-FILE_DIR = $(TOP_DIR)/kernel
+C_SRCS += $(TOP_DIR)/kernel/task.c
 
-TEMP_C_SCRS = task.c
+ASM_SRCS +=
 
-TEMP_ASM_SCRS =
-
-OBJS += $(TEMP_C_SCRS:%.c:$(TOP_DIR)/debug/objs/%.o)
-OBJS += $(TEMP_ASM_SCRS:%.s:$(TOP_DIR)/debug/objs/%.o)
-
-C_SCRS += $(TEMP_C_SCRS:%:$(FILE_DIR)/%)
-ASM_SCRS += $(TEMP_ASM_SCRS:%:$(FILE_DIR)/%)
 
