@@ -10,8 +10,9 @@
 #define __WK_KERNEL_H__
 
 #include <asm/types.h>
+#include <wk/compiler.h>
 
-/*#define USHRT_MAX	((u16)(~0U))
+#define USHRT_MAX	((u16)(~0U))
 #define SHRT_MAX	((s16)(USHRT_MAX>>1))
 #define SHRT_MIN	((s16)(-SHRT_MAX - 1))
 #define INT_MAX		((int)(~0U>>1))
@@ -49,7 +50,7 @@
 #define WK_S32_MIN		((wk_s32_t)(-WK_S32_MAX - 1))
 #define WK_U64_MAX		((wk_u64_t)~0ULL)
 #define WK_S64_MAX		((wk_s64_t)(WK_U64_MAX>>1))
-#define WK_S64_MIN		((wk_s64_t)(-WK_S64_MAX - 1)) */
+#define WK_S64_MIN		((wk_s64_t)(-WK_S64_MAX - 1))
 
 #undef NULL
 #define NULL ((void *)0)

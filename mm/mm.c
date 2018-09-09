@@ -56,7 +56,10 @@ int __mm_free(void *addr)
     struct mm_list_t *list;
     size_t num;
 
+    LIST_HEAD(head);
+
     list = (struct mm_list_t *)((addr_t)addr - sizeof(struct mm_list_t));
+
     head_main = &list->list;
 
     num = list->block_num;
@@ -71,7 +74,9 @@ int __mm_free(void *addr)
         return -1;
     }
 
-    list_splice(head_new, head_main);
+    list_add(&head, head_new);
+
+    list_splice(&head, head_main);
 
     return 0;
 }

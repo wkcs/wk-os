@@ -32,7 +32,7 @@ struct hlist_node {
 
 static inline void INIT_LIST_HEAD(struct list_head *list)
 {
-	list->next = list;
+	WRITE_ONCE(list->next, list);
 	list->prev = list;
 }
 
@@ -43,7 +43,7 @@ static inline void __list_add(struct list_head *new,
 	next->prev = new;
 	new->next = next;
 	new->prev = prev;
-	prev->next = new;
+	WRITE_ONCE(prev->next, new);
 }
 
 static inline void list_add(struct list_head *new, struct list_head *head)
@@ -58,10 +58,8 @@ static inline void list_add_tail(struct list_head *new, struct list_head *head)
 
 static inline void __list_del(struct list_head * prev, struct list_head * next)
 {
-    if (next != NULL)
-	    next->prev = prev;
-    if (prev != NULL)
-	    prev->next = next;
+	next->prev = prev;
+	WRITE_ONCE(prev->next, next);
 }
 
 static inline void __list_del_entry(struct list_head *entry)
@@ -72,8 +70,8 @@ static inline void __list_del_entry(struct list_head *entry)
 static inline void list_del(struct list_head *entry)
 {
 	__list_del_entry(entry);
-	entry->next = NULL;
-	entry->prev = NULL;
+	entry->next = entry;
+	entry->prev = entry;
 }
 
 static inline void list_replace(struct list_head *old,
@@ -142,8 +140,7 @@ static inline int list_is_last(const struct list_head *list,
  */
 static inline int list_empty(const struct list_head *head)
 {
-	//return READ_ONCE(head->next) == head;
-	return false;
+	return READ_ONCE(head->next) == head;
 }
 
 /**
@@ -228,11 +225,11 @@ static inline void list_cut_position(struct list_head *list,
 		__list_cut_position(list, head, entry);
 }
 
-static inline void __list_splice(struct list_head *list,
+static inline void __list_splice(const struct list_head *list,
 				 struct list_head *prev,
 				 struct list_head *next)
 {
-	struct list_head *first = list;
+	struct list_head *first = list->next;
 	struct list_head *last = list->prev;
 
 	first->prev = prev;

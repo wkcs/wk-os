@@ -24,7 +24,7 @@ typedef __wk_s64_t wk_s64_t;
 typedef __wk_u64_t wk_u64_t;
 
 /**********************************/
-/*typedef __wk_s8_t __s8;
+typedef __wk_s8_t __s8;
 typedef __wk_u8_t __u8;
 
 typedef __wk_s16_t __s16;
@@ -34,10 +34,10 @@ typedef __wk_s32_t __s32;
 typedef __wk_u32_t __u32;
 
 typedef __wk_s64_t __s64;
-typedef __wk_u64_t __u64;*/
+typedef __wk_u64_t __u64;
 
 /***********************************/
-/*typedef __wk_s8_t s8;
+typedef __wk_s8_t s8;
 typedef __wk_u8_t u8;
 
 typedef __wk_s16_t s16;
@@ -47,10 +47,10 @@ typedef __wk_s32_t s32;
 typedef __wk_u32_t u32;
 
 typedef __wk_s64_t s64;
-typedef __wk_u64_t u64;*/
+typedef __wk_u64_t u64;
 
 /***********************************/
-/*typedef __wk_s8_t int8_t;
+typedef __wk_s8_t int8_t;
 typedef __wk_u8_t uint8_t;
 
 typedef __wk_s16_t int16_t;
@@ -60,7 +60,7 @@ typedef __wk_s32_t int32_t;
 typedef __wk_u32_t uint32_t;
 
 typedef __wk_s64_t int64_t;
-typedef __wk_u64_t uint64_t;*/
+typedef __wk_u64_t uint64_t;
  
 
 typedef __wk_size_t size_t;
