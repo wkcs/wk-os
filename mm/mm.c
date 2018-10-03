@@ -49,7 +49,11 @@ void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
 
     return (void *)((addr_t)list_temp + sizeof(struct mm_list_t));
 }
-
+/* zzr
+ * 释放内存 
+ * @param 需要释放地址的指针
+ * @return int
+ */
 int __mm_free(void *addr)
 {
     struct list_head *head_main, *head_new;
