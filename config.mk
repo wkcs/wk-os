@@ -32,16 +32,16 @@ endif
 
 
 #定义工具链
-PREFIX		:= arm-none-eabi
-CC		    := $(PREFIX)-gcc
-CXX		    := $(PREFIX)-g++
-LD		    := $(PREFIX)-gcc
-AR		    := $(PREFIX)-ar
-AS		    := $(PREFIX)-as
-OBJCOPY		:= $(PREFIX)-objcopy
-OBJDUMP		:= $(PREFIX)-objdump
-SIZE        := $(PREFIX)-size
-GDB		    := $(PREFIX)-gdb
+PREFIX		:= arm-none-eabi-
+CC		    := $(PREFIX)gcc
+CXX		    := $(PREFIX)g++
+LD		    := $(PREFIX)gcc
+AR		    := $(PREFIX)ar
+AS		    := $(PREFIX)as
+OBJCOPY		:= $(PREFIX)objcopy
+OBJDUMP		:= $(PREFIX)objdump
+SIZE        := $(PREFIX)size
+GDB		    := $(PREFIX)gdb
 
 # 架构相关编译指令
 #使用硬件fpu
