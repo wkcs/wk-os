@@ -2,7 +2,7 @@
  * Copyright (C) 2018 胡启航<Hu Qihang>
  *
  * Author: wkcs
- * 
+ *
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
@@ -37,7 +37,7 @@ struct mm_list_t *__find_block(size_t size)
 void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
 {
     struct mm_list_t *list_temp;
-    
+
     list_temp = __find_block(size);
     if (list_temp == NULL)
         return NULL;
@@ -50,7 +50,7 @@ void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
     return (void *)((addr_t)list_temp + sizeof(struct mm_list_t));
 }
 /* zzr
- * 释放内存 
+ * 释放内存
  * @param 需要释放地址的指针
  * @return int
  */

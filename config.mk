@@ -55,7 +55,7 @@ CCFLAGS += $(FP_FLAGS)
 CCFLAGS += $(OPTSRC)
 CCFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections                  \
            -fdata-sections -ffreestanding -fno-move-loop-invariants
-CCFLAGS += -Wall -Wextra  -g3
+CCFLAGS += -Wall -Wextra  -g3 
 CCFLAGS += -std=gnu11 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c
 
 ASFLAGS = $(ARCH_FLAGS)
@@ -68,7 +68,7 @@ ASFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c
 
 LDFLAGS = $(ARCH_FLAGS)
 LDFLAGS += $(FP_FLAGS)
-LDFLAGS += -specs=nano.specs -specs=nosys.specs -static
+LDFLAGS += -nostdinc -nostdlib
 LDFLAGS += -Wl,--start-group -lc -lm -Wl,--end-group -Wl,-cref,-u,Reset_Handler -Wl,-Map=$(TOP_DIR)/debug/$(TARGET).map   \
            -Wl,--defsym=malloc_getpagesize_P=0x80
 

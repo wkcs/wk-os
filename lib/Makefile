@@ -9,5 +9,6 @@
 DEBUG_DIR += $(TOP_DIR)/debug/lib
 
 C_SRCS += $(TOP_DIR)/lib/string.c
+C_SRCS += $(TOP_DIR)/lib/vsprintf.c
 
 ASM_SRCS +=

@@ -7,24 +7,10 @@ static inline void usart_send_blocking(uint8_t data)
 	USART_SendData(USART1, data);
 }
 
-/*
- * Called by libc stdio fwrite functions
- */
-int _write(int fd, char *ptr, int len)
+int usart_send(char *ptr, int len)
 {
     int i = 0;
-
-    /*
-     * write "len" of char from "ptr" to file id "fd"
-     * Return number of char written.
-     *
-    * Only work for STDOUT, STDIN, and STDERR
-     */
-    if (fd > 2)
-    {
-        return -1;
-    }
-
+	
     while (*ptr && (i < len))
     {
         usart_send_blocking(*ptr);

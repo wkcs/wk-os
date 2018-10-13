@@ -21,7 +21,7 @@
  *
  ******************************************************************************/
 
-#include <stdint.h>
+#include <wk/kernel.h>
 
 /* define compiler specific symbols */
 #if defined ( __CC_ARM   )

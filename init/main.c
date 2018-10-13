@@ -14,6 +14,7 @@
 #include <wk/mm.h>
 #include <wk/mm_core.h>
 #include <wk/kernel.h>
+#include <lib/stdio.h>
 
 int main(void)
 {
@@ -27,7 +28,8 @@ int main(void)
     printf("start\r\n");
     mm_pool_init();
     printf("init ok\r\n");
-    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+    list_for_each_entry(list_temp, mm_pool_data.head, list)
+    {
         i++;
         printf("block[%d]----addr = %p\r\n", i, list_temp);
         printf("         |---size = %d\r\n", list_temp->size);
@@ -44,7 +46,8 @@ int main(void)
     test_addr2 = __mm_alloc(128, 0, 25);
     test_addr = __mm_alloc(800, 0, 25);
     i = 0;
-    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+    list_for_each_entry(list_temp, mm_pool_data.head, list)
+    {
         i++;
         printf("block[%d]----addr = %p\r\n", i, list_temp);
         printf("         |---size = %d\r\n", list_temp->size);
@@ -54,7 +57,8 @@ int main(void)
     test_addr = __mm_alloc(500, 0, 25);
     printf("\r\ntest_addr = %p\r\n\r\n", test_addr);
     i = 0;
-    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+    list_for_each_entry(list_temp, mm_pool_data.head, list)
+    {
         i++;
         printf("block[%d]----addr = %p\r\n", i, list_temp);
         printf("         |---size = %d\r\n", list_temp->size);
@@ -68,7 +72,8 @@ int main(void)
         printf("         |---size = %d\r\n", list_temp->size);
         printf("         -----num = %d\r\n", list_temp->block_num);
     }*/
-    while (1) {
+    while (1)
+    {
         LED0 = 0;
         LED1 = 1;
         delay_ms(300);
