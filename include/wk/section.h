@@ -6,5 +6,9 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#include <wk/kernel.h>
-#include <wk/task.h>
+#ifndef __SECTION_H__
+#define __SECTION_H__
+
+#define __init __attribute__((section("kernel_init")))
+
+#endif

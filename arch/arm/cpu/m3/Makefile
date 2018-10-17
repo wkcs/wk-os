@@ -6,12 +6,13 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/test
+DEBUG_DIR += $(TOP_DIR)/debug/arch/arm/cpu/m3
 
-C_SRCS += $(TOP_DIR)/test/delay.c
-C_SRCS += $(TOP_DIR)/test/led.c
-#C_SRCS += $(TOP_DIR)/test/usart.c
+C_SRCS += $(TOP_DIR)/arch/arm/cpu/m3/cpu_c.c
 
-ASM_SRCS += 
+ASM_SRCS += $(TOP_DIR)/arch/arm/cpu/m3/cpu_s.S
 
-INC_DIR += -I $(TOP_DIR)/test
+INC_DIR += -I$(TOP_DIR)/debug/arch/arm/cpu/m3
+
+
+

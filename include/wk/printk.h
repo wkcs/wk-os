@@ -6,5 +6,9 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#include <wk/kernel.h>
-#include <wk/task.h>
+#ifndef __PRINTK_H__
+#define __PRINTK_H__
+
+int printk(const char *fmt, ...);
+
+#endif

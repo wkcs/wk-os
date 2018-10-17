@@ -12,7 +12,7 @@ TOP_DIR = .
 include config.mk
 
 # 宏定义
-DEFS = 
+DEFS = -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER
 
 #设定包含文件目录
 INC_DIR = -I $(TOP_DIR)/include
@@ -65,7 +65,7 @@ SECONDARY_ELF = $(TOP_DIR)/debug/$(TARGET).elf
 SECONDARY_LIST = $(TOP_DIR)/debug/$(TARGET).list
 
 
-.PHONY: images clean size bin hex size list debug stlink-flash style-code flash debug_file
+.PHONY: all clean size bin hex debug stlink-flash flash debug_file
 
 
 all: $(TARGET).images debug_file

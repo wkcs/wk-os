@@ -6,5 +6,9 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#include <wk/kernel.h>
-#include <wk/task.h>
+#ifndef __GPIO_H__
+#define __GPIO_H__
+
+#include <arch_gpio.h>
+
+#endif

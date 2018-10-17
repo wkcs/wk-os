@@ -34,6 +34,7 @@ SECTIONS
     . = ALIGN(4);
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
+    *(kernel_init)
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     *(.glue_7)         /* glue arm to thumb code */
@@ -119,8 +120,10 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(4);
   } >RAM
-
-  __mm_pool_start = .;
+  __log_buf_start = .;
+  __log_buf_end = __log_buf_start + 1024;
+  __uart_log_dma_buf_start = __log_buf_end;
+  __mm_pool_start = __uart_log_dma_buf_start + 256;
   __mm_pool_end = _estack - _Min_Stack_Size;
 
   /* MEMORY_bank1 section, code must be located here explicitly            */

@@ -11,6 +11,7 @@
 
 #include <asm/types.h>
 #include <wk/compiler.h>
+#include <wk/section.h>
 
 #define USHRT_MAX	((u16)(~0U))
 #define SHRT_MAX	((s16)(USHRT_MAX>>1))
@@ -73,5 +74,6 @@ enum {
 	const typeof( ((type *)0)->member ) *__mptr = (ptr);   \
 	(type *)( (size_t)__mptr - wk_offsetof(type, member) );})
 
+#define get_kernel_run_time() 0
 
 #endif

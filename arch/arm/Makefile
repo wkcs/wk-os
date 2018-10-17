@@ -8,13 +8,15 @@
 
 DEBUG_DIR += $(TOP_DIR)/debug/arch/arm
 
+include $(TOP_DIR)/arch/arm/board/Makefile
 include $(TOP_DIR)/arch/arm/boot/Makefile
 include $(TOP_DIR)/arch/arm/cmsis/Makefile
+include $(TOP_DIR)/arch/arm/cpu/Makefile
 
-C_SRCS += $(TOP_DIR)/arch/arm/cpu_c.c
+C_SRCS += 
 
-ASM_SRCS += $(TOP_DIR)/arch/arm/cpu_s.S
-ASM_SRCS += $(TOP_DIR)/arch/arm/startup_stm32f10x_hd.S
+ASM_SRCS += 
+ASM_SRCS += 
 
 INC_DIR += -I $(TOP_DIR)/arch/arm/include
 

@@ -7,11 +7,11 @@
  */
 
 #include <wk/kernel.h>
-#include <lib/stdarg.h>
 #include <lib/string.h>
 #include <lib/stdio.h>
+#include <lib/vsprintf.h>
 
-#include "usart.h"
+#include "arch_uart.h"
 
 #define isdigit(c) ((unsigned)((c) - '0') < 10)
 
@@ -330,19 +330,48 @@ uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
     return str - buf;
 }
 
+uint32_t snprintf(char *buf, size_t size, const char *fmt, ...)
+{
+    uint32_t n;
+    va_list args;
+
+    va_start(args, fmt);
+    n = vsnprintf(buf, size, fmt, args);
+    va_end(args);
+
+    return n;
+}
+
+uint32_t vsprintf(char *buf, const char *format, va_list arg_ptr)
+{
+    return vsnprintf(buf, SIZE_MAX, format, arg_ptr);
+}
+
+uint32_t sprintf(char *buf, const char *format, ...)
+{
+    uint32_t n;
+    va_list arg_ptr;
+
+    va_start(arg_ptr, format);
+    n = vsprintf(buf, format, arg_ptr);
+    va_end(arg_ptr);
+
+    return n;
+}
+
 void printf(const char *fmt, ...)
 {
 
     va_list args;
     size_t length;
-    static char log_buf[256];
+    static char buf[256];
 
     va_start(args, fmt);
-    length = vsnprintf(log_buf, sizeof(log_buf) - 1, fmt, args);
+    length = vsnprintf(buf, sizeof(buf) - 1, fmt, args);
     if (length > 256 - 1)
         length = 256 - 1;
 
-    usart_send(log_buf, length);
+    usart_send(buf, length);
 
     va_end(args);
 }

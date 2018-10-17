@@ -6,15 +6,17 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#include "sys.h"
 #include "delay.h"
-#include "usart.h"
 #include "led.h"
 
 #include <wk/mm.h>
 #include <wk/mm_core.h>
 #include <wk/kernel.h>
 #include <lib/stdio.h>
+#include <wk/printk.h>
+#include <wk/log.h>
+
+#include <board.h>
 
 int main(void)
 {
@@ -23,17 +25,23 @@ int main(void)
     void *test_addr, *test_addr2, *test_addr3;
 
     delay_init();
-    uart_init(115200);
+    board_config_init();
+    log_server_init();
     LED_Init();
-    printf("start\r\n");
+    printk("start\r\n");
+    read_log();
     mm_pool_init();
-    printf("init ok\r\n");
+    printk("init ok\r\n");
+    read_log();
     list_for_each_entry(list_temp, mm_pool_data.head, list)
     {
         i++;
-        printf("block[%d]----addr = %p\r\n", i, list_temp);
-        printf("         |---size = %d\r\n", list_temp->size);
-        printf("         -----num = %d\r\n", list_temp->block_num);
+        printk("block[%d]----addr = %p\r\n", i, list_temp);
+        read_log();
+        printk("         |---size = %d\r\n", list_temp->size);
+        read_log();
+        printk("         -----num = %d\r\n", list_temp->block_num);
+        read_log();
     }
     test_addr = __mm_alloc(500, 0, 25);
     test_addr2 = __mm_alloc(138, 0, 25);
@@ -49,28 +57,31 @@ int main(void)
     list_for_each_entry(list_temp, mm_pool_data.head, list)
     {
         i++;
-        printf("block[%d]----addr = %p\r\n", i, list_temp);
-        printf("         |---size = %d\r\n", list_temp->size);
-        printf("         -----num = %d\r\n", list_temp->block_num);
+        printk("block[%d]----addr = %p\r\n", i, list_temp);
+        printk("         |---size = %d\r\n", list_temp->size);
+        printk("         -----num = %d\r\n", list_temp->block_num);
     }
+    printf("ok\n");
+    read_log();
     __mm_free(test_addr2);
     test_addr = __mm_alloc(500, 0, 25);
-    printf("\r\ntest_addr = %p\r\n\r\n", test_addr);
+    printk("\r\ntest_addr = %p\r\n\r\n", test_addr);
     i = 0;
     list_for_each_entry(list_temp, mm_pool_data.head, list)
     {
         i++;
-        printf("block[%d]----addr = %p\r\n", i, list_temp);
-        printf("         |---size = %d\r\n", list_temp->size);
-        printf("         -----num = %d\r\n", list_temp->block_num);
+        printk("block[%d]----addr = %p\r\n", i, list_temp);
+        printk("         |---size = %d\r\n", list_temp->size);
+        printk("         -----num = %d\r\n", list_temp->block_num);
     }
+    read_log();
     /*__mm_free(test_addr);
     i = 0;
     list_for_each_entry(list_temp, mm_pool_data.head, list) {
         i++;
-        printf("block[%d]----addr = %p\r\n", i, list_temp);
-        printf("         |---size = %d\r\n", list_temp->size);
-        printf("         -----num = %d\r\n", list_temp->block_num);
+        printk("block[%d]----addr = %p\r\n", i, list_temp);
+        printk("         |---size = %d\r\n", list_temp->size);
+        printk("         -----num = %d\r\n", list_temp->block_num);
     }*/
     while (1)
     {
@@ -80,6 +91,7 @@ int main(void)
         LED0 = 1;
         LED1 = 0;
         delay_ms(300);
-        printf("Hello wk-os\r\n");
+        printk("Hello wk-os\r\n");
+        read_log();
     }
 }

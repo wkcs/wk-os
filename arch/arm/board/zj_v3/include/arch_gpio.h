@@ -1,11 +1,18 @@
-#ifndef __SYS_H
-#define __SYS_H	
+/*
+ * Copyright (C) 2018 胡启航<Hu Qihang>
+ *
+ * Author: wkcs
+ * 
+ * Email: hqh2030@gmail.com, huqihan@live.com
+ */
+
+#ifndef __ARCH_GPIO_H__
+#define __ARCH_GPIO_H__
+
 #include "stm32f10x.h"
-																	    
-	 
-//位带操作,实现51类似的GPIO控制功能
-//具体实现思想,参考<<CM3权威指南>>第五章(87页~92页).
-//IO口操作宏定义
+#include "arch_clk.h"
+#include "arch_irq.h"
+
 #define BITBAND(addr, bitnum) ((addr & 0xF0000000)+0x2000000+((addr &0xFFFFF)<<5)+(bitnum<<2)) 
 #define MEM_ADDR(addr)  *((volatile unsigned long  *)(addr)) 
 #define BIT_ADDR(addr, bitnum)   MEM_ADDR(BITBAND(addr, bitnum)) 
@@ -26,8 +33,6 @@
 #define GPIOF_IDR_Addr    (GPIOF_BASE+8) //0x40011A08 
 #define GPIOG_IDR_Addr    (GPIOG_BASE+8) //0x40011E08 
  
-//IO口操作,只对单一的IO口!
-//确保n的值小于16!
 #define PAout(n)   BIT_ADDR(GPIOA_ODR_Addr,n)  //输出 
 #define PAin(n)    BIT_ADDR(GPIOA_IDR_Addr,n)  //输入 
 
@@ -49,10 +54,16 @@
 #define PGout(n)   BIT_ADDR(GPIOG_ODR_Addr,n)  //输出 
 #define PGin(n)    BIT_ADDR(GPIOG_IDR_Addr,n)  //输入
 
-//以下为汇编函数
-void WFI_SET(void);		//执行WFI指令
-void INTX_DISABLE(void);//关闭所有中断
-void INTX_ENABLE(void);	//开启所有中断
-void MSR_MSP(u32 addr);	//设置堆栈地址
+struct gpio_config_t {
+    struct clk_config_t *clk_config;
+    struct irq_config_t *irq_config;
+    uint8_t gpio_port_source;
+    uint8_t gpio_pin_source;
+    EXTI_InitTypeDef exit_init_type;
+    GPIO_TypeDef *gpio;
+    GPIO_InitTypeDef init_type;
+};
+
+int gpio_config(struct gpio_config_t *config);
 
 #endif

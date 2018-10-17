@@ -9,6 +9,7 @@
 DEBUG_DIR += $(TOP_DIR)/debug/kernel/printk
 
 C_SRCS += $(TOP_DIR)/kernel/printk/printk.c
+C_SRCS += $(TOP_DIR)/kernel/printk/log.c
 
 ASM_SRCS +=
 
