@@ -6,9 +6,10 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#ifndef __CPU_H__
-#define __CPU_H__
+#ifndef __ASM_IRQ_H__
+#define __ASM_IRQ_H__
 
-#include <asm_cpu.h>
+#include <asm_types.h>
+
 
 #endif

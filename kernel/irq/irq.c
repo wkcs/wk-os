@@ -9,14 +9,22 @@
 #include <wk/kernel.h>
 #include <wk/irq.h>
 
-void (*__irq_handler[128])(void);
+volatile uint8_t interrupt_nest;
 
-int register_irq(int num, void (*callback_func)(void))
+inline void wk_interrupt_enter(void)
 {
-    if (num >= 0 && num < 128)
-        __irq_handler[num] = callback_func;
-    else
-        return -1;
-    
-    return 0;
+    addr_t level;
+
+    level = disable_irq_save();
+    interrupt_nest ++;
+    enable_irq_save(level);
+}
+
+inline void wk_interrupt_leave(void)
+{
+    addr_t level;
+
+    level = disable_irq_save();
+    interrupt_nest --;
+    enable_irq_save(level);
 }

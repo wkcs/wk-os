@@ -6,9 +6,11 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#ifndef __CPU_H__
-#define __CPU_H__
+#ifndef __CLK_H__
+#define __CLK_H__
 
-#include <asm_cpu.h>
+#include <wk/kernel.h>
+
+void system_beat_processing(void);
 
 #endif

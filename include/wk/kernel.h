@@ -12,6 +12,7 @@
 #include <asm/types.h>
 #include <wk/compiler.h>
 #include <wk/section.h>
+#include <kernel_cfg.h>
 
 #define USHRT_MAX	((u16)(~0U))
 #define SHRT_MAX	((s16)(USHRT_MAX>>1))

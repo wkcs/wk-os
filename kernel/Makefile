@@ -12,6 +12,8 @@ include $(TOP_DIR)/kernel/irq/Makefile
 include $(TOP_DIR)/kernel/printk/Makefile
 
 C_SRCS += $(TOP_DIR)/kernel/task.c
+C_SRCS += $(TOP_DIR)/kernel/clk.c
+C_SRCS += $(TOP_DIR)/kernel/sch.c
 C_SRCS += $(TOP_DIR)/kernel/kernel.c
 
 ASM_SRCS +=
