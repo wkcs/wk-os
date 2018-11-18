@@ -9,6 +9,10 @@
 #ifndef __PRINTK_H__
 #define __PRINTK_H__
 
-int printk(const char *fmt, ...);
+#include <asm/types.h>
+
+#define PR_LOG_BUG_SIZE 256
+
+int pr_log(uint8_t grade, const char *fmt, ...);
 
 #endif

@@ -20,6 +20,7 @@
 
 extern struct uart_config_t uart_log_dev;
 
+void board_init(void);
 int board_config_init(void);
 int consol_init(void);
 void send_to_console(void);

@@ -8,6 +8,8 @@
 
 #include <wk/kernel.h>
 
+addr_t kernel_running = false;
+
 #ifndef USE_CPU_FFS
 static const uint8_t __lowest_bit_bitmap[] =
 {

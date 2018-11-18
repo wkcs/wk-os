@@ -15,6 +15,7 @@
     .global switch_interrupt_flag
     .global interrupt_from_task
     .global interrupt_to_task
+    .global kernel_running
 
     .equ    SCB_VTOR, 0xE000ED08            /* Vector Table Offset Register */
     .equ    ICSR, 0xE000ED04                /* interrupt control state register */
@@ -112,8 +113,9 @@ pendsv_exit:
     ORR     LR, LR, #0x04
     BX      LR
 
+
 /*
- * void context_switch_to(__addr_t *to);
+ * void context_switch_to(__addr_t to);
  * R0 --> to
  */
     .global context_switch_to
@@ -129,6 +131,11 @@ context_switch_to:
 
     /* set interrupt flag to 1 */
     LDR     R1, =switch_interrupt_flag
+    MOV     R0, #1
+    STR     R0, [R1]
+
+    /* set kernel running to 1 */
+    LDR     R1, =kernel_running
     MOV     R0, #1
     STR     R0, [R1]
 
@@ -155,4 +162,5 @@ context_switch_to:
     CPSIE   I
 
     /* never reach here! */
-
+loop:
+    b loop

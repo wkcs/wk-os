@@ -12,6 +12,19 @@
 #include <wk/pid.h>
 #include <wk/config.h>
 
+void mm_dump(void)
+{
+    struct mm_list_t *list_temp;
+    uint32_t i = 0;
+
+    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+        i++;
+        pr_info("block[%d]----addr = %p\r\n", i, list_temp);
+        pr_info("         |---size = %d\r\n", list_temp->size);
+        pr_info("         -----num = %d\r\n", list_temp->block_num);
+    }
+}
+
 static struct mm_list_t *__find_block(size_t size)
 {
     int num = 0;
@@ -61,6 +74,11 @@ static int __mm_free(void *addr)
 
     LIST_HEAD(head);
 
+    if (!addr) {
+        pr_err("%s[%d]:the addr to be free is NULL %d\r\n", __func__, __LINE__);
+        return -1;
+    }
+
     list = (struct mm_list_t *)((addr_t)addr - sizeof(struct mm_list_t));
 
     head_main = &list->list;
@@ -95,6 +113,8 @@ void *wk_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
 
     enable_irq_save(level);
 
+    //mm_dump();
+
     return addr;
 }
 
@@ -107,7 +127,73 @@ int wk_free(void *addr)
 
     status = __mm_free(addr);
 
-    enable_irq_save(level);   
+    enable_irq_save(level);
+
+    //mm_dump();   
+
+    return status;
+}
+
+/*void wk_mm_set_pid(wk_pid_t pid, void *addr)
+{
+
+}*/
+
+#define STACK_GROW_DOWN
+
+void *stack_alloc(size_t stack_size)
+{
+    register addr_t level;
+    void *addr;
+
+    if (stack_size % 4) {
+        pr_err("%s[%d]:stack_size must be an integer multiple of %d\r\n", __func__, __LINE__, MM_ALIGN);
+        return NULL;
+    }
+
+    level = disable_irq_save();
+
+    addr = __mm_alloc(stack_size, 0, 0);
+
+    enable_irq_save(level);
+
+    //mm_dump();
+
+#ifdef STACK_GROW_UP
+    return addr;
+#else
+    return (void *)((addr_t)addr + stack_size);
+#endif
+}
+
+int stack_free(size_t stack_size, void *addr)
+{
+    register addr_t level;
+    int status = 0;
+
+    if (stack_size % 4) {
+        pr_err("%s[%d]:stack_size must be an integer multiple of %d\r\n", __func__, __LINE__, MM_ALIGN);
+        return -1;
+    }
+
+    if (!addr) {
+        pr_err("%s[%d]:the addr to be free is NULL %d\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+#ifdef STACK_GROW_DOWN
+    if ((addr_t)addr < stack_size) {
+        pr_err("%s[%d]:the addr is error %d\r\n", __func__, __LINE__);
+        return -1;
+    }
+    addr = (void *)((addr_t)addr - stack_size);
+#endif
+
+    level = disable_irq_save();
+
+    status = __mm_free(addr);
+
+    enable_irq_save(level);
 
     return status;
 }

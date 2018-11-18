@@ -120,10 +120,8 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(4);
   } >RAM
-  __log_buf_start = .;
-  __log_buf_end = __log_buf_start + 1024;
-  __uart_log_dma_buf_start = __log_buf_end;
-  __mm_pool_start = __uart_log_dma_buf_start + 256;
+  . = ALIGN(4);
+  __mm_pool_start = .;
   __mm_pool_end = _estack - _Min_Stack_Size;
 
   /* MEMORY_bank1 section, code must be located here explicitly            */

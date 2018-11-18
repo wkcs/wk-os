@@ -35,6 +35,7 @@ int __task_create(struct task_struct_t *task,
 
     INIT_LIST_HEAD(&task->list);
 
+    memset(task->name, 0, TASK_NAME_MAX);
     len = strlen(name);
     if (len < TASK_NAME_MAX)
         memcpy(task->name, name, len);
@@ -47,9 +48,11 @@ int __task_create(struct task_struct_t *task,
     task->stack_addr = stack_start;
     task->stack_size = stack_size;
 
+    pr_info("sp = 0x%x\r\n", task->stack_addr);
     task->sp = (addr_t *)stack_init(task->entry, task->parameter,
-                                        (addr_t *)((size_t)task->stack_addr + task->stack_size - 4),
+                                        (addr_t *)task->stack_addr,
                                         (void *)task_exit);
+    pr_info("sp = 0x%x\r\n", task->sp);
 
     task->init_priority    = priority;
     task->current_priority = priority;
@@ -84,36 +87,44 @@ struct task_struct_t * task_create(const char *name,
 {
     struct task_struct_t *task;
     addr_t *stack_start;
+    wk_pid_t pid;
 
-    task = (struct task_struct_t *)wk_alloc(sizeof(struct task_struct_t), 0, 0);
-    if (!task)
-        return NULL;
-    
-    //stack_start = (addr_t *)stack_alloc(stack_size);
-    stack_start = 0;
-    if (!stack_start) 
+    stack_start = (addr_t *)stack_alloc(stack_size);
+    pr_info("stack_start = 0x%x\r\n");
+    if (!stack_start)
         goto stack_err;
+
+    pid = pid_alloc((addr_t)stack_start);
+    if (!pid)
+        goto pid_err;
+
+    task = (struct task_struct_t *)wk_alloc(sizeof(struct task_struct_t), 0, pid);
+    pr_info("task struct addr = 0x%x\r\n", task);
+    if (!task)
+        goto pid_err;
+
+    task->pid = pid;
     
     if (__task_create(task, name, entry, parameter, stack_start, 
                         stack_size, priority, tick, clean, resource))
         goto task_create_err;
-
-    //task->id = task_id_alloc();
-    if (!task->id)
-        goto id_err;
     
     return task;
 
-id_err:
 task_create_err:
-    //stack_free(stack_start);
-stack_err:
     wk_free(task);
+pid_err:
+stack_err:
+    stack_free(stack_size, stack_start);
     return NULL;
 }
 
 void task_ready(struct task_struct_t *task)
 {
+    if (!task) {
+        pr_err("%s[%d]:task struct addr is NULL\r\n");
+        return;
+    }
     add_task_to_ready_list(task);
     if (get_current_task())
         switch_task();

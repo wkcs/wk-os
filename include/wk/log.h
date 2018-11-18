@@ -9,8 +9,8 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
-#include <wk/kernel.h>
-#include <wk/list.h>
+#include <asm/types.h>
+#include <wk/section.h>
 
 #define KERNEL_LOG_ENABLE
 

@@ -10,6 +10,7 @@
 #define __TASK_H__
 
 #include <wk/kernel.h>
+#include <wk/pid.h>
 #include <wk/list.h>
 
 enum task_status_t {
@@ -24,7 +25,7 @@ struct task_struct_t {
     addr_t *sp;
     
     char name[TASK_NAME_MAX];
-    uint32_t id;
+    wk_pid_t pid;
 
     addr_t *entry;                                
     addr_t *parameter;                             
@@ -49,7 +50,15 @@ struct task_struct_t {
 
     struct list_head list;                           
 };
-
+struct task_struct_t * task_create(const char *name,
+                                    void (*entry)(void *parameter),
+                                    void *parameter,
+                                    size_t stack_size,
+                                    uint8_t priority,
+                                    uint32_t tick,
+                                    void (*clean)(struct task_struct_t *task),
+                                    addr_t *resource);
+void task_ready(struct task_struct_t *task);
 int task_yield_cpu(void);
 
 #endif

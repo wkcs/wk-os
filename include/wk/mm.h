@@ -41,5 +41,7 @@ struct list_head *__mm_init(addr_t start, addr_t end);
 int mm_pool_init(void);
 void *wk_alloc(size_t size, mm_flag_t flag, wk_pid_t pid);
 int wk_free(void *addr);
+void *stack_alloc(size_t stack_size);
+int stack_free(size_t stack_size, void *addr);
 
 #endif

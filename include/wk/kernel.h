@@ -12,6 +12,8 @@
 #include <asm/types.h>
 #include <wk/compiler.h>
 #include <wk/section.h>
+#include <wk/printk.h>
+#include <wk/log.h>
 #include <kernel_cfg.h>
 
 #define USHRT_MAX	((u16)(~0U))
@@ -76,5 +78,19 @@ enum {
 	(type *)( (size_t)__mptr - wk_offsetof(type, member) );})
 
 #define get_kernel_run_time() 0
+
+#define pr_fatal(fmt, ...)  \
+	pr_log(LOG_FATAL, fmt, ## __VA_ARGS__)
+
+#define pr_err(fmt, ...)  \
+	pr_log(LOG_ERROR, fmt, ## __VA_ARGS__)
+
+#define pr_warning(fmt, ...)  \
+	pr_log(LOG_WARNING, fmt, ## __VA_ARGS__)
+
+#define pr_info(fmt, ...)  \
+	pr_log(LOG_INFO, fmt, ## __VA_ARGS__)
+
+extern addr_t kernel_running;
 
 #endif
