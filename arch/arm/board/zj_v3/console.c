@@ -25,14 +25,21 @@ void send_to_console(void)
 {
     size_t len;
 
-    if (!dma_transport) {
+    if (kernel_running) {
+        if (!dma_transport) {
+            len = read_log(log_buf, UART_LOG_DMA_BUF_SIZE);
+            if (!len)
+                return;
+            dma_transport = true;
+            DMA_Cmd(uart_log_dev.dma_config->ch, DISABLE );   
+            DMA_SetCurrDataCounter(uart_log_dev.dma_config->ch, len);
+            DMA_Cmd(uart_log_dev.dma_config->ch, ENABLE);
+        }
+    } else {
         len = read_log(log_buf, UART_LOG_DMA_BUF_SIZE);
         if (!len)
             return;
-        dma_transport = true;
-        DMA_Cmd(uart_log_dev.dma_config->ch, DISABLE );   
-        DMA_SetCurrDataCounter(uart_log_dev.dma_config->ch, len);
-        DMA_Cmd(uart_log_dev.dma_config->ch, ENABLE);
+        usart_send(log_buf, len);
     }
 }
 

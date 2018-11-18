@@ -64,11 +64,10 @@ void sch_start(void)
     to_task = list_entry(ready_task_list[highest_ready_priority].next,
                               struct task_struct_t,
                               list);
-
     current_task = to_task;
 
     /* switch to new task */
-    context_switch_to(to_task->sp);
+    context_switch_to((addr_t)&to_task->sp);
 
     /* never come back */
 }
@@ -109,14 +108,13 @@ void switch_task (void)
 
 
             if (interrupt_nest == 0) {
-
-                context_switch(from_task->sp, to_task->sp);
+                context_switch((addr_t)&from_task->sp, (addr_t)&to_task->sp);
 
                 /* enable interrupt */
                 enable_irq_save(level);
 
             } else {
-                context_switch_interrupt(from_task->sp, to_task->sp);
+                context_switch_interrupt((addr_t)&from_task->sp, (addr_t)&to_task->sp);
                 /* enable interrupt */
                 enable_irq_save(level);
             }
@@ -145,9 +143,9 @@ void add_task_to_ready_list(struct task_struct_t *task)
     list_add_tail(&(task->list), &(ready_task_list[task->current_priority]));
 
 #if MAX_PRIORITY > 32
-    ready_task_table[task->offset] |= task->offset_mask;
+    ready_task_table[task->offset] |= task->prio_mask;
 #endif
-    ready_task_priority_group |= task->prio_mask;
+    ready_task_priority_group |= task->offset_mask;
 
     /* enable interrupt */
     enable_irq_save(level);
@@ -165,10 +163,10 @@ void del_task_to_ready_list(struct task_struct_t *task)
     if (list_empty(&(ready_task_list[task->current_priority])))
     {
 #if MAX_PRIORITY > 32
-        ready_task_table[task->offset] &= ~task->offset_mask;
+        ready_task_table[task->offset] &= ~task->prio_mask;
         if (ready_task_table[task->offset] == 0)
         {
-            ready_task_priority_group &= ~task->prio_mask;
+            ready_task_priority_group &= ~task->offset_mask;
         }
 #else
         ready_task_priority_group &= ~task->prio_mask;

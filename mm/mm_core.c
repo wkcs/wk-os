@@ -26,7 +26,7 @@ size_t check_mm_pool(void)
      *如不符合，则修改起始地址使其符合要求
      */
     mm_pool_data.mm_pool_start = (addr_t)(&__mm_pool_start);
-    if ((addr_t)(&__mm_pool_start) / MM_ALIGN != 0)
+    if ((addr_t)(&__mm_pool_start) % MM_ALIGN != 0)
         mm_pool_data.mm_pool_start = mm_pool_data.mm_pool_start + MM_ALIGN - ((mm_pool_data.mm_pool_start) % MM_ALIGN);
 
     mm_pool_data.block_num = (size_t)(((addr_t)(&__mm_pool_end) - mm_pool_data.mm_pool_start) / MM_BLOCK_SIZE);

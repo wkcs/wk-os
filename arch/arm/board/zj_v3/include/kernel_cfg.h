@@ -11,5 +11,6 @@
 
 #define MAX_PRIORITY 256
 #define TASK_NAME_MAX 16
+#define TICK_PER_SECOND 100
 
 #endif

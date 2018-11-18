@@ -15,6 +15,7 @@ C_SRCS += $(TOP_DIR)/kernel/task.c
 C_SRCS += $(TOP_DIR)/kernel/clk.c
 C_SRCS += $(TOP_DIR)/kernel/sch.c
 C_SRCS += $(TOP_DIR)/kernel/kernel.c
+C_SRCS += $(TOP_DIR)/kernel/pid.c
 
 ASM_SRCS +=
 

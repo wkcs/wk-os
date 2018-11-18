@@ -47,6 +47,9 @@ size_t write_log(struct log_head_t *head, char * buf)
     register addr_t level;
     register size_t size = 0;
 
+    if (!logs.status)
+        return 0;
+
     level = disable_irq_save();
 
     size += write_fifo_buf_size(&logs.log_buf, (uint8_t *)head, sizeof(struct log_head_t));
@@ -61,6 +64,9 @@ size_t write_log(struct log_head_t *head, char * buf)
 
 size_t get_log_len(struct log_head_t *head)
 {
+    if (!logs.status)
+        return 0;
+
     switch(head->grade) {
         case LOG_FATAL:
         case LOG_ERROR:
@@ -79,6 +85,9 @@ size_t read_next_log_len(void)
     register size_t len;
     struct log_head_t head;
 
+    if (!logs.status)
+        return 0;
+
     if (!read_fifo_buf_size_test(&logs.log_buf, (uint8_t *)&head, sizeof(struct log_head_t))) {
         return 0;
     }
@@ -92,6 +101,9 @@ size_t __read_log_one(char *buf)
 {
     register size_t len;
     struct log_head_t head;
+
+    if (!logs.status)
+        return 0;
 
     if (!read_fifo_buf_size(&logs.log_buf, (uint8_t *)&head, sizeof(struct log_head_t)))
         return 0;
@@ -128,6 +140,9 @@ size_t read_log(char *buf, size_t free_size)
 {
     register addr_t level;
     size_t len = 0, len_old, size;
+
+    if (!logs.status)
+        return 0;
 
     level = disable_irq_save();
 

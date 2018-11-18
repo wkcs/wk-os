@@ -6,15 +6,15 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#include <wk/kernel.h>
+#include <wk/printk.h>
 #include <lib/vsprintf.h>
-#include <wk/log.h>
 #include <lib/string.h>
+#include <wk/log.h>
 
-int printk(const char *fmt, ...)
+int pr_log(uint8_t grade, const char *fmt, ...)
 {
 	va_list args;
-	static char buf[100];
+	static char buf[PR_LOG_BUG_SIZE];
 	struct log_head_t head;
 	int len;
 
@@ -22,8 +22,8 @@ int printk(const char *fmt, ...)
 	len = vsprintf(buf, fmt, args);
 	va_end(args);
 
-	head.grade = LOG_INFO;
-	head.time = 124;
+	head.grade = grade;
+	head.time = 0;
 	head.log_size = len;
 
 	len = write_log(&head, buf);

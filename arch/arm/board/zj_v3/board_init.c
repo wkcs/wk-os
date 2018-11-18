@@ -9,6 +9,7 @@
 #include <wk/kernel.h>
 #include <wk/clk.h>
 #include <wk/irq.h>
+#include <board.h>
 
 void SysTick_Handler(void)
 {
@@ -19,4 +20,10 @@ void SysTick_Handler(void)
 
     /* leave interrupt */
     wk_interrupt_leave();
+}
+
+void board_init(void)
+{
+    SysTick_Config( SystemCoreClock / TICK_PER_SECOND );
+    board_config_init();
 }

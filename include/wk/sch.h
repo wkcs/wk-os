@@ -12,6 +12,7 @@
 #include <wk/kernel.h>
 #include <wk/task.h>
 
+void sch_init(void);
 void add_task_to_ready_list(struct task_struct_t *task);
 void del_task_to_ready_list(struct task_struct_t *task);
 struct task_struct_t *get_current_task(void);

@@ -1,40 +1,74 @@
-/*
- * Copyright (C) 2018 胡启航<Hu Qihang>
- *
- * Author: wkcs
- *
- * Email: hqh2030@gmail.com, huqihan@live.com
- */
-
-#include "delay.h"
+ #include <lib/stdio.h>
+ #include <wk/printk.h>
+ #include <wk/log.h>
+#include <wk/sch.h>
+#include <wk/task.h>
 #include "led.h"
+ 
+ #include <board.h>
+ 
+static void led1_task_entry(void* parameter)
+{
+    uint32_t count=0;
 
-#include <wk/mm.h>
-#include <wk/kernel.h>
-#include <lib/stdio.h>
-#include <wk/printk.h>
-#include <wk/log.h>
+     LED_Init();
+ 
 
-#include <board.h>
+    while (1)
+    {
+        LED0 = 1;
+        pr_info("led0 on\r\n");
+        while(count < 1000000)
+            count++;
+        count = 0;
+        LED0 = 0;
+        pr_info("led0 off\r\n");
+        while(count < 1000000)
+            count++;
+        count = 0;
+     }
+}
+
+static void led2_task_entry(void* parameter)
+{
+    uint32_t count=0;
+
+    LED_Init();
+
+    while (1)
+    {
+        LED1 = 1;
+        pr_info("led1 on\r\n");
+        while(count < 1000000)
+            count++;
+        count = 0;
+        LED1 = 0;
+        pr_info("led1 off\r\n");
+        while(count < 1000000)
+            count++;
+        count = 0;
+    }
+}
+
+void task_init(void)
+{
+    struct task_struct_t *task1, *task2;
+
+    task1 = task_create("led1", led1_task_entry, NULL, 256, 10, 3, NULL, NULL);
+    task_ready(task1);
+
+    task2 = task_create("led2", led2_task_entry, NULL, 256, 10, 3, NULL, NULL);
+    task_ready(task2);
+}
 
 int main(void)
 {
-    uint32_t i = 0;
-
+    disable_irq_save();
+    board_init();
     mm_pool_init();
-    delay_init();
-    board_config_init();
     log_server_init();
-    LED_Init();
-
-    printk("wkcs:%s[%d] write log\r\n", __func__, __LINE__);
-    while(1) {
-        i++;
-        delay_ms(10);
-        if (i == 50) {
-            LED0 = !LED0;
-            i = 0;
-            printk("wkcs:%s[%d] write log\r\n", __func__, __LINE__);
-        }
-    }
+    pr_info("kernel start\r\n");
+    sch_init();
+    task_init();
+    sch_start();
 }

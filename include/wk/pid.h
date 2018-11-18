@@ -13,4 +13,6 @@
 
 typedef wk_u32_t wk_pid_t;
 
+wk_pid_t pid_alloc(addr_t addr);
+
 #endif
