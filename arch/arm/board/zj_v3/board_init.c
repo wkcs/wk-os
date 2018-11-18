@@ -8,6 +8,7 @@
 
 #include <wk/kernel.h>
 #include <wk/clk.h>
+#include <wk/irq.h>
 
 void SysTick_Handler(void)
 {

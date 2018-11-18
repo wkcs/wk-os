@@ -15,19 +15,18 @@ int printk(const char *fmt, ...)
 {
 	va_list args;
 	static char buf[100];
-	struct log_type_t log;
-	int r;
+	struct log_head_t head;
+	int len;
 
 	va_start(args, fmt);
-	r = vsprintf(buf, fmt, args);
+	len = vsprintf(buf, fmt, args);
 	va_end(args);
 
-	log.grade = LOG_NORMAL;
-	log.buf = buf;
-	log.log_size = r;
+	head.grade = LOG_INFO;
+	head.time = 124;
+	head.log_size = len;
 
-	write_log(&log);
-	//usart_send(buf, strlen(buf));
+	len = write_log(&head, buf);
 
-	return r;
+	return len;
 }

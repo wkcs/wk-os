@@ -18,24 +18,18 @@
     #define KERNEL_LOG_BUF_SIZE 1024
 #endif
 
-struct log_type_t {
+struct log_head_t {
     uint8_t grade;
-#define LOG_FATAL 1
-#define LOG_URGENT 1 << 1
-#define LOG_CRITICAL 1 << 2
-#define LOG_ERROR 1 << 3
-#define LOG_WARNING 1 << 4
-#define LOG_INFO 1 << 5
-#define LOG_NORMAL 1 << 6
-#define LOG_NULL 1 << 7
-    char *buf;
+#define LOG_FATAL 1U
+#define LOG_ERROR 1U << 1
+#define LOG_WARNING 1U << 2
+#define LOG_INFO 1U << 3
+    uint64_t time;
     size_t log_size;
 };
 
-int log_server_init(void);
-void __write_log(struct log_type_t *log);
-void write_log(struct log_type_t *log);
-uint32_t __read_log(void);
-uint32_t read_log(void);
+int __init log_server_init(void);
+size_t write_log(struct log_head_t *head, char * buf);
+size_t read_log(char *buf, size_t free_size);
 
 #endif

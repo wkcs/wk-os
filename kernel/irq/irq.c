@@ -8,12 +8,13 @@
 
 #include <wk/kernel.h>
 #include <wk/irq.h>
+#include <wk/cpu.h>
 
 volatile uint8_t interrupt_nest;
 
 inline void wk_interrupt_enter(void)
 {
-    addr_t level;
+    register addr_t level;
 
     level = disable_irq_save();
     interrupt_nest ++;
@@ -22,7 +23,7 @@ inline void wk_interrupt_enter(void)
 
 inline void wk_interrupt_leave(void)
 {
-    addr_t level;
+    register addr_t level;
 
     level = disable_irq_save();
     interrupt_nest --;

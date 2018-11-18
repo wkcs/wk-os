@@ -7,7 +7,6 @@
  */
 
 #include <wk/kernel.h>
-#include <wk/mm_core.h>
 #include <wk/mm.h>
 #include <wk/config.h>
 

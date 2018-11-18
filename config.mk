@@ -43,6 +43,10 @@ OBJDUMP		:= $(PREFIX)objdump
 SIZE        := $(PREFIX)size
 GDB		    := $(PREFIX)gdb
 
+#下载工具
+STFLASH = 
+JFLASH = JFlash
+
 # 架构相关编译指令
 #使用硬件fpu
 #FP_FLAGS	= -mfloat-abi=hard -mfpu=fpv4-sp-d16

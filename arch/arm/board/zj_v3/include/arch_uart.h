@@ -17,9 +17,14 @@
 #include "arch_irq.h"
 #include "arch_gpio.h"
 
+#define UART_DMA
+
 struct uart_config_t {
     struct clk_config_t *clk_config;
+#ifdef UART_DMA
     struct dma_config_t *dma_config;
+    uint16_t dma_tx_rx;
+#endif
     struct irq_config_t *irq_config;
     uint32_t irq_type;
     struct gpio_config_t (*gpio_config)[];

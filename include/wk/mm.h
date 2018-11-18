@@ -15,6 +15,16 @@
 #include <wk/pid.h>
 #include <wk/config.h>
 
+struct mm_pool_data_t {
+    addr_t mm_pool_start;
+    addr_t mm_pool_end;
+    size_t block_num;
+    size_t size;
+    struct list_head *head;
+};
+
+extern struct mm_pool_data_t mm_pool_data;
+
 typedef wk_u8_t mm_flag_t;
 
 struct mm_list_t {
@@ -26,9 +36,10 @@ struct mm_list_t {
     struct list_head list;
 };
 
+size_t check_mm_pool(void);
 struct list_head *__mm_init(addr_t start, addr_t end);
 int mm_pool_init(void);
-void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid);
-int __mm_free(void *addr);
+void *wk_alloc(size_t size, mm_flag_t flag, wk_pid_t pid);
+int wk_free(void *addr);
 
 #endif

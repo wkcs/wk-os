@@ -7,7 +7,6 @@
  */
 
 #include <wk/kernel.h>
-#include <wk/mm_core.h>
 #include <wk/mm.h>
 #include <wk/list.h>
 #include <wk/config.h>
@@ -49,8 +48,7 @@ struct list_head *__mm_init(addr_t start, addr_t end)
 int mm_pool_init(void)
 {
     if (check_mm_pool() == 0)
-        return -1;
-    printf("mm_pool_start = %p, mm_pool_end = %p\r\n", mm_pool_data.mm_pool_start, mm_pool_data.mm_pool_end);    
+        return -1;    
     mm_pool_data.head = __mm_init(mm_pool_data.mm_pool_start, mm_pool_data.mm_pool_end);
     if (mm_pool_data.head == NULL)
         return -1;

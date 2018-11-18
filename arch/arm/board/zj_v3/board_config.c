@@ -23,9 +23,6 @@ static struct irq_config_t uart_log_dev_dma_irq = {
     }
 };
 
-extern addr_t __uart_log_dma_buf_start;
-#define UART_LOG_DMA_BUF_SIZE 256
-
 static struct dma_config_t uart_log_dev_dma = {
     .clk_config = &uart_log_dev_dma_clk,
     .irq_config = &uart_log_dev_dma_irq,
@@ -33,7 +30,7 @@ static struct dma_config_t uart_log_dev_dma = {
     .ch = DMA1_Channel4,
     .init_type = {
         .DMA_PeripheralBaseAddr = (uint32_t)&USART1->DR,
-	    .DMA_MemoryBaseAddr = (uint32_t)&__uart_log_dma_buf_start,
+	    .DMA_MemoryBaseAddr = 0,
 	    .DMA_DIR = DMA_DIR_PeripheralDST,
 	    .DMA_BufferSize = UART_LOG_DMA_BUF_SIZE,
 	    .DMA_PeripheralInc = DMA_PeripheralInc_Disable,
@@ -80,6 +77,7 @@ static struct clk_config_t uart_log_dev_clk = {
 struct uart_config_t uart_log_dev = {
     .clk_config = &uart_log_dev_clk,
     .dma_config = &uart_log_dev_dma,
+    .dma_tx_rx = USART_DMAReq_Tx,
     .irq_config = NULL,
     .gpio_config = &uart_log_dev_gpio,
     .gpio_group_num = 2,
@@ -96,7 +94,6 @@ struct uart_config_t uart_log_dev = {
 
 int board_config_init(void)
 {
-    uart_config(&uart_log_dev);
-
+    consol_init();
     return 0;
 }

@@ -10,6 +10,8 @@
 #include <wk/sch.h>
 #include <lib/string.h>
 #include <wk/irq.h>
+#include <wk/cpu.h>
+#include <wk/mm.h>
 
 extern struct list_head ready_task_list[MAX_PRIORITY];
 
@@ -26,7 +28,7 @@ int __task_create(struct task_struct_t *task,
                 size_t stack_size,
                 uint8_t priority,
                 uint32_t tick,
-                void (*clean)(void),
+                void (*clean)(struct task_struct_t *task),
                 addr_t *resource)
 {
     size_t len;
@@ -45,7 +47,6 @@ int __task_create(struct task_struct_t *task,
     task->stack_addr = stack_start;
     task->stack_size = stack_size;
 
-    BUG_ON();
     task->sp = (addr_t *)stack_init(task->entry, task->parameter,
                                         (addr_t *)((size_t)task->stack_addr + task->stack_size - 4),
                                         (void *)task_exit);
@@ -78,17 +79,18 @@ struct task_struct_t * task_create(const char *name,
                                     size_t stack_size,
                                     uint8_t priority,
                                     uint32_t tick,
-                                    void (*clean)(void),
+                                    void (*clean)(struct task_struct_t *task),
                                     addr_t *resource)
 {
     struct task_struct_t *task;
     addr_t *stack_start;
 
-    task = (struct task_struct_t *)wk_alloc(sizeof(struct task_struct_t));
+    task = (struct task_struct_t *)wk_alloc(sizeof(struct task_struct_t), 0, 0);
     if (!task)
         return NULL;
     
-    stack_start = (addr_t *)stack_alloc(stack_size);
+    //stack_start = (addr_t *)stack_alloc(stack_size);
+    stack_start = 0;
     if (!stack_start) 
         goto stack_err;
     
@@ -96,7 +98,7 @@ struct task_struct_t * task_create(const char *name,
                         stack_size, priority, tick, clean, resource))
         goto task_create_err;
 
-    task->id = task_id_alloc();
+    //task->id = task_id_alloc();
     if (!task->id)
         goto id_err;
     
@@ -104,7 +106,7 @@ struct task_struct_t * task_create(const char *name,
 
 id_err:
 task_create_err:
-    stack_free(stack_start);
+    //stack_free(stack_start);
 stack_err:
     wk_free(task);
     return NULL;

@@ -135,8 +135,6 @@ void add_task_to_ready_list(struct task_struct_t *task)
 {
     register addr_t level;
 
-    BUG_ON(task == NULL);
-
     /* disable interrupt */
     level = disable_irq_save();
 
@@ -158,8 +156,6 @@ void add_task_to_ready_list(struct task_struct_t *task)
 void del_task_to_ready_list(struct task_struct_t *task)
 {
     register addr_t level;
-
-    BUG_ON(task == NULL);
 
     /* disable interrupt */
     level = disable_irq_save();

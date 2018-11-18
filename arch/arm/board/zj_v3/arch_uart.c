@@ -43,7 +43,9 @@ int uart_config(struct uart_config_t *config)
         return 0;
 	
 	clk_enable_all(config->clk_config);
+#ifdef UART_DMA
     dma_config(config->dma_config);
+#endif
 
     for (num = 0; num < config->gpio_group_num; num++)
 	    gpio_config(&(*config->gpio_config)[num]);
@@ -55,6 +57,12 @@ int uart_config(struct uart_config_t *config)
         irq_config(config->irq_config);
         USART_ITConfig(config->uart, config->irq_type, ENABLE);
     }
+
+#ifdef UART_DMA
+    if (config->dma_config) {
+        USART_DMACmd(config->uart, config->dma_tx_rx, ENABLE);
+    }
+#endif
     
     return 0;
 }

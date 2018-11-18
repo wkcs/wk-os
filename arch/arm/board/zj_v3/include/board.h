@@ -16,8 +16,12 @@
 #include "arch_irq.h"
 #include "arch_uart.h"
 
+#define UART_LOG_DMA_BUF_SIZE 256
+
 extern struct uart_config_t uart_log_dev;
 
 int board_config_init(void);
+int consol_init(void);
+void send_to_console(void);
 
 #endif

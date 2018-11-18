@@ -50,4 +50,6 @@ struct task_struct_t {
     struct list_head list;                           
 };
 
+int task_yield_cpu(void);
+
 #endif

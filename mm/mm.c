@@ -7,13 +7,12 @@
  */
 
 #include <wk/kernel.h>
-#include <wk/mm_core.h>
 #include <wk/mm.h>
 #include <wk/list.h>
 #include <wk/pid.h>
 #include <wk/config.h>
 
-struct mm_list_t *__find_block(size_t size)
+static struct mm_list_t *__find_block(size_t size)
 {
     int num = 0;
     struct mm_list_t *list_temp;
@@ -34,7 +33,7 @@ struct mm_list_t *__find_block(size_t size)
     return NULL;
 }
 
-void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
+static void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
 {
     struct mm_list_t *list_temp;
 
@@ -54,7 +53,7 @@ void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
  * @param 需要释放地址的指针
  * @return int
  */
-int __mm_free(void *addr)
+static int __mm_free(void *addr)
 {
     struct list_head *head_main, *head_new;
     struct mm_list_t *list;
@@ -83,4 +82,32 @@ int __mm_free(void *addr)
     list_splice(&head, head_main);
 
     return 0;
+}
+
+void *wk_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
+{
+    register addr_t level;
+    void *addr;
+
+    level = disable_irq_save();
+
+    addr = __mm_alloc(size, flag, pid);
+
+    enable_irq_save(level);
+
+    return addr;
+}
+
+int wk_free(void *addr)
+{
+    register addr_t level;
+    int status = 0;
+
+    level = disable_irq_save();
+
+    status = __mm_free(addr);
+
+    enable_irq_save(level);   
+
+    return status;
 }
