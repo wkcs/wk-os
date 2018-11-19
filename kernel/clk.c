@@ -11,13 +11,16 @@
 #include <wk/list.h>
 #include <wk/sch.h>
 
-static uint32_t run_time;
+static uint32_t run_tick;
 
 void system_beat_processing(void)
 {
     struct task_struct_t *task;
 
-    run_time++;
+    if (run_tick < WK_U32_MAX)
+        run_tick++;
+    else
+        run_tick = 1;
 
     task = get_current_task();
 
@@ -30,4 +33,11 @@ void system_beat_processing(void)
         /* yield */
         task_yield_cpu();
     }
+
+    timer_check();
+}
+
+uint32_t get_run_tick(void)
+{
+    return run_tick;
 }

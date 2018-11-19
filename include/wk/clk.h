@@ -12,5 +12,6 @@
 #include <wk/kernel.h>
 
 void system_beat_processing(void);
+uint32_t get_run_tick(void);
 
 #endif

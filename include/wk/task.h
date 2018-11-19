@@ -12,6 +12,7 @@
 #include <wk/kernel.h>
 #include <wk/pid.h>
 #include <wk/list.h>
+#include <wk/timer.h>
 
 enum task_status_t {
     TASK_RUNING = 0x01,
@@ -24,7 +25,7 @@ enum task_status_t {
 struct task_struct_t {
     addr_t *sp;
     
-    char name[TASK_NAME_MAX];
+    char name[WK_NAME_MAX];
     wk_pid_t pid;
 
     addr_t *entry;                                
@@ -47,6 +48,8 @@ struct task_struct_t {
     uint8_t  offset_mask;
 #endif
     uint32_t prio_mask;
+
+    struct timer_struct_t timer;
 
     struct list_head list;                           
 };

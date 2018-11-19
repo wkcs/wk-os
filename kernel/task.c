@@ -35,12 +35,12 @@ int __task_create(struct task_struct_t *task,
 
     INIT_LIST_HEAD(&task->list);
 
-    memset(task->name, 0, TASK_NAME_MAX);
+    memset(task->name, 0, WK_NAME_MAX);
     len = strlen(name);
-    if (len < TASK_NAME_MAX)
+    if (len < WK_NAME_MAX)
         memcpy(task->name, name, len);
     else
-        memcpy(task->name, name, TASK_NAME_MAX - 1);
+        memcpy(task->name, name, WK_NAME_MAX - 1);
 
     task->entry = (void *)entry;
     task->parameter = parameter;
@@ -48,11 +48,9 @@ int __task_create(struct task_struct_t *task,
     task->stack_addr = stack_start;
     task->stack_size = stack_size;
 
-    pr_info("sp = 0x%x\r\n", task->stack_addr);
     task->sp = (addr_t *)stack_init(task->entry, task->parameter,
                                         (addr_t *)task->stack_addr,
                                         (void *)task_exit);
-    pr_info("sp = 0x%x\r\n", task->sp);
 
     task->init_priority    = priority;
     task->current_priority = priority;

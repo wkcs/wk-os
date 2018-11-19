@@ -14,6 +14,7 @@
 #include <wk/section.h>
 #include <wk/printk.h>
 #include <wk/log.h>
+#include <wk/debug.h>
 #include <kernel_cfg.h>
 
 #define USHRT_MAX	((u16)(~0U))
@@ -90,6 +91,21 @@ enum {
 
 #define pr_info(fmt, ...)  \
 	pr_log(LOG_INFO, fmt, ## __VA_ARGS__)
+
+#define WK_FATAL(ex)  \
+	if (!(ex)) {  \
+		wk_debug(LOG_FATAL, #ex, __func__, __LINE__);  \
+	}
+
+#define WK_ERROR(ex)  \
+	if (!(ex)) {  \
+		wk_debug(LOG_ERROR, #ex, __func__, __LINE__);  \
+	}
+
+#define WK_WARNING(ex)  \
+	if (!(ex)) {  \
+		wk_debug(LOG_WARNING, #ex, __func__, __LINE__);  \
+	}
 
 extern addr_t kernel_running;
 
