@@ -8,6 +8,7 @@
 
 DEBUG_DIR += $(TOP_DIR)/debug/init
 
+C_SRCS += $(TOP_DIR)/init/system.c
 C_SRCS += $(TOP_DIR)/init/main.c
 
 ASM_SRCS += 

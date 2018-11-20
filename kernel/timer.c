@@ -16,7 +16,7 @@
 
 static LIST_HEAD(system_timer_list);
 
-void timer_init(struct timer_struct_t *timer,
+int timer_init(struct timer_struct_t *timer,
                 const char *name,
                 void (*timeout)(void *parameter),
                 void *parameter,
@@ -24,6 +24,11 @@ void timer_init(struct timer_struct_t *timer,
                 uint32_t tick)
 {
     size_t len;
+
+    if (tick > TIMER_TICK_MAX) {
+        pr_err("%s[%d]:tick(=%u) > TIMER_TICK_MAX\r\n", __func__, __LINE__, tick);
+        return -1;
+    }
 
     INIT_LIST_HEAD(&timer->list);
 
@@ -38,6 +43,8 @@ void timer_init(struct timer_struct_t *timer,
     timer->parameter = parameter;
     timer->priority = priority;
     timer->init_tick = tick;
+
+    return 0;
 }
 
 void timer_remove(struct timer_struct_t *timer)
@@ -48,11 +55,17 @@ void timer_remove(struct timer_struct_t *timer)
 inline uint32_t get_lave_tick(struct timer_struct_t *timer)
 {
     uint32_t run_tick = get_run_tick();
+    uint32_t lave_tick = 0;
 
     if (timer->timeout_tick >= run_tick)
         return timer->timeout_tick - run_tick;
-    else
-        return WK_U32_MAX - run_tick + timer->timeout_tick;
+    else {
+        lave_tick = WK_U32_MAX - run_tick + timer->timeout_tick;
+        if (lave_tick > TIMER_TICK_MAX)
+            return 0;
+        else
+            return lave_tick;
+    }
 }
 
 struct timer_struct_t *timer_create(const char *name,
@@ -63,6 +76,12 @@ struct timer_struct_t *timer_create(const char *name,
                 wk_pid_t pid)
 {
     struct timer_struct_t *timer;
+    int rc = 0;
+
+    if (tick > TIMER_TICK_MAX) {
+        pr_err("%s[%d]:tick(=%u) > TIMER_TICK_MAX\r\n", __func__, __LINE__, tick);
+        return NULL;
+    }
 
     timer = (struct timer_struct_t *)wk_alloc(sizeof(struct timer_struct_t), 0, pid);
     if (!timer) {
@@ -70,7 +89,12 @@ struct timer_struct_t *timer_create(const char *name,
         return timer;
     }
 
-    timer_init(timer, name, timeout, parameter, priority, tick);
+    rc = timer_init(timer, name, timeout, parameter, priority, tick);
+
+    if (rc) {
+        pr_err("%s[%d]:timer init err(rc = %d)\r\n", __func__, __LINE__, rc);
+        return NULL;
+    }
 
     return timer;
 }
@@ -166,13 +190,22 @@ void timer_check(void)
     level = disable_irq_save();
 
     if (!list_empty(&system_timer_list)) {
-        timer = list_entry(&system_timer_list, struct timer_struct_t, list);
-        if (timer->timeout_tick == get_run_tick()) {
+        timer = list_entry(system_timer_list.next, struct timer_struct_t, list);
+        if (!get_lave_tick(timer)) {
             timer_remove(timer);
             timer->timeout_func(timer->parameter);
         }
     }
 
     enable_irq_save(level);
+}
+
+void dump_timer(void)
+{
+    struct timer_struct_t *list_temp;
+
+    list_for_each_entry(list_temp, &system_timer_list, list) {
+        pr_info("timer[%s]:timeout = %u, lave = %u\r\n", list_temp->name, list_temp->timeout_tick, get_lave_tick(list_temp));
+    }
 }
 

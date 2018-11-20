@@ -45,9 +45,9 @@ struct task_struct_t {
 
 #if MAX_PRIORITY > 32
     uint8_t  offset;
-    uint8_t  offset_mask;
+    uint8_t  prio_mask;
 #endif
-    uint32_t prio_mask;
+    uint32_t offset_mask;
 
     struct timer_struct_t timer;
 

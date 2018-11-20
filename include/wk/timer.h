@@ -28,7 +28,7 @@ enum timer_cmd_t {
     CMD_TIMER_MAX,
 };
 
-void timer_init(struct timer_struct_t *timer,
+int timer_init(struct timer_struct_t *timer,
                 const char *name,
                 void (*timeout)(void *parameter),
                 void *parameter,
@@ -46,5 +46,6 @@ int timer_start(struct timer_struct_t *timer);
 int timer_stop(struct timer_struct_t *timer);
 int timer_ctrl(struct timer_struct_t *timer, enum timer_cmd_t cmd, void *arge);
 void timer_check(void);
+void dump_timer(void);
 
 #endif

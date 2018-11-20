@@ -50,9 +50,12 @@ static void timeout(void *parameter)
     level = disable_irq_save();
 
     list_del(&task->list);
-    add_task_to_ready_list(task);
 
     enable_irq_save(level);
+    
+    add_task_to_ready_list(task);
+
+    switch_task();
 }
 
 int __task_create(struct task_struct_t *task,
@@ -92,10 +95,10 @@ int __task_create(struct task_struct_t *task,
 
 #if MAX_PRIORITY > 32
     task->offset = priority >> 3;
-    task->offset_mask = 1L << task->offset;
-    task->prio_mask = 1L << (priority & 0x07);
+    task->offset_mask = 1UL << task->offset;
+    task->prio_mask = 1UL << (priority & 0x07);
 #elif
-    task->prio_mask = 1L << priority;
+    task->offset_mask = 1UL << priority;
 #endif
 
     task->init_tick      = tick;
@@ -173,7 +176,7 @@ int task_hang(struct task_struct_t *task)
         return -1;
     }
 
-    if (task->status != TASK_READY || task->status != TASK_RUNING) {
+    if (task->status != TASK_READY && task->status != TASK_RUNING) {
         pr_err("%s[%d]:task status is not TASK_READY or TASK_RUNING\r\n", __func__, __LINE__);
         return -1;
     }

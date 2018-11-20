@@ -170,7 +170,7 @@ void del_task_to_ready_list(struct task_struct_t *task)
             ready_task_priority_group &= ~task->offset_mask;
         }
 #else
-        ready_task_priority_group &= ~task->prio_mask;
+        ready_task_priority_group &= ~task->offset_mask;
 #endif
     }
 
