@@ -63,5 +63,8 @@ struct task_struct_t * task_create(const char *name,
                                     addr_t *resource);
 void task_ready(struct task_struct_t *task);
 int task_yield_cpu(void);
+int task_hang(struct task_struct_t *task);
+int task_resume(struct task_struct_t *task);
+int task_sleep(uint32_t tick);
 
 #endif

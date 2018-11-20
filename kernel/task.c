@@ -12,12 +12,47 @@
 #include <wk/irq.h>
 #include <wk/cpu.h>
 #include <wk/mm.h>
+#include <wk/list.h>
+#include <wk/timer.h>
 
 extern struct list_head ready_task_list[MAX_PRIORITY];
 
-void task_exit(void)
+static void task_exit(void)
 {
-    while(1);
+    register addr_t level;
+    struct task_struct_t *task;
+    
+    task = get_current_task();
+
+    WK_ERROR(task != NULL);
+
+    level = disable_irq_save();
+
+    del_task_to_ready_list(task);
+    task->status = TASK_CLOSE;
+    timer_delete(&task->timer);
+
+    enable_irq_save(level);
+
+    switch_task();
+}
+
+static void timeout(void *parameter)
+{
+    register addr_t level;
+    struct task_struct_t *task;
+
+    task = (struct task_struct_t *)parameter;
+
+    WK_ERROR(task != NULL);
+    WK_ERROR(task->status == TASK_WAIT);
+
+    level = disable_irq_save();
+
+    list_del(&task->list);
+    add_task_to_ready_list(task);
+
+    enable_irq_save(level);
 }
 
 int __task_create(struct task_struct_t *task,
@@ -71,6 +106,8 @@ int __task_create(struct task_struct_t *task,
     task->cleanup   = clean;
     task->resource = resource;
 
+    timer_init(&task->timer, task->name, timeout, task, priority, 0);
+
     return 0;
 }
 
@@ -88,7 +125,6 @@ struct task_struct_t * task_create(const char *name,
     wk_pid_t pid;
 
     stack_start = (addr_t *)stack_alloc(stack_size);
-    pr_info("stack_start = 0x%x\r\n");
     if (!stack_start)
         goto stack_err;
 
@@ -97,7 +133,6 @@ struct task_struct_t * task_create(const char *name,
         goto pid_err;
 
     task = (struct task_struct_t *)wk_alloc(sizeof(struct task_struct_t), 0, pid);
-    pr_info("task struct addr = 0x%x\r\n", task);
     if (!task)
         goto pid_err;
 
@@ -120,12 +155,100 @@ stack_err:
 void task_ready(struct task_struct_t *task)
 {
     if (!task) {
-        pr_err("%s[%d]:task struct addr is NULL\r\n");
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
         return;
     }
+
     add_task_to_ready_list(task);
     if (get_current_task())
         switch_task();
+}
+
+int task_hang(struct task_struct_t *task)
+{
+    register addr_t level;
+
+    if (!task) {
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    if (task->status != TASK_READY || task->status != TASK_RUNING) {
+        pr_err("%s[%d]:task status is not TASK_READY or TASK_RUNING\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    level = disable_irq_save();
+
+    task->status = TASK_WAIT;
+
+    del_task_to_ready_list(task);
+    timer_stop(&task->timer);
+
+    enable_irq_save(level);
+
+    return 0;
+}
+
+int task_resume(struct task_struct_t *task)
+{
+    register addr_t level;
+
+    if (!task) {
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    if (task->status != TASK_WAIT) {
+        pr_err("%s[%d]:task status is not TASK_WAIT\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    level = disable_irq_save();
+
+    list_del(&task->list);
+    timer_stop(&task->timer);
+
+    enable_irq_save(level);
+
+    add_task_to_ready_list(task);
+
+    return 0;
+}
+
+int task_sleep(uint32_t tick)
+{
+    register addr_t level;
+    struct task_struct_t *task;
+    int rc = 0;
+
+    if (!tick) {
+        pr_err("%s[%d]:sleep tick is 0\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    task = get_current_task();
+
+    if (!task) {
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    level = disable_irq_save();
+
+    rc = task_hang(task);
+    if (rc) {
+        pr_err("%s[%d]:task hang err(%d)\r\n", __func__, __LINE__, rc);
+        return rc;
+    }
+    timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &tick);
+    timer_start(&task->timer);
+
+    enable_irq_save(level);
+
+    switch_task();
+
+    return 0;
 }
 
 int task_yield_cpu(void)
@@ -139,12 +262,13 @@ int task_yield_cpu(void)
     /* set to current task */
     task = get_current_task();
 
-    if (task->status == TASK_READY && !list_empty(&task->list)) {
+    if (task->status == TASK_RUNING && !list_empty(&task->list)) {
         /* remove task from task list */
         list_del(&(task->list));
 
         list_add_tail(&(task->list), &(ready_task_list[task->current_priority]));
 
+        task->status = TASK_READY;
         /* enable interrupt */
         enable_irq_save(level);
 

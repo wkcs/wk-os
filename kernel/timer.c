@@ -96,6 +96,7 @@ int timer_start(struct timer_struct_t *timer)
     struct timer_struct_t *list_temp;
 
     WK_ERROR(timer != NULL);
+    WK_ERROR(timer->init_tick != 0);
 
     level = disable_irq_save();
 
@@ -133,6 +134,25 @@ int timer_stop(struct timer_struct_t *timer)
     timer_remove(timer);
 
     enable_irq_save(level);
+
+    return 0;
+}
+
+int timer_ctrl(struct timer_struct_t *timer, enum timer_cmd_t cmd, void *arge)
+{
+    if (timer == NULL) {
+        pr_err("%s[%d]:timer struct is NULL\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    switch (cmd) {
+        case CMD_TIMER_SET_TICK:
+            timer->init_tick = *(uint32_t *)arge;
+            break;
+        default:
+            pr_err("%s[%d]:Without this cmd(%d)\r\n", __func__, __LINE__, cmd);
+            return -1;
+    }
 
     return 0;
 }

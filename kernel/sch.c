@@ -65,7 +65,8 @@ void sch_start(void)
                               struct task_struct_t,
                               list);
     current_task = to_task;
-
+    to_task->status = TASK_RUNING;
+    
     /* switch to new task */
     context_switch_to((addr_t)&to_task->sp);
 
@@ -100,12 +101,12 @@ void switch_task (void)
                                   struct task_struct_t,
                                   list);
 
+        to_task->status = TASK_RUNING;
         /* if the destination task is not the same as current task */
         if (to_task != current_task) {
             current_priority = (uint8_t)highest_ready_priority;
             from_task = current_task;
             current_task = to_task;
-
 
             if (interrupt_nest == 0) {
                 context_switch((addr_t)&from_task->sp, (addr_t)&to_task->sp);
