@@ -53,6 +53,14 @@ struct task_struct_t {
 
     struct list_head list;                           
 };
+
+enum task_cmd_t {
+    CMD_TASK_SET_CURR_PRIO = 0x00,
+    CMD_TASK_SET_INIT_PRIO,
+    CMD_TASK_SET_INIT_TICK,
+    CMD_TASK_MAX,
+};
+
 struct task_struct_t * task_create(const char *name,
                                     void (*entry)(void *parameter),
                                     void *parameter,
@@ -66,5 +74,6 @@ int task_yield_cpu(void);
 int task_hang(struct task_struct_t *task);
 int task_resume(struct task_struct_t *task);
 int task_sleep(uint32_t tick);
+int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc);
 
 #endif

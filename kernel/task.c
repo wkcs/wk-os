@@ -285,3 +285,28 @@ int task_yield_cpu(void)
 
     return 0;
 }
+
+int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc)
+{
+    if (task == NULL) {
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    switch (cmd) {
+        case CMD_TASK_SET_CURR_PRIO:
+            task->current_priority = *(uint32_t *)argc;
+            break;
+        case CMD_TASK_SET_INIT_PRIO:
+            task->init_priority = *(uint32_t *)argc;
+            break;
+        case CMD_TASK_SET_INIT_TICK:
+            task->init_tick = *(uint32_t *)argc;
+            break;
+        default:
+            pr_err("%s[%d]:Without this cmd(%d)\r\n", __func__, __LINE__, cmd);
+            return -1;
+    }
+
+    return 0;
+}

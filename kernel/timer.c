@@ -162,7 +162,7 @@ int timer_stop(struct timer_struct_t *timer)
     return 0;
 }
 
-int timer_ctrl(struct timer_struct_t *timer, enum timer_cmd_t cmd, void *arge)
+int timer_ctrl(struct timer_struct_t *timer, enum timer_cmd_t cmd, void *argc)
 {
     if (timer == NULL) {
         pr_err("%s[%d]:timer struct is NULL\r\n", __func__, __LINE__);
@@ -171,7 +171,7 @@ int timer_ctrl(struct timer_struct_t *timer, enum timer_cmd_t cmd, void *arge)
 
     switch (cmd) {
         case CMD_TIMER_SET_TICK:
-            timer->init_tick = *(uint32_t *)arge;
+            timer->init_tick = *(uint32_t *)argc;
             break;
         default:
             pr_err("%s[%d]:Without this cmd(%d)\r\n", __func__, __LINE__, cmd);

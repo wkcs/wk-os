@@ -72,5 +72,8 @@ typedef __dma64_addr_t dma64_addr_t;
 
 typedef __addr_t addr_t;
 
+typedef struct {
+    int counter;
+} atomic_t;
 
 #endif

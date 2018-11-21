@@ -44,7 +44,7 @@ struct timer_struct_t *timer_create(const char *name,
 int timer_delete(struct timer_struct_t *timer);
 int timer_start(struct timer_struct_t *timer);
 int timer_stop(struct timer_struct_t *timer);
-int timer_ctrl(struct timer_struct_t *timer, enum timer_cmd_t cmd, void *arge);
+int timer_ctrl(struct timer_struct_t *timer, enum timer_cmd_t cmd, void *argc);
 void timer_check(void);
 void dump_timer(void);
 
