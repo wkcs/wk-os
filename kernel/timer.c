@@ -131,16 +131,20 @@ int timer_start(struct timer_struct_t *timer)
     else
         timer->timeout_tick = timer->init_tick - (WK_U32_MAX - get_run_tick());
 
-    list_for_each_entry(list_temp, &system_timer_list, list) {
-        uint32_t tick_list = get_lave_tick(list_temp);
-        uint32_t tick_new = get_lave_tick(timer);
-        if ((tick_list < tick_new) || (tick_list == tick_new && list_temp-> priority <= timer->priority))
-            continue;
-        else
-            break;
-    }
+    if (list_empty(&system_timer_list))
+        list_add_tail(&timer->list, &system_timer_list);
+    else {
+        list_for_each_entry(list_temp, &system_timer_list, list) {
+            uint32_t tick_list = get_lave_tick(list_temp);
+            uint32_t tick_new = get_lave_tick(timer);
+            if ((tick_list < tick_new) || (tick_list == tick_new && list_temp-> priority <= timer->priority))
+                continue;
+            else
+                break;
+        }
 
-    list_add_tail(&timer->list, &list_temp->list);
+        list_add_tail(&timer->list, &list_temp->list);
+    }
 
     enable_irq_save(level);
 

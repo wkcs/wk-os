@@ -162,6 +162,11 @@ void task_ready(struct task_struct_t *task)
         return;
     }
 
+    if (task->status == TASK_READY || task->status == TASK_RUNING) {
+        pr_err("%s[%d]:task is ready\r\n", __func__, __LINE__);
+        return;
+    }
+
     add_task_to_ready_list(task);
     if (get_current_task())
         switch_task();
@@ -286,6 +291,26 @@ int task_yield_cpu(void)
     return 0;
 }
 
+static inline int task_set_prio(struct task_struct_t *task, uint32_t prio)
+{
+    register addr_t level;
+
+    if (task == NULL) {
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    level = disable_irq_save();
+
+    del_task_to_ready_list(task);
+    task->current_priority = prio;
+    add_task_to_ready_list(task);
+
+    enable_irq_save(level);
+
+    return 0;
+}
+
 int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc)
 {
     if (task == NULL) {
@@ -295,7 +320,7 @@ int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc)
 
     switch (cmd) {
         case CMD_TASK_SET_CURR_PRIO:
-            task->current_priority = *(uint32_t *)argc;
+            task_set_prio(task, *(uint32_t *)argc);
             break;
         case CMD_TASK_SET_INIT_PRIO:
             task->init_priority = *(uint32_t *)argc;
@@ -309,4 +334,16 @@ int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc)
     }
 
     return 0;
+}
+
+void dump_all_task(void)
+{
+    int i;
+    struct task_struct_t *task_temp;
+
+    for (i = 0; i < MAX_PRIORITY; i++) {
+        list_for_each_entry(task_temp, &ready_task_list[i], list) {
+            pr_info("task[%s]:prio=%d, pid=%d\r\n", task_temp->name, task_temp->current_priority, task_temp->pid);
+        }
+    }
 }

@@ -75,5 +75,6 @@ int task_hang(struct task_struct_t *task);
 int task_resume(struct task_struct_t *task);
 int task_sleep(uint32_t tick);
 int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc);
+void dump_all_task(void);
 
 #endif

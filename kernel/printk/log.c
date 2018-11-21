@@ -109,22 +109,22 @@ size_t __read_log_one(char *buf)
         return 0;
     switch(head.grade) {
         case LOG_FATAL:
-            sprintf(buf, "%06d.%06d[FATAL]",  (uint32_t)(head.time << 32), (uint32_t)(head.time));
+            sprintf(buf, "%06d.%06d[FATAL]",  (uint32_t)(head.time >> 32), (uint32_t)(head.time & 0xffffffff));
             len = 20;
             buf += 20;
             break;
         case LOG_ERROR:
-            sprintf(buf, "%06d.%06d[ERROR]",  (uint32_t)(head.time << 32), (uint32_t)(head.time));
+            sprintf(buf, "%06d.%06d[ERROR]",  (uint32_t)(head.time >> 32), (uint32_t)(head.time & 0xffffffff));
             len = 20;
             buf += 20;
             break;
         case LOG_WARNING:
-            sprintf(buf, "%06d.%06d[WARNING]",  (uint32_t)(head.time << 32), (uint32_t)(head.time));
+            sprintf(buf, "%06d.%06d[WARNING]",  (uint32_t)(head.time >> 32), (uint32_t)(head.time & 0xffffffff));
             len = 22;
             buf += 22;
             break;
         case LOG_INFO:
-            sprintf(buf, "%06d.%06d[INFO]",  (uint32_t)(head.time << 32), (uint32_t)(head.time));
+            sprintf(buf, "%06d.%06d[INFO]",  (uint32_t)(head.time >> 32), (uint32_t)(head.time & 0xffffffff));
             len = 19;
             buf += 19;
             break;
