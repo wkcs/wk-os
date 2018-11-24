@@ -11,16 +11,19 @@
 #include <wk/sch.h>
 #include <wk/cpu.h>
 
+/*设置互斥体的拥有者*/
 static inline void mutex_set_owner(struct mutex *lock, struct task_struct_t *task)
 {
     lock->owner = task;
 }
 
+/*清除互斥体的拥有者*/
 static inline void mutex_clear_owner(struct mutex *lock)
 {
     lock->owner = NULL;
 }
 
+/*初始化一个互斥体*/
 void __mutex_init(struct mutex *lock, const char *name)
 {
     lock->count = 1;
@@ -30,9 +33,11 @@ void __mutex_init(struct mutex *lock, const char *name)
     lock->name = name;
 #endif
 
+    /*这句话什么也不做，是为了防止在没有定义CONFIG_DEBUG_MUTEXES是编译器产生警告*/
     debug_mutex_init(lock, name);
 }
 
+/*给互斥体加锁*/
 void mutex_lock(struct mutex *lock)
 {
     register addr_t level;
@@ -70,6 +75,7 @@ void mutex_lock(struct mutex *lock)
     }
 }
 
+/*尝试给一个互斥体加锁，失败则立即返回*/
 int mutex_try_lock(struct mutex *lock)
 {
     register addr_t level;
@@ -84,6 +90,7 @@ int mutex_try_lock(struct mutex *lock)
         return -1;
 }
 
+/*给互斥体解锁*/
 void mutex_unlock(struct mutex *lock)
 {
     register addr_t level;

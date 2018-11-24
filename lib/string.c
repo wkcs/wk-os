@@ -209,3 +209,25 @@ char *strreplace(char *s, char old, char new)
 	return s;
 }
 
+int rt_strncmp(const char *cs, const char *ct, size_t count)
+{
+    register signed char __res = 0;
+
+    while (count)
+    {
+        if ((__res = *cs - *ct++) != 0 || !*cs++)
+            break;
+        count --;
+    }
+
+    return __res;
+}
+
+int rt_strcmp(const char *cs, const char *ct)
+{
+    while (*cs && *cs == *ct)
+        cs++, ct++;
+
+    return (*cs - *ct);
+}
+

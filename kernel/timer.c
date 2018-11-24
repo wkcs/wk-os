@@ -12,6 +12,7 @@
 #include <wk/irq.h>
 #include <wk/clk.h>
 #include <wk/mm.h>
+#include <wk/err.h>
 #include <lib/string.h>
 
 static LIST_HEAD(system_timer_list);

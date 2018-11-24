@@ -14,6 +14,7 @@
 #include <wk/mm.h>
 #include <wk/list.h>
 #include <wk/timer.h>
+#include <wk/err.h>
 
 extern struct list_head ready_task_list[MAX_PRIORITY];
 
@@ -49,10 +50,12 @@ static void timeout(void *parameter)
 
     level = disable_irq_save();
 
+    task->flag = -ETIMEDOUT;
+
     list_del(&task->list);
 
     enable_irq_save(level);
-    
+
     add_task_to_ready_list(task);
 
     switch_task();
@@ -108,6 +111,8 @@ int __task_create(struct task_struct_t *task,
 
     task->cleanup   = clean;
     task->resource = resource;
+
+    task->flag = 0;
 
     timer_init(&task->timer, task->name, timeout, task, priority, 0);
 
@@ -255,6 +260,9 @@ int task_sleep(uint32_t tick)
     enable_irq_save(level);
 
     switch_task();
+
+    if(task->flag == -ETIMEDOUT)
+        task->flag = 0;
 
     return 0;
 }

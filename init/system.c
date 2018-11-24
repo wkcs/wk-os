@@ -21,7 +21,7 @@ static void idle_task_handle(void *argc)
 
 static void init_task_handle(void *argc)
 {
-
+    
 }
 
 void system_init(void)

@@ -23,5 +23,7 @@ char *strnstr(const char *s1, const char *s2, size_t len);
 void *memchr(const void *s, int c, size_t n);
 void *memchr_inv(const void *start, int c, size_t bytes);
 char *strreplace(char *s, char old, char new);
+int rt_strncmp(const char *cs, const char *ct, size_t count);
+int rt_strcmp(const char *cs, const char *ct);
 
 #endif

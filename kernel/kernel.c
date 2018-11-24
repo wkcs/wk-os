@@ -8,8 +8,10 @@
 
 #include <wk/kernel.h>
 
+/*kernel运行标记*/
 addr_t kernel_running = false;
 
+/*位图*/
 #ifndef USE_CPU_FFS
 static const uint8_t __lowest_bit_bitmap[] =
 {
@@ -31,6 +33,9 @@ static const uint8_t __lowest_bit_bitmap[] =
     /* F0 */ 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0
 };
 
+/*
+ * 获取一个32位变量的最低有效位
+ */
 int __wk_ffs(int value)
 {
     if (value == 0) return 0;

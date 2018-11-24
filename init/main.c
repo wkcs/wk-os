@@ -6,76 +6,97 @@
 #include <wk/timer.h>
 #include <init/system.h>
 #include <wk/mutex.h>
+#include <wk/ipc.h>
+#include <wk/err.h>
 
 #include "led.h"
  
 #include <board.h>
 
-static int32_t test = 1;
-static struct mutex lock;
-struct task_struct_t *main_task, *task1, *task2;
-
 static void main_task_entry(void* parameter)
 {
     while (1)
     {
-        /*pr_info("main task running!\r\n");
-        pr_info("run_tick = %d\r\n", get_run_tick());
+        pr_info("main task running!\r\n");
+        /*pr_info("run_tick = %d\r\n", get_run_tick());
         dump_timer();*/
-        task_ready(task2);
-        while(1);
-        task_sleep(1000);
+        task_sleep(sec_to_tick(1));
     }
 }
  
-static void led1_task_entry(void* parameter)
+static void led0_task_entry(void* parameter)
 {
-     LED_Init();
+    msg_t msg;
+    int rc;
+    uint8_t buf;
+    struct msg_q msg_test;
+
+    LED_Init();
+    msg_q_init(msg_test);
  
     while (1)
     {
-        LED0 = 1;
-        pr_info("led0 on\r\n");
-        task_sleep(1000);
-        mutex_lock(&lock);
-        task_ready(main_task);
-        LED0 = 0;
-        test = 3;
-        mutex_unlock(&lock);
-        LED0 = 0;
-        pr_info("led0 off\r\n");
-        task_sleep(1000);
-     }
+        rc = msg_q_recv(&msg_test, &msg, msec_to_tick(300));
+        if (rc == -ETIMEDOUT) {
+            pr_info("get msg timeout\r\n");
+        } else if (rc < 0) {
+            pr_err("get msg err\r\n");
+        } else {
+            buf = *((uint8_t *)(msg.addr));
+            LED0 = buf;
+            if (buf == 0)
+                pr_info("led0 off\r\n");
+            else
+                pr_info("led0 on\r\n");
+        }
+    }
 }
 
-static void led2_task_entry(void* parameter)
+static void led1_task_entry(void* parameter)
 {
+    msg_t msg;
+    uint8_t buf = 0;
+    int rc;
+    struct msg_q *msg_q;
+
     LED_Init();
+
+    msg_q = get_msg_q_byd_name("msg_test");
+
+    msg.addr = (void *)&buf;
+    msg.len = 1;
 
     while (1)
     {
         LED1 = 1;
         pr_info("led1 on\r\n");
-        task_sleep(500);
-        //dump_all_task();
-        mutex_lock(&lock);
-        test = 3;
-        mutex_unlock(&lock);
+        buf = 0;
+        rc = msg_q_send(msg_q, &msg);
+        if (rc < 0)
+            pr_err("msg send err (rc = %d)\r\n", rc);
+        task_sleep(msec_to_tick(500));
         LED1 = 0;
         pr_info("led1 off\r\n");
-        task_sleep(500);
+        buf = 1;
+        rc = msg_q_send(msg_q, &msg);
+        if (rc < 0)
+            pr_err("msg send err (rc = %d)\r\n", rc);
+        task_sleep(msec_to_tick(500));
     }
 }
 
 void task_init(void)
 {
-    main_task = task_create("main", main_task_entry, NULL, 256, 35, 3, NULL, NULL);
-    
+    struct task_struct_t *main_task, *task1, *task2;
 
-    task1 = task_create("led1", led1_task_entry, NULL, 256, 45, 3, NULL, NULL);
+    main_task = task_create("main", main_task_entry, NULL, 256, 35, 3, NULL, NULL);
+    task_ready(main_task);
+
+    task1 = task_create("led0", led0_task_entry, NULL, 256, 10, 3, NULL, NULL);
     task_ready(task1);
 
-    task2 = task_create("led2", led2_task_entry, NULL, 256, 10, 3, NULL, NULL);
+    task2 = task_create("led1", led1_task_entry, NULL, 256, 20, 3, NULL, NULL);
+    task_ready(task2);
 }
 
 int main(void)
@@ -87,7 +108,6 @@ int main(void)
     pr_info("kernel start\r\n");
     sch_init();
     system_init();
-    mutex_init(&lock);
     task_init();
     sch_start();
 

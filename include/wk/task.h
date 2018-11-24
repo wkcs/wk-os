@@ -51,6 +51,8 @@ struct task_struct_t {
 
     struct timer_struct_t timer;
 
+    int flag;
+
     struct list_head list;                           
 };
 

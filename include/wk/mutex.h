@@ -27,7 +27,7 @@ struct mutex {
 
 #define mutex_init(mutex)  \
     do {  \
-        __mutex_init((mutex), #mutex);  \
+        __mutex_init(&(mutex), #mutex);  \
     } while (0)
 
 void __mutex_init(struct mutex *lock, const char *name);
