@@ -18,22 +18,18 @@
 
 extern struct list_head ready_task_list[MAX_PRIORITY];
 
+static LIST_HEAD(task_list);
+LIST_HEAD(close_task_list);
+
 static void task_exit(void)
 {
-    register addr_t level;
     struct task_struct_t *task;
     
     task = get_current_task();
 
     WK_ERROR(task != NULL);
 
-    level = disable_irq_save();
-
-    del_task_to_ready_list(task);
-    task->status = TASK_CLOSE;
-    timer_delete(&task->timer);
-
-    enable_irq_save(level);
+    task_del(task);
 
     switch_task();
 }
@@ -72,9 +68,11 @@ int __task_create(struct task_struct_t *task,
                 void (*clean)(struct task_struct_t *task),
                 addr_t *resource)
 {
+    register addr_t level;
     size_t len;
 
     INIT_LIST_HEAD(&task->list);
+    INIT_LIST_HEAD(&task->tlist);
 
     memset(task->name, 0, WK_NAME_MAX);
     len = strlen(name);
@@ -115,6 +113,10 @@ int __task_create(struct task_struct_t *task,
     task->flag = 0;
 
     timer_init(&task->timer, task->name, timeout, task, priority, 0);
+
+    level = disable_irq_save();
+    list_add_tail(&task->tlist, &task_list);
+    enable_irq_save(level);
 
     return 0;
 }
@@ -158,6 +160,28 @@ pid_err:
 stack_err:
     stack_free(stack_size, stack_start);
     return NULL;
+}
+
+void task_del(struct task_struct_t *task)
+{
+    register addr_t level;
+
+    if (!task) {
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
+        return;
+    }
+
+    level = disable_irq_save();
+
+    if (task->status == TASK_READY || task->status == TASK_RUNING)
+        del_task_to_ready_list(task);
+
+    list_del(&task->tlist);
+    task->status = TASK_CLOSE;
+    timer_delete(&task->timer);
+    list_add_tail(&task->list, &close_task_list);
+
+    enable_irq_save(level);
 }
 
 void task_ready(struct task_struct_t *task)
@@ -344,14 +368,91 @@ int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc)
     return 0;
 }
 
-void dump_all_task(void)
+struct task_struct_t *find_task_by_name(char *name)
 {
-    int i;
     struct task_struct_t *task_temp;
 
-    for (i = 0; i < MAX_PRIORITY; i++) {
-        list_for_each_entry(task_temp, &ready_task_list[i], list) {
-            pr_info("task[%s]:prio=%d, pid=%d\r\n", task_temp->name, task_temp->current_priority, task_temp->pid);
-        }
+    if (name == NULL) {
+        pr_err("%s[%d]:name addr is NULL\r\n", __func__, __LINE__);
+        return NULL;
+    }
+
+    list_for_each_entry(task_temp, &task_list, tlist) {
+        if (!rt_strcmp(name, task_temp->name))
+            return task_temp;
+    }
+
+    return NULL;
+}
+
+struct task_struct_t *find_task_by_pid(wk_pid_t pid)
+{
+    struct task_struct_t *task_temp;
+
+    list_for_each_entry(task_temp, &task_list, tlist) {
+        if (pid == task_temp->pid)
+            return task_temp;
+    }
+
+    return NULL;
+}
+
+bool task_stack_check(struct task_struct_t *task)
+{
+#ifdef CONFIG_STACK_GROW_DOWN
+    if (*(char *)((addr_t)task->stack_addr - task->stack_size + 4) != '*')
+        return false;
+    else
+        return true;
+#else
+    if (*(char *)((addr_t)task->stack_addr + task->stack_size) != '*')
+        return false;
+    else
+        return true;
+#endif
+}
+
+size_t task_get_stack_max_used(struct task_struct_t *task)
+{
+    size_t used, i;
+    addr_t addr;
+
+    if (!task_stack_check(task))
+        return 0;
+    
+    used = task->stack_size;
+
+#ifdef CONFIG_STACK_GROW_DOWN
+    addr = (addr_t)task->stack_addr - task->stack_size + 4;
+    for (i = 0; i < task->stack_size; i++) {
+        if (*(char *)(addr + i) == '*')
+            used--;
+        else
+            return used;
+    }
+#elif
+    addr = (addr_t)task->stack_addr + task->stack_size;
+    for (i = 0; i < task->stack_size; i++) {
+        if (*(char *)(addr - i) == '*')
+            used--;
+        else
+            return used;
+    }
+#endif
+
+    return used;
+}
+
+void dump_all_task(void)
+{
+    struct task_struct_t *task_temp;
+    size_t max_used;
+
+    list_for_each_entry(task_temp, &task_list, tlist) {
+        max_used = task_get_stack_max_used(task_temp);
+        pr_info("task[%s]:prio = %d, pid = %d, stack_size = %d, stack_lave = %d, stack_max_used = %d%s, flag = %d\r\n", 
+            task_temp->name, task_temp->current_priority, task_temp->pid, task_temp->stack_size, 
+            task_temp->stack_size - ((addr_t)task_temp->stack_addr - (addr_t)task_temp->sp),
+            max_used, max_used ? "" : "(task stack overflow)", task_temp->flag);
     }
 }

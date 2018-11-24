@@ -15,5 +15,6 @@
 #define WK_NAME_MAX 16
 #define TICK_PER_SECOND 1000
 #define TIMER_TICK_MAX (WK_U32_MAX >> 1)
+#define CONFIG_STACK_GROW_DOWN
 
 #endif

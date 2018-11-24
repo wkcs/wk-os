@@ -6,8 +6,8 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#ifndef __WK_IPC_H__
-#define __WK_IPC_H__
+#ifndef __WK_MSG_QUEUE_H__
+#define __WK_MSG_QUEUE_H__
 
 #include <wk/kernel.h>
 #include <wk/task.h>

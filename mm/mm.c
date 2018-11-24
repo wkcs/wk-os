@@ -12,6 +12,8 @@
 #include <wk/pid.h>
 #include <wk/config.h>
 
+#include <lib/string.h>
+
 void mm_dump(void)
 {
     struct mm_list_t *list_temp;
@@ -66,20 +68,12 @@ static void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
  * @param 需要释放地址的指针
  * @return int
  */
-static int __mm_free(void *addr)
+static int __mm_free(struct mm_list_t *list)
 {
     struct list_head *head_main, *head_new;
-    struct mm_list_t *list;
     size_t num;
 
     LIST_HEAD(head);
-
-    if (!addr) {
-        pr_err("%s[%d]:the addr to be free is NULL %d\r\n", __func__, __LINE__);
-        return -1;
-    }
-
-    list = (struct mm_list_t *)((addr_t)addr - sizeof(struct mm_list_t));
 
     head_main = &list->list;
 
@@ -113,19 +107,25 @@ void *wk_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
 
     enable_irq_save(level);
 
-    //mm_dump();
-
     return addr;
 }
 
 int wk_free(void *addr)
 {
     register addr_t level;
+    struct mm_list_t *list_temp;
     int status = 0;
+
+    if (!addr) {
+        pr_err("%s[%d]:the addr to be free is NULL %d\r\n", __func__, __LINE__);
+        return -1;
+    }
+
+    list_temp = (struct mm_list_t *)((addr_t)addr - sizeof(struct mm_list_t));
 
     level = disable_irq_save();
 
-    status = __mm_free(addr);
+    status = __mm_free(list_temp);
 
     enable_irq_save(level);
 
@@ -134,12 +134,32 @@ int wk_free(void *addr)
     return status;
 }
 
+void wk_free_by_pid(wk_pid_t pid)
+{
+    register addr_t level;
+    struct mm_list_t *list_temp;
+
+    if (pid == 0) {
+        pr_fatal("%s[%d]:It's forbidden to release the memory block with pid 0\r\n", __func__, __LINE__);
+        return;
+    }
+
+    level = disable_irq_save();
+
+    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+        if (list_temp->pid == pid) {
+            __mm_free(list_temp);
+        }
+    }
+
+    enable_irq_save(level);
+
+}
+
 /*void wk_mm_set_pid(wk_pid_t pid, void *addr)
 {
 
 }*/
-
-#define STACK_GROW_DOWN
 
 void *stack_alloc(size_t stack_size)
 {
@@ -157,18 +177,19 @@ void *stack_alloc(size_t stack_size)
 
     enable_irq_save(level);
 
-    //mm_dump();
+    memset(addr, '*', stack_size);
 
-#ifdef STACK_GROW_UP
-    return addr;
+#ifdef CONFIG_STACK_GROW_DOWN
+    return (void *)((addr_t)addr + stack_size - 4);
 #else
-    return (void *)((addr_t)addr + stack_size);
+    return addr;
 #endif
 }
 
 int stack_free(size_t stack_size, void *addr)
 {
     register addr_t level;
+    struct mm_list_t *list_temp;
     int status = 0;
 
     if (stack_size % 4) {
@@ -181,17 +202,19 @@ int stack_free(size_t stack_size, void *addr)
         return -1;
     }
 
-#ifdef STACK_GROW_DOWN
+#ifdef CONFIG_STACK_GROW_DOWN
     if ((addr_t)addr < stack_size) {
         pr_err("%s[%d]:the addr is error %d\r\n", __func__, __LINE__);
         return -1;
     }
-    addr = (void *)((addr_t)addr - stack_size);
+    addr = (void *)((addr_t)addr - stack_size + 4);
 #endif
+
+    list_temp = (struct mm_list_t *)((addr_t)addr - sizeof(struct mm_list_t));
 
     level = disable_irq_save();
 
-    status = __mm_free(addr);
+    status = __mm_free(list_temp);
 
     enable_irq_save(level);
 

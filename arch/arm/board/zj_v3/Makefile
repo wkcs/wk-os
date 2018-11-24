@@ -17,7 +17,7 @@ C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/board_config.c
 C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/board_init.c
 C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/console.c
 
-ASM_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/startup_stm32f10x_hd.S
+ASM_SRCS += 
 
 INC_DIR += -I $(TOP_DIR)/arch/arm/board/zj_v3/include
 

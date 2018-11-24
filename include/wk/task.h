@@ -53,7 +53,8 @@ struct task_struct_t {
 
     int flag;
 
-    struct list_head list;                           
+    struct list_head list;
+    struct list_head tlist;                           
 };
 
 enum task_cmd_t {
@@ -71,12 +72,15 @@ struct task_struct_t * task_create(const char *name,
                                     uint32_t tick,
                                     void (*clean)(struct task_struct_t *task),
                                     addr_t *resource);
+void task_del(struct task_struct_t *task);
 void task_ready(struct task_struct_t *task);
 int task_yield_cpu(void);
 int task_hang(struct task_struct_t *task);
 int task_resume(struct task_struct_t *task);
 int task_sleep(uint32_t tick);
 int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc);
+struct task_struct_t *find_task_by_name(char *name);
+struct task_struct_t *find_task_by_pid(wk_pid_t pid);
 void dump_all_task(void);
 
 #endif

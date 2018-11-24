@@ -6,7 +6,7 @@
 #include <wk/timer.h>
 #include <init/system.h>
 #include <wk/mutex.h>
-#include <wk/ipc.h>
+#include <wk/msg_queue.h>
 #include <wk/err.h>
 
 #include "led.h"
@@ -89,13 +89,13 @@ void task_init(void)
 {
     struct task_struct_t *main_task, *task1, *task2;
 
-    main_task = task_create("main", main_task_entry, NULL, 256, 35, 3, NULL, NULL);
+    main_task = task_create("main", main_task_entry, NULL, 512, 35, 3, NULL, NULL);
     task_ready(main_task);
 
-    task1 = task_create("led0", led0_task_entry, NULL, 256, 10, 3, NULL, NULL);
+    task1 = task_create("led0", led0_task_entry, NULL, 512, 10, 3, NULL, NULL);
     task_ready(task1);
 
-    task2 = task_create("led1", led1_task_entry, NULL, 256, 20, 3, NULL, NULL);
+    task2 = task_create("led1", led1_task_entry, NULL, 512, 20, 3, NULL, NULL);
     task_ready(task2);
 }
 

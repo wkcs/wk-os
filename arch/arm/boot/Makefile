@@ -8,7 +8,6 @@
 
 DEBUG_DIR += $(TOP_DIR)/debug/arch/arm/boot
 
-C_SRCS += $(TOP_DIR)/arch/arm/boot/stm32f10x_it.c
 C_SRCS += $(TOP_DIR)/arch/arm/boot/system_stm32f10x.c
 
 ASM_SRCS += 

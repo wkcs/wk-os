@@ -6,7 +6,7 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#include <wk/ipc.h>
+#include <wk/msg_queue.h>
 #include <wk/mm.h>
 #include <wk/err.h>
 #include <lib/string.h>

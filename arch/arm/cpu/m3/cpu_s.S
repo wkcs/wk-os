@@ -164,3 +164,31 @@ context_switch_to:
     /* never reach here! */
 loop:
     b loop
+
+    .global HardFault_Handler
+    .type HardFault_Handler, %function
+HardFault_Handler:
+    /* get current context */
+    MRS     r0, msp                 /* get fault context from handler. */
+    TST     lr, #0x04               /* if(!EXC_RETURN[2]) */
+    BEQ     _get_sp_done
+    MRS     r0, psp                 /* get fault context from task. */
+_get_sp_done:
+
+    STMFD   r0!, {r4 - r11}         /* push r4 - r11 register */
+    STMFD   r0!, {lr}               /* push exec_return register */
+
+    TST     lr, #0x04               /* if(!EXC_RETURN[2]) */
+    BEQ     _update_msp
+    MSR     psp, r0                 /* update stack pointer to PSP. */
+    B       _update_done
+_update_msp:
+    MSR     msp, r0                 /* update stack pointer to MSP. */
+_update_done:
+
+    PUSH    {LR}
+    BL      cpu_hard_fault
+    POP     {LR}
+
+    ORR     LR, LR, #0x04
+    BX      LR

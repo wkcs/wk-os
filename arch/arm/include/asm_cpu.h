@@ -18,6 +18,13 @@ inline int __rt_ffs(int value)
     return __builtin_ffs(value);
 }
 
+inline void fatal_err(void)
+{
+    __addr_t addr = 0xffffffff;
+
+    asm  volatile ("mov pc, %0\n" : : "r" (addr) : "pc");
+}
+
 extern __addr_t *stack_init(void *task_entry, void *parameter, __addr_t *stack_addr, void *task_exit);
 extern __addr_t disable_irq_save();
 extern void enable_irq_save(__addr_t level);

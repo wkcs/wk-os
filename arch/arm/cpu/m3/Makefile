@@ -12,6 +12,7 @@ C_SRCS += $(TOP_DIR)/arch/arm/cpu/m3/cpu_c.c
 C_SRCS += $(TOP_DIR)/arch/arm/cpu/m3/asm_irq.c
 
 ASM_SRCS += $(TOP_DIR)/arch/arm/cpu/m3/cpu_s.S
+ASM_SRCS += $(TOP_DIR)/arch/arm/cpu/m3/start.S
 
 INC_DIR += -I$(TOP_DIR)/debug/arch/arm/cpu/m3
 
