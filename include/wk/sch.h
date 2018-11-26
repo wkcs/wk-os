@@ -18,5 +18,8 @@ void add_task_to_ready_list(struct task_struct_t *task);
 void del_task_to_ready_list(struct task_struct_t *task);
 struct task_struct_t *get_current_task(void);
 void switch_task (void);
+void sch_lock(void);
+void sch_unlock(void);
+uint32_t get_sch_lock_level(void);
 
 #endif

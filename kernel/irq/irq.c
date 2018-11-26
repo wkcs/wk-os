@@ -29,3 +29,8 @@ inline void wk_interrupt_leave(void)
     interrupt_nest --;
     enable_irq_save(level);
 }
+
+inline uint8_t get_irq_level(void)
+{
+    return interrupt_nest;
+}

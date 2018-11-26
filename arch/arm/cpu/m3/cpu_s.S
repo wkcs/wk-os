@@ -16,6 +16,7 @@
     .global interrupt_from_task
     .global interrupt_to_task
     .global kernel_running
+    .global interrupt_nest
 
     .equ    SCB_VTOR, 0xE000ED08            /* Vector Table Offset Register */
     .equ    ICSR, 0xE000ED04                /* interrupt control state register */
@@ -168,6 +169,9 @@ loop:
     .global HardFault_Handler
     .type HardFault_Handler, %function
 HardFault_Handler:
+    ldr     r1, =interrupt_nest
+    mov     r2, #1
+    str     r2, [r1]
     /* get current context */
     MRS     r0, msp                 /* get fault context from handler. */
     TST     lr, #0x04               /* if(!EXC_RETURN[2]) */

@@ -59,7 +59,7 @@ static void timeout(void *parameter)
 
 int __task_create(struct task_struct_t *task,
                 const char *name,
-                void (*entry)(void *parameter),
+                void (*entry)(__maybe_unused void *parameter),
                 void *parameter,
                 addr_t *stack_start,
                 size_t stack_size,
@@ -122,7 +122,7 @@ int __task_create(struct task_struct_t *task,
 }
 
 struct task_struct_t * task_create(const char *name,
-                                    void (*entry)(void *parameter),
+                                    void (*entry)(__maybe_unused void *parameter),
                                     void *parameter,
                                     size_t stack_size,
                                     uint8_t priority,
@@ -308,7 +308,7 @@ int task_yield_cpu(void)
 
         list_add_tail(&(task->list), &(ready_task_list[task->current_priority]));
 
-        task->status = TASK_READY;
+        //task->status = TASK_READY;
         /* enable interrupt */
         enable_irq_save(level);
 
@@ -443,16 +443,45 @@ size_t task_get_stack_max_used(struct task_struct_t *task)
     return used;
 }
 
+char *get_task_status_string(struct task_struct_t *task)
+{
+    if (task == NULL) {
+        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
+        return NULL;
+    }
+
+    switch(task->status) {
+        case TASK_RUNING:
+            return "RUNING";
+        case TASK_READY:
+            return "READY";
+        case TASK_WAIT:
+            return "WAIT";
+        case TASK_SUSPEND:
+            return "SUSPEND";
+        case TASK_CLOSE:
+            return "CLOSE";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 void dump_all_task(void)
 {
     struct task_struct_t *task_temp;
     size_t max_used;
-
+    sch_lock();
+    pr_info("----------------------------------------------------------------------------------------\r\n");
+    pr_info("|      task      |prio|    pid    |stack size|stack lave|stack max used| flag | status |\r\n");
+    //pr_info("----------------------------------------------------------------------------------------\r\n");
     list_for_each_entry(task_temp, &task_list, tlist) {
         max_used = task_get_stack_max_used(task_temp);
-        pr_info("task[%s]:prio = %d, pid = %d, stack_size = %d, stack_lave = %d, stack_max_used = %d%s, flag = %d\r\n", 
+        pr_info("|%16s|%4d|%11d|%10d|%10d|%14d|%6d|%8s|%s\r\n", 
             task_temp->name, task_temp->current_priority, task_temp->pid, task_temp->stack_size, 
             task_temp->stack_size - ((addr_t)task_temp->stack_addr - (addr_t)task_temp->sp),
-            max_used, max_used ? "" : "(task stack overflow)", task_temp->flag);
+            max_used, task_temp->flag, get_task_status_string(task_temp),
+            max_used ? "" : "(task stack overflow)");
     }
+    pr_info("----------------------------------------------------------------------------------------\r\n");
+    sch_unlock();
 }

@@ -9,6 +9,7 @@
 #include <wk/kernel.h>
 #include <wk/log.h>
 #include <wk/irq.h>
+#include <wk/cpu.h>
 
 #include "board.h"
 
@@ -26,6 +27,7 @@ int consol_init(void)
 
 void send_to_console(void)
 {
+    register addr_t level;
     size_t len;
 
     if (kernel_running && interrupt_nest == 0) {
@@ -42,7 +44,9 @@ void send_to_console(void)
         len = read_log(log_buf, UART_LOG_DMA_BUF_SIZE);
         if (!len)
             return;
+        level = disable_irq_save();
         usart_send(log_buf, len);
+        enable_irq_save(level);
     }
 }
 

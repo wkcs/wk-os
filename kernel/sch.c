@@ -108,6 +108,9 @@ void switch_task (void)
             from_task = current_task;
             current_task = to_task;
 
+            if (from_task->status == TASK_RUNING)
+                from_task->status = TASK_READY;
+
             if (interrupt_nest == 0) {
                 context_switch((addr_t)&from_task->sp, (addr_t)&to_task->sp);
 
@@ -181,4 +184,47 @@ void del_task_to_ready_list(struct task_struct_t *task)
 inline struct task_struct_t *get_current_task(void)
 {
     return current_task;
+}
+
+void sch_lock(void)
+{
+    register addr_t level;
+
+    /* disable interrupt */
+    level = disable_irq_save();
+
+    scheduler_lock_nest++;
+
+    /* enable interrupt */
+    enable_irq_save(level);
+}
+
+
+void sch_unlock(void)
+{
+    register addr_t level;
+
+    /* disable interrupt */
+    level = disable_irq_save();
+
+    scheduler_lock_nest--;
+
+    if (scheduler_lock_nest <= 0)
+    {
+        scheduler_lock_nest = 0;
+        /* enable interrupt */
+        enable_irq_save(level);
+
+        switch_task();
+    }
+    else
+    {
+        /* enable interrupt */
+        enable_irq_save(level);
+    }
+}
+
+inline uint32_t get_sch_lock_level(void)
+{
+    return scheduler_lock_nest;
 }

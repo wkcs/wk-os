@@ -10,6 +10,8 @@
 #include <wk/sch.h>
 #include <wk/task.h>
 
+#include <board.h>
+
 struct cpu_reg {
     addr_t r4;
     addr_t r5;
@@ -64,7 +66,7 @@ void NMI_Handler(void)
  
 void cpu_hard_fault(struct cpu_dump_type *cpu_dump_type)
 {
-    pr_info("------------------------------------\r\n", cpu_dump_type->cpu_reg.r0);
+    pr_info("-------------------\r\n");
     pr_info("r0  = 0x%08x\r\n", cpu_dump_type->cpu_reg.r0);
     pr_info("r1  = 0x%08x\r\n", cpu_dump_type->cpu_reg.r1);
     pr_info("r2  = 0x%08x\r\n", cpu_dump_type->cpu_reg.r2);
@@ -90,8 +92,6 @@ void cpu_hard_fault(struct cpu_dump_type *cpu_dump_type)
     }
 
     dump_all_task();
-    
-    pr_info("------------------------------------\r\n");
 
   while (1);
 }
@@ -127,4 +127,30 @@ void SVC_Handler(void)
  
 void DebugMon_Handler(void)
 {
+}
+
+extern uint32_t SystemCoreClock;
+
+void cpu_delay_usec(__wk_u32_t usec)
+{
+    __wk_u32_t ticks;
+	__wk_u32_t told,tnow,tcnt=0;
+	__wk_u32_t reload = SysTick->LOAD;
+
+	ticks = usec * (SystemCoreClock / 8000000);
+	tcnt = 0;
+
+    told = SysTick->VAL;
+	while(1) {
+		tnow = SysTick->VAL;	
+		if (tnow != told) {	    
+			if (tnow < told)
+                tcnt += told - tnow;
+			else 
+                tcnt += reload - tnow + told;	    
+			told = tnow;
+			if (tcnt >= ticks)
+                break;
+		}  
+	}
 }

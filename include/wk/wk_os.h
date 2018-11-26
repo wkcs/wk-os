@@ -9,9 +9,9 @@
 #ifndef __WK_OS_H__
 #define __WK_OS_H__
 
-#define WRITE_ONCE(var, val) \
+/*#define WRITE_ONCE(var, val) \
 	(*((volatile typeof(val) *)(&(var))) = (val))
 
-#define READ_ONCE(var) (*((volatile typeof(var) *)(&(var))))
+#define READ_ONCE(var) (*((volatile typeof(var) *)(&(var))))*/
 
 #endif

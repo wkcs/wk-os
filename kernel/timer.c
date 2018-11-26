@@ -86,7 +86,7 @@ struct timer_struct_t *timer_create(const char *name,
 
     timer = (struct timer_struct_t *)wk_alloc(sizeof(struct timer_struct_t), 0, pid);
     if (!timer) {
-        pr_err("%s[%d]:alloc timer struct filed\r\n");
+        pr_err("%s[%d]:alloc timer struct filed\r\n", __func__, __LINE__);
         return timer;
     }
 

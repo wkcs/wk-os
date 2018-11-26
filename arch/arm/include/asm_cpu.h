@@ -32,5 +32,6 @@ extern void context_switch_interrupt(__addr_t from, __addr_t to);
 extern void context_switch(__addr_t from, __addr_t to);
 extern void context_switch_to(__addr_t to);
 extern void asm_irq_init(void);
+void cpu_delay_usec(__wk_u32_t usec);
 
 #endif

@@ -19,7 +19,7 @@ void mm_dump(void)
     struct mm_list_t *list_temp;
     uint32_t i = 0;
 
-    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+    list_for_each_entry(list_temp, &mm_pool_data.head, list) {
         i++;
         pr_info("block[%d]----addr = %p\r\n", i, list_temp);
         pr_info("         |---size = %d\r\n", list_temp->size);
@@ -32,8 +32,7 @@ static struct mm_list_t *__find_block(size_t size)
     int num = 0;
     struct mm_list_t *list_temp;
 
-    //list_temp = list_first_entry(mm_pool_data.head, typeof(*list_temp), list);
-    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+    list_for_each_entry(list_temp, &mm_pool_data.head, list) {
         if (list_temp->block_num == 0) {
             num++;
             if (size <= (MM_BLOCK_SIZE * num - sizeof(struct mm_list_t))) {
@@ -70,28 +69,27 @@ static void *__mm_alloc(size_t size, mm_flag_t flag, wk_pid_t pid)
  */
 static int __mm_free(struct mm_list_t *list)
 {
-    struct list_head *head_main, *head_new;
+    struct list_head *head_main;
     size_t num;
 
-    LIST_HEAD(head);
+    LIST_HEAD(head_new);
 
-    head_main = &list->list;
+    head_main = list->list.prev;
 
     num = list->block_num;
 
-    list->pid = 0;
+    /*list->pid = 0;
     list->size = 0;
     list->block_num = 0;
-    list->flag = 0;
+    list->flag = 0;*/
 
-    head_new = __mm_init((addr_t)list + MM_BLOCK_SIZE, (addr_t)list + num * MM_BLOCK_SIZE);
-    if (head_new == NULL) {
+    __mm_init((addr_t)list, (addr_t)list + num * MM_BLOCK_SIZE, &head_new);
+    if (list_empty(&head_new)) {
         return -1;
     }
 
-    list_add(&head, head_new);
 
-    list_splice(&head, head_main);
+    list_splice(&head_new, head_main);
 
     return 0;
 }
@@ -117,7 +115,7 @@ int wk_free(void *addr)
     int status = 0;
 
     if (!addr) {
-        pr_err("%s[%d]:the addr to be free is NULL %d\r\n", __func__, __LINE__);
+        pr_err("%s[%d]:the addr to be free is NULL\r\n", __func__, __LINE__);
         return -1;
     }
 
@@ -138,6 +136,7 @@ void wk_free_by_pid(wk_pid_t pid)
 {
     register addr_t level;
     struct mm_list_t *list_temp;
+    struct list_head *list_save;
 
     if (pid == 0) {
         pr_fatal("%s[%d]:It's forbidden to release the memory block with pid 0\r\n", __func__, __LINE__);
@@ -146,9 +145,11 @@ void wk_free_by_pid(wk_pid_t pid)
 
     level = disable_irq_save();
 
-    list_for_each_entry(list_temp, mm_pool_data.head, list) {
+    list_for_each_entry(list_temp, &mm_pool_data.head, list) {
         if (list_temp->pid == pid) {
+            list_save = list_temp->list.next;
             __mm_free(list_temp);
+            list_temp = list_entry(list_save->prev, struct mm_list_t, list);
         }
     }
 
@@ -198,13 +199,13 @@ int stack_free(size_t stack_size, void *addr)
     }
 
     if (!addr) {
-        pr_err("%s[%d]:the addr to be free is NULL %d\r\n", __func__, __LINE__);
+        pr_err("%s[%d]:the addr to be free is NULL\r\n", __func__, __LINE__);
         return -1;
     }
 
 #ifdef CONFIG_STACK_GROW_DOWN
     if ((addr_t)addr < stack_size) {
-        pr_err("%s[%d]:the addr is error %d\r\n", __func__, __LINE__);
+        pr_err("%s[%d]:the addr is error\r\n", __func__, __LINE__);
         return -1;
     }
     addr = (void *)((addr_t)addr - stack_size + 4);

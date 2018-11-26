@@ -12,25 +12,42 @@
 #include <wk/log.h>
 #include <wk/clk.h>
 
-int pr_log(uint8_t grade, const char *fmt, ...)
+__printf(2,3) int pr_log(uint8_t grade, const char *fmt, ...)
 {
 	va_list args;
 	static char buf[PR_LOG_BUG_SIZE];
-	struct log_head_t head;
+	uint32_t time_sec, time_usec;
 	int len;
-	uint32_t temp;
+
+	time_sec = tick_to_sec(get_run_tick());
+	time_usec = (tick_to_msec(get_run_tick()) % 1000) * 1000;
+
+	switch(grade) {
+        case LOG_FATAL:
+            sprintf(buf, "%06d.%06d[FATAL]",  time_sec, time_usec);
+            len = 20;
+            break;
+        case LOG_ERROR:
+            sprintf(buf, "%06d.%06d[ERROR]",  time_sec, time_usec);
+            len = 20;
+            break;
+        case LOG_WARNING:
+            sprintf(buf, "%06d.%06d[WARNING]",  time_sec, time_usec);
+            len = 22;
+            break;
+        case LOG_INFO:
+            sprintf(buf, "%06d.%06d[INFO]",  time_sec, time_usec);
+            len = 19;
+            break;
+        default:
+            return 0;
+    }
 
 	va_start(args, fmt);
-	len = vsprintf(buf, fmt, args);
+	len += vsprintf(buf + len, fmt, args);
 	va_end(args);
 
-	head.grade = grade;
-	head.time = tick_to_sec(get_run_tick());
-	temp = (tick_to_msec(get_run_tick()) % 1000) * 1000;
-	head.time = (head.time << 32) | temp;
-	head.log_size = len;
-
-	len = write_log(&head, buf);
+	len = write_log(buf, len);
 
 	return len;
 }

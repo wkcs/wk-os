@@ -65,7 +65,7 @@ enum task_cmd_t {
 };
 
 struct task_struct_t * task_create(const char *name,
-                                    void (*entry)(void *parameter),
+                                    void (*entry)(__maybe_unused void *parameter),
                                     void *parameter,
                                     size_t stack_size,
                                     uint8_t priority,

@@ -12,12 +12,15 @@ TOP_DIR = .
 include config.mk
 
 # 宏定义
-DEFS = -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER
+DEFS =
 
 #设定包含文件目录
 INC_DIR = -I $(TOP_DIR)/include
 
 DEBUG_DIR = $(TOP_DIR)/debug
+
+#链接脚本
+LDSCRIPT = 
 
 # 展开工作子目录
 include $(TOP_DIR)/arch/Makefile
@@ -36,9 +39,6 @@ ASM_OBJS = $(ASM_SRCS:./%.S=$(TOP_DIR)/debug/%.o)
 OBJS = $(C_OBJS)
 OBJS += $(ASM_OBJS)
 DEPS = $(OBJS:%.o=%.d)
-
-#链接脚本
-LDSCRIPT    = $(TOP_DIR)/stm32_flash.ld
 
 # OpenOCD specific variables
 OOCD		:= openocd

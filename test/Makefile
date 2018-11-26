@@ -8,9 +8,9 @@
 
 DEBUG_DIR += $(TOP_DIR)/debug/test
 
-C_SRCS += $(TOP_DIR)/test/delay.c
+#C_SRCS += $(TOP_DIR)/test/delay.c
 C_SRCS += $(TOP_DIR)/test/led.c
-#C_SRCS += $(TOP_DIR)/test/usart.c
+C_SRCS += $(TOP_DIR)/test/lcd.c
 
 ASM_SRCS += 
 

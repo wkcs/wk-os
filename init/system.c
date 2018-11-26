@@ -13,7 +13,7 @@
 static struct task_struct_t *idle_task, *init_task;
 extern struct list_head close_task_list;
 
-static void idle_task_handle(void *argc)
+static void idle_task_handle(__maybe_unused void *argc)
 {
     register addr_t level;
 
@@ -29,14 +29,13 @@ static void idle_task_handle(void *argc)
         enable_irq_save(level);
 
         if (task_temp != NULL) {
-            wk_free_by_pid(task_temp->pid);
             stack_free(task_temp->stack_size, task_temp->stack_addr);
-            wk_free(task_temp);
+            wk_free_by_pid(task_temp->pid);
         }
     }
 }
 
-static void init_task_handle(void *argc)
+static void init_task_handle(__maybe_unused void *argc)
 {
     
 }

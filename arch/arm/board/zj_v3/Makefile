@@ -6,6 +6,8 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
+DEFS += -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER
+
 DEBUG_DIR += $(TOP_DIR)/debug/arch/arm/board/zj_v3
 
 C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/arch_dma.c

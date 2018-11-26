@@ -29,7 +29,7 @@ struct log_head_t {
 };
 
 int __init log_server_init(void);
-size_t write_log(struct log_head_t *head, char * buf);
+size_t write_log(char * buf, size_t len);
 size_t read_log(char *buf, size_t free_size);
 
 #endif

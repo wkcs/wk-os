@@ -52,8 +52,6 @@ extern void __chk_io_ptr(const volatile void __iomem *);
 #define ___PASTE(a,b) a##b
 #define __PASTE(a,b) ___PASTE(a,b)
 
-#ifdef __KERNEL__
-
 #ifdef __GNUC__
 #include <wk/compiler-gcc.h>
 #endif
@@ -329,8 +327,6 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
 	__write_once_size(&(x), __u.__c, sizeof(x));	\
 	__u.__val;					\
 })
-
-#endif /* __KERNEL__ */
 
 #endif /* __ASSEMBLY__ */
 

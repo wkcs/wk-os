@@ -9,6 +9,6 @@
 #ifndef __SECTION_H__
 #define __SECTION_H__
 
-#define __init __attribute__((section("kernel_init")))
+#define __init __attribute__((section(".kernel_init")))
 
 #endif

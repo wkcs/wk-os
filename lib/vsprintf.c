@@ -130,7 +130,7 @@ static char *print_number(char *buf, char *end, int num, int base, int s, int ty
     return buf;
 }
 
-uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
+__printf(3, 0) uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 {
     uint32_t num;
     int i, len;
@@ -330,7 +330,7 @@ uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
     return str - buf;
 }
 
-uint32_t snprintf(char *buf, size_t size, const char *fmt, ...)
+__printf(3, 4) uint32_t snprintf(char *buf, size_t size, const char *fmt, ...)
 {
     uint32_t n;
     va_list args;
@@ -342,12 +342,12 @@ uint32_t snprintf(char *buf, size_t size, const char *fmt, ...)
     return n;
 }
 
-uint32_t vsprintf(char *buf, const char *format, va_list arg_ptr)
+__printf(2, 0) uint32_t vsprintf(char *buf, const char *format, va_list arg_ptr)
 {
     return vsnprintf(buf, SIZE_MAX, format, arg_ptr);
 }
 
-uint32_t sprintf(char *buf, const char *format, ...)
+__printf(2, 3) uint32_t sprintf(char *buf, const char *format, ...)
 {
     uint32_t n;
     va_list arg_ptr;
@@ -357,21 +357,4 @@ uint32_t sprintf(char *buf, const char *format, ...)
     va_end(arg_ptr);
 
     return n;
-}
-
-void printf(const char *fmt, ...)
-{
-
-    va_list args;
-    size_t length;
-    static char buf[256];
-
-    va_start(args, fmt);
-    length = vsnprintf(buf, sizeof(buf) - 1, fmt, args);
-    if (length > 256 - 1)
-        length = 256 - 1;
-
-    usart_send(buf, length);
-
-    va_end(args);
 }

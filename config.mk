@@ -16,19 +16,21 @@ Q		    := @
 endif
 
 #优化等级
-ifeq ($(OPT),0)
-OPTSRC = -O0
-else ifeq ($(OPT),1)
-OPTSRC = -O1
-else ifeq ($(OPT),2)
+#ifeq ($(OPT),0)
+#OPTSRC = -O0
+#else ifeq ($(OPT),1)
+#OPTSRC = -O1
+#else ifeq ($(OPT),2)
+#OPTSRC = -O2
+#else ifeq ($(OPT),3)
+#OPTSRC = -O3
+#else ifeq ($(OPT),s)
+#OPTSRC = -Os
+#else 
+#OPTSRC = -Og
+#endif
+
 OPTSRC = -O2
-else ifeq ($(OPT),3)
-OPTSRC = -O3
-else ifeq ($(OPT),s)
-OPTSRC = -Os
-else 
-OPTSRC = -Og
-endif
 
 
 #定义工具链
@@ -47,19 +49,13 @@ GDB		    := $(PREFIX)gdb
 STFLASH = 
 JFLASH = JFlash
 
-# 架构相关编译指令
-#使用硬件fpu
-#FP_FLAGS	= -mfloat-abi=hard -mfpu=fpv4-sp-d16
-FP_FLAGS	= -msoft-float
-ARCH_FLAGS	= -mthumb -mcpu=cortex-m3
-
 
 CCFLAGS = $(ARCH_FLAGS)
 CCFLAGS += $(FP_FLAGS)
 CCFLAGS += $(OPTSRC)
 CCFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections                  \
            -fdata-sections -ffreestanding -fno-move-loop-invariants
-CCFLAGS += -Wall -Wextra  -g3 
+CCFLAGS += -Wall -Wextra -Werror -g3 
 CCFLAGS += -std=gnu11 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c
 
 ASFLAGS = $(ARCH_FLAGS)
@@ -67,7 +63,7 @@ ASFLAGS += $(FP_FLAGS)
 ASFLAGS += $(OPTSRC)
 ASFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections                  \
            -fdata-sections -ffreestanding -fno-move-loop-invariants
-ASFLAGS += -Wall -Wextra  -g3 -x assembler-with-cpp
+ASFLAGS += -Wall -Wextra -Werror -g3 -x assembler-with-cpp
 ASFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c
 
 LDFLAGS = $(ARCH_FLAGS)
