@@ -87,6 +87,7 @@ int mutex_try_lock(struct mutex *lock)
         enable_irq_save(level);
         return 0;
     } else
+        enable_irq_save(level);
         return -1;
 }
 
