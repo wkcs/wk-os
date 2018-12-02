@@ -8,7 +8,7 @@
 
 DEBUG_DIR += $(TOP_DIR)/debug/arch/arm/board
 
-include $(TOP_DIR)/arch/arm/board/zj_v3/Makefile
+include $(TOP_DIR)/arch/arm/board/$(BOARD)/Makefile
 
 C_SRCS += 
 

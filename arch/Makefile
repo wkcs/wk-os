@@ -8,4 +8,4 @@
 
 DEBUG_DIR += $(TOP_DIR)/debug/arch
 
-include $(TOP_DIR)/arch/arm/Makefile
+include $(TOP_DIR)/arch/$(ARCH)/Makefile

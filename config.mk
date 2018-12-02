@@ -32,6 +32,9 @@ endif
 
 OPTSRC = -O2
 
+ARCH = arm
+BOARD = zj_v3
+
 
 #定义工具链
 PREFIX		:= arm-none-eabi-

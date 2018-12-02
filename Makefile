@@ -87,7 +87,7 @@ $(TARGET).images: $(SECONDARY_BIN) $(SECONDARY_FLASH) $(SECONDARY_LIST)
 $(SECONDARY_ELF): debug_dir $(OBJS) $(LDSCRIPT)
 	@echo   LD      $(SECONDARY_ELF)
 	$(Q)$(CC) $(LDFLAGS) -o "$(SECONDARY_ELF)" $(C_OBJS) $(ASM_OBJS)
-	@echo   SIZE    $(SECONDARY_ELF)\n\n
+	@echo   SIZE    $(SECONDARY_ELF)
 	$(Q)$(SIZE) --format=berkeley "$(SECONDARY_ELF)"
 
 
