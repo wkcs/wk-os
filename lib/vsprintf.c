@@ -278,6 +278,9 @@ __printf(3, 0) uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_li
 
         case 'X':
             flags |= LARGE;
+            base = 16;
+            break;
+
         case 'x':
             base = 16;
             break;

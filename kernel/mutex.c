@@ -86,9 +86,10 @@ int mutex_try_lock(struct mutex *lock)
         mutex_set_owner(lock, get_current_task());
         enable_irq_save(level);
         return 0;
-    } else
+    } else {
         enable_irq_save(level);
         return -1;
+    }
 }
 
 /*给互斥体解锁*/

@@ -39,8 +39,9 @@ int uart_config(struct uart_config_t *config)
 {
     uint32_t num;
 
-    if (config == NULL)
+    if (config == NULL) {
         return 0;
+    }
 	
 	clk_enable_all(config->clk_config);
 #ifdef UART_DMA
