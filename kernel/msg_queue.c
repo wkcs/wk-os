@@ -149,7 +149,7 @@ alloc_err:
     return rc;
 }
 
-int msg_q_recv(struct msg_q *msg_q, msg_t *msg, uint32_t timeout)
+int msg_q_recv(struct msg_q *msg_q, msg_t *msg, int32_t timeout)
 {
     msg_block_t *msg_block;
     register addr_t level;
@@ -182,10 +182,14 @@ int msg_q_recv(struct msg_q *msg_q, msg_t *msg, uint32_t timeout)
         rc = task_hang(task);
         if (rc) {
             pr_err("%s[%d]:task hang err(%d)\r\n", __func__, __LINE__, rc);
+            enable_irq_save(level);
             return rc;
         }
-        timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &timeout);
-        timer_start(&task->timer);
+
+        if (timeout > 0) {
+            timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &timeout);
+            timer_start(&task->timer);
+        }
 
         enable_irq_save(level);
 

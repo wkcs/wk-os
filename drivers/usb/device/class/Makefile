@@ -6,12 +6,10 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/drivers
+DEBUG_DIR += $(TOP_DIR)/debug/drivers/usb/device/class
 
-#include $(TOP_DIR)/drivers/usb/Makefile
-
-C_SRCS += 
+C_SRCS += $(TOP_DIR)/drivers/usb/device/class/hid.c
 
 ASM_SRCS += 
 
-INC_DIR += 
+INC_DIR += -I $(TOP_DIR)/drivers/inc

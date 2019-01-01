@@ -12,6 +12,7 @@ include $(TOP_DIR)/arch/arm/board/Makefile
 include $(TOP_DIR)/arch/arm/boot/Makefile
 include $(TOP_DIR)/arch/arm/cmsis/Makefile
 include $(TOP_DIR)/arch/arm/cpu/Makefile
+include $(TOP_DIR)/arch/arm/config/Makefile
 
 C_SRCS += 
 

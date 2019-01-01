@@ -10,6 +10,8 @@
 #define __WK_DEVICE_H__
 
 #include <wk/list.h>
+#include <wk/of.h>
+#include <wk/mutex.h>
 #include <asm/types.h>
 
 struct device;
@@ -18,7 +20,6 @@ struct device_driver;
 struct driver_private;
 struct subsys_private;
 struct bus_type;
-struct device_node;
 
 struct bus_type {
 	const char		*name;
@@ -34,7 +35,17 @@ struct bus_type {
 	int (*suspend)(struct device *dev);
 	int (*resume)(struct device *dev);
 
+	struct list_head list;
+
 	struct subsys_private *p;
+};
+
+struct subsys_private {
+	struct mutex mutex;
+
+	struct list_head devices_list;
+	struct list_head drivers_list;
+	struct bus_type *bus;
 };
 
 struct device_driver {
@@ -49,7 +60,14 @@ struct device_driver {
 	int (*suspend) (struct device *dev);
 	int (*resume) (struct device *dev);
 
+	struct list_head list;
+
 	struct driver_private *p;
+};
+
+struct driver_private {
+	struct list_head devices_list;
+	struct device_driver *driver;
 };
 
 struct device {
@@ -74,6 +92,14 @@ struct device {
 	struct device_node	*of_node; /* associated device tree node */
 
 	struct list_head	devres_head;
+	struct list_head list;
+	struct list_head dlist;
+};
+
+struct device_private {
+	struct list_head children_list;
+	struct list_head parent_list;
+	struct device *device;
 };
 
 #endif

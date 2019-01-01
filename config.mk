@@ -32,9 +32,6 @@ endif
 
 OPTSRC = -O2
 
-ARCH = arm
-BOARD = zj_v3
-
 
 #定义工具链
 PREFIX		:= arm-none-eabi-
@@ -51,6 +48,14 @@ GDB		    := $(PREFIX)gdb
 #下载工具
 STFLASH = 
 JFLASH = JFlash
+
+ifndef $(ARCH)
+    ARCH := arm
+endif
+
+ifndef $(BOARD)
+    BOARD := zj_v3
+endif
 
 
 CCFLAGS = $(ARCH_FLAGS)
