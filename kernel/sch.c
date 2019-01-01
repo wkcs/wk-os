@@ -54,10 +54,10 @@ void sch_start(void)
 #if MAX_PRIORITY > 32
     register addr_t offset;
 
-    offset = __rt_ffs(ready_task_priority_group) - 1;
-    highest_ready_priority = (offset << 3) + __rt_ffs(ready_task_table[offset]) - 1;
+    offset = __wk_ffs(ready_task_priority_group) - 1;
+    highest_ready_priority = (offset << 3) + __wk_ffs(ready_task_table[offset]) - 1;
 #else
-    highest_ready_priority = __rt_ffs(ready_task_priority_group) - 1;
+    highest_ready_priority = __wk_ffs(ready_task_priority_group) - 1;
 #endif
 
     /* get switch to task */
@@ -88,12 +88,12 @@ void switch_task (void)
         register addr_t highest_ready_priority;
 
 #if MAX_PRIORITY <= 32
-        highest_ready_priority = __rt_ffs(ready_task_priority_group) - 1;
+        highest_ready_priority = __wk_ffs(ready_task_priority_group) - 1;
 #else
         register addr_t offset;
 
-        offset = __rt_ffs(ready_task_priority_group) - 1;
-        highest_ready_priority = (offset << 3) + __rt_ffs(ready_task_table[offset]) - 1;
+        offset = __wk_ffs(ready_task_priority_group) - 1;
+        highest_ready_priority = (offset << 3) + __wk_ffs(ready_task_table[offset]) - 1;
 #endif
 
         /* get switch to task */

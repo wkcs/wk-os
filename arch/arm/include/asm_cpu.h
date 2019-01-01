@@ -13,7 +13,7 @@
 
 #define USE_CPU_FFS
 
-inline int __rt_ffs(int value)
+inline int __wk_ffs(int value)
 {
     return __builtin_ffs(value);
 }
