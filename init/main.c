@@ -290,7 +290,7 @@ void task_init(void)
     task_ready(task3);
 }
 
-int main(void)
+int wkos_start(void)
 {
 	char lcd_id[12];
 
