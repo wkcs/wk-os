@@ -60,11 +60,12 @@ void DMA1_Channel4_IRQHandler(void)
     len = read_log(log_buf, UART_LOG_DMA_BUF_SIZE);
     if (!len) {
         dma_transport = false;
+        wk_interrupt_leave();
         return;
     }
     DMA_Cmd(uart_log_dev.dma_config->ch, DISABLE );
  	DMA_SetCurrDataCounter(uart_log_dev.dma_config->ch, len);
  	DMA_Cmd(uart_log_dev.dma_config->ch, ENABLE);
 
-     wk_interrupt_leave();
+    wk_interrupt_leave();
 }

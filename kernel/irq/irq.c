@@ -15,18 +15,18 @@ volatile uint8_t interrupt_nest;
 inline void wk_interrupt_enter(void)
 {
     register addr_t level;
-
+    
     level = disable_irq_save();
-    interrupt_nest ++;
+    interrupt_nest++;
     enable_irq_save(level);
 }
 
 inline void wk_interrupt_leave(void)
 {
     register addr_t level;
-
+    
     level = disable_irq_save();
-    interrupt_nest --;
+    interrupt_nest--;
     enable_irq_save(level);
 }
 
