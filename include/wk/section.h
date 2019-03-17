@@ -10,5 +10,6 @@
 #define __SECTION_H__
 
 #define __init __attribute__((section(".kernel_init")))
+#define __init_task __attribute__((section(".init_task")))
 
 #endif

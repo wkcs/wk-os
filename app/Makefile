@@ -6,12 +6,10 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/init
+DEBUG_DIR += $(TOP_DIR)/debug/app
 
-C_SRCS += $(TOP_DIR)/init/system.c
-C_SRCS += $(TOP_DIR)/init/main.c
-C_SRCS += $(TOP_DIR)/init/init.c
+C_SRCS += $(TOP_DIR)/app/test_app.c
 
-ASM_SRCS += 
+ASM_SRCS +=
 
 

@@ -32,9 +32,14 @@ SECTIONS
   .text :
   {
     . = ALIGN(4);
+    *(.kernel_init)
+    . = ALIGN(4);
+    __init_task_data_start = .;
+    *(.init_task)
+    __init_task_data_end = .;
+    . = ALIGN(4);
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
-    *(.kernel_init)
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     *(.glue_7)         /* glue arm to thumb code */

@@ -33,6 +33,7 @@ include $(TOP_DIR)/mm/Makefile
 include $(TOP_DIR)/net/Makefile
 include $(TOP_DIR)/scripts/Makefile
 include $(TOP_DIR)/test/Makefile
+include $(TOP_DIR)/app/Makefile
 
 C_OBJS = $(C_SRCS:./%.c=$(TOP_DIR)/debug/%.o)
 ASM_OBJS = $(ASM_SRCS:./%.S=$(TOP_DIR)/debug/%.o)

@@ -9,8 +9,10 @@
 #include <wk/kernel.h>
 #include <wk/task.h>
 #include <wk/mm.h>
+#include <wk/err.h>
+#include <init/init.h>
 
-static struct task_struct_t *idle_task, *init_task;
+static struct task_struct_t *idle_task;
 extern struct list_head close_task_list;
 
 static void idle_task_handle(__maybe_unused void *argc)
@@ -35,24 +37,17 @@ static void idle_task_handle(__maybe_unused void *argc)
     }
 }
 
-static void init_task_handle(__maybe_unused void *argc)
+int idle_task_init(void)
 {
-    
-}
-
-void system_init(void)
-{
-    init_task = task_create("init", init_task_handle, NULL, 256, 0, 1000, NULL, NULL);
-    
-    if (init_task)
-        task_ready(init_task);
-    else 
-        pr_fatal("%s[%d]:create init task error\r\n", __func__, __LINE__);
-
     idle_task = task_create("idle", idle_task_handle, NULL, 256, MAX_PRIORITY - 1, 1000, NULL, NULL);
 
     if (idle_task)
         task_ready(idle_task);
-    else 
+    else {
         pr_fatal("%s[%d]:create idle task error\r\n", __func__, __LINE__);
+        return -ENODEV;
+    }
+
+    return 0;
 }
+task_init(idle_task_init);
