@@ -43,7 +43,7 @@ DEPS = $(OBJS:%.o=%.d)
 # OpenOCD specific variables
 OOCD		:= openocd
 OOCD_INTERFACE	:= flossjtag
-OOCD_TARGET	:= stm32f4x
+OOCD_TARGET	:= stm32f1x
 OOCDFLAGS := -f openocd.cfg
            
 
