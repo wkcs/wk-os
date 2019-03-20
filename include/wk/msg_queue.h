@@ -44,7 +44,8 @@ int __msg_q_init(struct msg_q *msg_q,
                 const char *name,
                 struct task_struct_t *owner);
 int msg_q_send(struct msg_q *msg_q, msg_t *msg);
-int msg_q_recv(struct msg_q *msg_q, msg_t *msg, int32_t timeout);
+int msg_q_recv(struct msg_q *msg_q, msg_t *msg);
+int msg_q_recv_timeout(struct msg_q *msg_q, msg_t *msg, uint32_t timeout);
 struct msg_q *get_msg_q_byd_name(char *name);
 
 #endif

@@ -27,6 +27,8 @@ void delay_msec(uint16_t msec)
         if (msec >= temp)
             task_sleep(msec_to_tick(msec / temp));
         msec = msec % temp;
+        if (msec == 0)
+            return;
     }
 
     delay_usec(msec * 1000);
@@ -34,7 +36,9 @@ void delay_msec(uint16_t msec)
 
 void delay_usec(uint32_t usec)
 {
-    sch_lock();
+    register addr_t level;
+
+    level = disable_irq_save();
     cpu_delay_usec(usec);
-    sch_unlock();
+    enable_irq_save(level);
 }

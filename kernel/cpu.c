@@ -6,11 +6,12 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#ifndef __CPU_H__
-#define __CPU_H__
+#include <wk/kernel.h>
+#include <wk/cpu.h>
 
-#include <asm_cpu.h>
+__init int cpu_init(void)
+{
+    asm_cpu_init();
 
-int cpu_init(void);
-
-#endif
+    return 0;
+}

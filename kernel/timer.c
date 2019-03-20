@@ -53,15 +53,15 @@ void timer_remove(struct timer_struct_t *timer)
     list_del(&timer->list);
 }
 
-inline uint32_t get_lave_tick(struct timer_struct_t *timer)
+inline uint64_t get_lave_tick(struct timer_struct_t *timer)
 {
-    uint32_t run_tick = get_run_tick();
-    uint32_t lave_tick = 0;
+    uint64_t run_tick = get_run_tick();
+    uint64_t lave_tick = 0;
 
     if (timer->timeout_tick >= run_tick)
         return timer->timeout_tick - run_tick;
     else {
-        lave_tick = WK_U32_MAX - run_tick + timer->timeout_tick;
+        lave_tick = WK_U64_MAX - run_tick + timer->timeout_tick;
         if (lave_tick > TIMER_TICK_MAX)
             return 0;
         else
@@ -127,17 +127,17 @@ int timer_start(struct timer_struct_t *timer)
 
     timer_remove(timer);
 
-    if (WK_U32_MAX - get_run_tick() >= timer->init_tick)
+    if (WK_U64_MAX - get_run_tick() >= timer->init_tick)
         timer->timeout_tick = get_run_tick() + timer->init_tick;
     else
-        timer->timeout_tick = timer->init_tick - (WK_U32_MAX - get_run_tick());
+        timer->timeout_tick = timer->init_tick - (WK_U64_MAX - get_run_tick());
 
     if (list_empty(&system_timer_list))
         list_add_tail(&timer->list, &system_timer_list);
     else {
         list_for_each_entry(list_temp, &system_timer_list, list) {
-            uint32_t tick_list = get_lave_tick(list_temp);
-            uint32_t tick_new = get_lave_tick(timer);
+            uint64_t tick_list = get_lave_tick(list_temp);
+            uint64_t tick_new = get_lave_tick(timer);
             if ((tick_list < tick_new) || (tick_list == tick_new && list_temp-> priority <= timer->priority))
                 continue;
             else
@@ -210,7 +210,8 @@ void dump_timer(void)
     struct timer_struct_t *list_temp;
 
     list_for_each_entry(list_temp, &system_timer_list, list) {
-        pr_info("timer[%s]:timeout = %u, lave = %u\r\n", list_temp->name, list_temp->timeout_tick, get_lave_tick(list_temp));
+        pr_info("timer[%s]:timeout = %u, lave = %u\r\n", list_temp->name,
+            (uint32_t)list_temp->timeout_tick, (uint32_t)get_lave_tick(list_temp));
     }
 }
 

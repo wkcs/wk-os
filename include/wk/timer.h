@@ -16,7 +16,7 @@
 struct timer_struct_t {
     char name[WK_NAME_MAX];
     uint32_t init_tick;
-    uint32_t timeout_tick;
+    uint64_t timeout_tick;
     void (*timeout_func)(void *parameter);
     void *parameter;
     uint8_t priority;

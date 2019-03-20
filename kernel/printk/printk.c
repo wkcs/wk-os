@@ -11,6 +11,7 @@
 #include <lib/string.h>
 #include <wk/log.h>
 #include <wk/clk.h>
+#include <wk/cpu.h>
 
 __printf(2,3) int pr_log(uint8_t grade, const char *fmt, ...)
 {
@@ -19,8 +20,9 @@ __printf(2,3) int pr_log(uint8_t grade, const char *fmt, ...)
 	uint32_t time_sec, time_usec;
 	int len;
 
-	time_sec = tick_to_sec(get_run_tick());
-	time_usec = (tick_to_msec(get_run_tick()) % 1000) * 1000;
+	time_sec = (uint32_t)tick_to_sec_64(get_run_tick());
+    time_usec = (uint32_t)((tick_to_msec_64(get_run_tick()) % 1000) *
+        1000 + get_cpu_run_time_by_sys_bead());
 
 	switch(grade) {
         case LOG_FATAL:

@@ -6,9 +6,10 @@
  * Email: hqh2030@gmail.com, huqihan@live.com
  */
 
-#include <wk/kernel.h>
 #include <wk/sch.h>
 #include <wk/task.h>
+#include <wk/irq.h>
+#include <wk/clk.h>
 
 #include <board.h>
 
@@ -37,10 +38,10 @@ struct cpu_dump_type {
     struct cpu_reg cpu_reg;
 };
 
-__addr_t *stack_init(void *task_entry, void *parameter, __addr_t *stack_addr, void *task_exit)
+addr_t *stack_init(void *task_entry, void *parameter, addr_t *stack_addr, void *task_exit)
 {
-    __addr_t *stk;
-    __wk_u8_t i = 0;
+    addr_t *stk;
+    uint8_t i = 0;
 
     stk  = stack_addr;
     
@@ -131,13 +132,22 @@ void DebugMon_Handler(void)
 
 extern uint32_t SystemCoreClock;
 
-void cpu_delay_usec(__wk_u32_t usec)
+uint32_t sys_tick_num_by_us;
+uint32_t sys_tick_num_by_beat;
+__init void asm_cpu_init(void)
 {
-    __wk_u32_t ticks;
-	__wk_u32_t told,tnow,tcnt=0;
-	__wk_u32_t reload = SysTick->LOAD;
+    sys_tick_num_by_us = SystemCoreClock / 1000000;
+    sys_tick_num_by_beat = SystemCoreClock / TICK_PER_SECOND;
+}
 
-	ticks = usec * (SystemCoreClock / 8000000);
+void cpu_delay_usec(uint32_t usec)
+{
+    register uint32_t ticks;
+	register uint32_t told, tnow;
+    register uint32_t tcnt=0;
+	register uint32_t reload = SysTick->LOAD;
+
+	ticks = usec * sys_tick_num_by_us;
 	tcnt = 0;
 
     told = SysTick->VAL;
@@ -149,8 +159,21 @@ void cpu_delay_usec(__wk_u32_t usec)
 			else 
                 tcnt += reload - tnow + told;	    
 			told = tnow;
-			if (tcnt >= ticks)
+			if (tcnt >= ticks) {
                 break;
+            }
 		}  
 	}
+}
+
+void SysTick_Handler(void)
+{
+    /* enter interrupt */
+    wk_interrupt_enter();
+
+    if (kernel_running)
+        system_beat_processing();
+
+    /* leave interrupt */
+    wk_interrupt_leave();
 }

@@ -73,6 +73,7 @@ int __task_create(struct task_struct_t *task,
 
     INIT_LIST_HEAD(&task->list);
     INIT_LIST_HEAD(&task->tlist);
+    INIT_LIST_HEAD(&task->wait_list);
 
     memset(task->name, 0, WK_NAME_MAX);
     len = strlen(name);

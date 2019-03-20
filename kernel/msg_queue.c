@@ -149,57 +149,9 @@ alloc_err:
     return rc;
 }
 
-int msg_q_recv(struct msg_q *msg_q, msg_t *msg, int32_t timeout)
+static int __msg_q_recv(struct msg_q *msg_q, msg_t *msg)
 {
     msg_block_t *msg_block;
-    register addr_t level;
-    struct task_struct_t *task;
-    int rc = 0;
-
-    if (msg_q == NULL) {
-        pr_err("%s[%d]:msg_q is NULL\r\n", __func__, __LINE__);
-        return -EFAULT;
-    }
-
-    if (msg == NULL) {
-        pr_err("%s[%d]:msg is NULL\r\n", __func__, __LINE__);
-        return -EFAULT;
-    }
-
-    task = get_current_task();
-
-    if (task == NULL) {
-        pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
-        return -EFAULT;
-    }
-
-    if (list_empty(&msg_q->msg_list)) {
-        if (timeout == 0)
-            return -ENOMSG;
-
-        level = disable_irq_save();
-
-        rc = task_hang(task);
-        if (rc) {
-            pr_err("%s[%d]:task hang err(%d)\r\n", __func__, __LINE__, rc);
-            enable_irq_save(level);
-            return rc;
-        }
-
-        if (timeout > 0) {
-            timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &timeout);
-            timer_start(&task->timer);
-        }
-
-        enable_irq_save(level);
-
-        switch_task();
-    }
-
-    if (task->flag == -ETIMEDOUT) {
-        task->flag = 0;
-        return -ETIMEDOUT;
-    }
 
     /*再检查一次消息队列是否为空，防止任务被其他事件唤醒时消息队列为空*/
     if (list_empty(&msg_q->msg_list)) {
@@ -217,6 +169,84 @@ int msg_q_recv(struct msg_q *msg_q, msg_t *msg, int32_t timeout)
     mutex_unlock(&msg_q->lock);
 
     return 0;
+}
+
+int msg_q_recv(struct msg_q *msg_q, msg_t *msg)
+{
+    struct task_struct_t *task = get_current_task();
+    int rc = 0;
+
+    if (msg_q == NULL) {
+        pr_err("%s[%d]:msg_q is NULL\r\n", __func__, __LINE__);
+        return -EFAULT;
+    }
+
+    if (msg == NULL) {
+        pr_err("%s[%d]:msg is NULL\r\n", __func__, __LINE__);
+        return -EFAULT;
+    }
+
+    if (list_empty(&msg_q->msg_list)) {
+        rc = task_hang(task);
+        if (rc) {
+            pr_err("%s[%d]:task hang err(%d)\r\n", __func__, __LINE__, rc);
+            return rc;
+        }
+        switch_task();
+    }
+
+    /*从消息队列读取一条消息*/
+    rc = __msg_q_recv(msg_q, msg);
+
+    return rc;
+}
+
+int msg_q_recv_timeout(struct msg_q *msg_q, msg_t *msg, uint32_t timeout)
+{
+    register addr_t level;
+    struct task_struct_t *task = get_current_task();
+    int rc = 0;
+
+    if (msg_q == NULL) {
+        pr_err("%s[%d]:msg_q is NULL\r\n", __func__, __LINE__);
+        return -EFAULT;
+    }
+
+    if (msg == NULL) {
+        pr_err("%s[%d]:msg is NULL\r\n", __func__, __LINE__);
+        return -EFAULT;
+    }
+
+    if (list_empty(&msg_q->msg_list)) {
+        if (timeout == 0)
+            return -ENOMSG;
+
+        level = disable_irq_save();
+
+        rc = task_hang(task);
+        if (rc) {
+            pr_err("%s[%d]:task hang err(%d)\r\n", __func__, __LINE__, rc);
+            enable_irq_save(level);
+            return rc;
+        }
+
+        timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &timeout);
+        timer_start(&task->timer);
+
+        enable_irq_save(level);
+
+        switch_task();
+    }
+
+    if (task->flag == -ETIMEDOUT) {
+        task->flag = 0;
+        return -ETIMEDOUT;
+    }
+
+    /*从消息队列读取一条消息*/
+    rc = __msg_q_recv(msg_q, msg);
+
+    return rc;
 }
 
 struct msg_q *get_msg_q_byd_name(char *name)

@@ -54,7 +54,8 @@ struct task_struct_t {
     int flag;
 
     struct list_head list;
-    struct list_head tlist;                           
+    struct list_head tlist;
+    struct list_head wait_list;                         
 };
 
 enum task_cmd_t {

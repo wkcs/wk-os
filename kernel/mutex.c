@@ -52,25 +52,19 @@ void mutex_lock(struct mutex *lock)
         struct task_struct_t *task = get_current_task();
         struct task_struct_t *task_temp;
 
-        list_del(&task->list);
+        list_del(&task->wait_list);
 
-        if (list_empty(&lock->wait_list))
-            list_add_tail(&task->list, &lock->wait_list);
-        else {
-            list_for_each_entry(task_temp, &lock->wait_list, list) {
-                if (task->current_priority > task_temp->current_priority)
-                    break;
-            }
-            list_add_tail(&task->list, &task_temp->list);
+        list_for_each_entry(task_temp, &lock->wait_list, wait_list) {
+            if (task->current_priority > task_temp->current_priority)
+                break;
         }
+        list_add_tail(&task->wait_list, &task_temp->wait_list);
 
         if (task->current_priority < lock->owner->current_priority)
             task_ctrl(lock->owner, CMD_TASK_SET_CURR_PRIO, &task->current_priority);
 
-        task->status = TASK_WAIT;
         enable_irq_save(level);
-
-        timer_stop(&task->timer);
+        task_hang(task);
         switch_task();
     }
 }
@@ -113,7 +107,7 @@ void mutex_unlock(struct mutex *lock)
     }
 
     struct task_struct_t *task_temp;
-    task_temp = list_entry(lock->wait_list.next, struct task_struct_t, list);
+    task_temp = list_entry(lock->wait_list.next, struct task_struct_t, wait_list);
     task_ctrl(lock->owner, CMD_TASK_SET_CURR_PRIO, &lock->owner->init_priority);
     mutex_set_owner(lock, task_temp);
     enable_irq_save(level);

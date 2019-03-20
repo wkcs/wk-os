@@ -76,7 +76,7 @@ ASFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c
 
 LDFLAGS = $(ARCH_FLAGS)
 LDFLAGS += $(FP_FLAGS)
-LDFLAGS += -nostdinc -nostdlib
+LDFLAGS += -nostdinc -nostdlib -lgcc
 LDFLAGS += -Wl,--start-group -lc -lm -Wl,--end-group -Wl,-cref,-u,Reset_Handler -Wl,-Map=$(TOP_DIR)/debug/$(TARGET).map   \
            -Wl,--defsym=malloc_getpagesize_P=0x80
 

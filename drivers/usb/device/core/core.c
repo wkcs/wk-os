@@ -2104,7 +2104,7 @@ static void usbd_task_entry(__maybe_unused void* parameter)
         udevice_t device;
 
         /* receive message */
-        if(msg_q_recv(&usb_mq, &usb_msg, -1) < 0 )
+        if(msg_q_recv(&usb_mq, &usb_msg) < 0 )
             continue;
         memcpy((void*)&msg, usb_msg.addr, usb_msg.len);
 

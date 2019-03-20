@@ -10,6 +10,7 @@
 int wkos_start(void)
 {
     disable_irq_save();
+    cpu_init();
     board_init();
     mm_pool_init();
     log_server_init();

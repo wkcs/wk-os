@@ -12,7 +12,7 @@
 #include <wk/sch.h>
 
 /*内核当前已经运行的时间片，最大值为2^32*/
-static uint32_t run_tick;
+uint64_t run_tick;
 
 /*
  * 
@@ -21,10 +21,10 @@ void system_beat_processing(void)
 {
     struct task_struct_t *task;
 
-    if (run_tick < WK_U32_MAX)
+    if (run_tick < WK_U64_MAX)
         run_tick++;
     else
-        run_tick = 1;
+        run_tick = 0;
 
     task = get_current_task();
 
@@ -41,10 +41,4 @@ void system_beat_processing(void)
     timer_check();
 }
 
-/*
- * 获取kernel当前运行时间片
- */
-uint32_t get_run_tick(void)
-{
-    return run_tick;
-}
+
