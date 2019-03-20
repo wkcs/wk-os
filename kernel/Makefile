@@ -21,6 +21,7 @@ C_SRCS += $(TOP_DIR)/kernel/timer.c
 C_SRCS += $(TOP_DIR)/kernel/mutex.c
 C_SRCS += $(TOP_DIR)/kernel/msg_queue.c
 C_SRCS += $(TOP_DIR)/kernel/delay.c
+C_SRCS += $(TOP_DIR)/kernel/sem.c
 
 ASM_SRCS +=
 
