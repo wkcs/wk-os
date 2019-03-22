@@ -80,6 +80,7 @@ int sem_get_timeout(sem_t *sem, uint32_t timedout)
     }
     timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &timedout);
     timer_start(&task->timer);
+    task_hang(task);
     switch_task();
 
     if (task->flag == -ETIMEDOUT) {
