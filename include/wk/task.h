@@ -80,8 +80,11 @@ int task_hang(struct task_struct_t *task);
 int task_resume(struct task_struct_t *task);
 int task_sleep(uint32_t tick);
 int task_ctrl(struct task_struct_t *task, enum task_cmd_t cmd, void *argc);
+struct list_head *get_task_list(void);
 struct task_struct_t *find_task_by_name(char *name);
 struct task_struct_t *find_task_by_pid(wk_pid_t pid);
+size_t task_get_stack_max_used(struct task_struct_t *task);
+char *get_task_status_string(struct task_struct_t *task);
 void dump_all_task(void);
 
 #endif

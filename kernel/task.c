@@ -412,6 +412,11 @@ struct task_struct_t *find_task_by_pid(wk_pid_t pid)
     return NULL;
 }
 
+struct list_head *get_task_list(void)
+{
+    return &task_list;
+}
+
 bool task_stack_check(struct task_struct_t *task)
 {
 #ifdef CONFIG_STACK_GROW_DOWN

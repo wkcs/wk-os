@@ -12,6 +12,7 @@ C_SRCS += $(TOP_DIR)/kernel/cmd/cmd.c
 C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_clear.c
 C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_ls.c
 C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_log.c
+C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_task_show.c
 
 ASM_SRCS +=
 
