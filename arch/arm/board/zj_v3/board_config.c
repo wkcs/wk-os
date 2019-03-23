@@ -74,11 +74,21 @@ static struct clk_config_t uart_log_dev_clk = {
     .clk[CLK_GROUP_APB2] = RCC_APB2Periph_USART1
 };
 
+static struct irq_config_t uart_log_dev_irq = {
+    .init_type = {
+        .NVIC_IRQChannel = USART1_IRQn,
+        .NVIC_IRQChannelPreemptionPriority = 3,
+        .NVIC_IRQChannelSubPriority = 0,
+        .NVIC_IRQChannelCmd = ENABLE
+    }
+};
+
 struct uart_config_t uart_log_dev = {
     .clk_config = &uart_log_dev_clk,
     .dma_config = &uart_log_dev_dma,
     .dma_tx_rx = USART_DMAReq_Tx,
-    .irq_config = NULL,
+    .irq_config = &uart_log_dev_irq,
+    .irq_type = USART_IT_RXNE,
     .gpio_config = &uart_log_dev_gpio,
     .gpio_group_num = 2,
     .uart = USART1,
@@ -88,7 +98,7 @@ struct uart_config_t uart_log_dev = {
         .USART_StopBits = USART_StopBits_1,
         .USART_Parity = USART_Parity_No,
         .USART_HardwareFlowControl = USART_HardwareFlowControl_None,
-        .USART_Mode = USART_Mode_Tx
+        .USART_Mode = USART_Mode_Rx | USART_Mode_Tx
     }
 };
 

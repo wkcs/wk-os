@@ -259,7 +259,7 @@ struct msg_q *get_msg_q_byd_name(char *name)
     }
 
     list_for_each_entry(msg_q_temp, &msg_q_list, list) {
-        if (!rt_strcmp(name, msg_q_temp->name))
+        if (!strcmp(name, msg_q_temp->name))
             return msg_q_temp;
     }
 

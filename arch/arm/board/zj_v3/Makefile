@@ -19,7 +19,7 @@ C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/arch_irq.c
 C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/arch_gpio.c
 C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/board_config.c
 C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/board_init.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/console.c
+C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/arch_console.c
 
 #C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/system_stm32f10x.c
 

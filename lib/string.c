@@ -209,7 +209,7 @@ char *strreplace(char *s, char old, char new)
 	return s;
 }
 
-int rt_strncmp(const char *cs, const char *ct, size_t count)
+int strncmp(const char *cs, const char *ct, size_t count)
 {
     register signed char __res = 0;
 
@@ -223,7 +223,7 @@ int rt_strncmp(const char *cs, const char *ct, size_t count)
     return __res;
 }
 
-int rt_strcmp(const char *cs, const char *ct)
+int strcmp(const char *cs, const char *ct)
 {
     while (*cs && *cs == *ct)
         cs++, ct++;

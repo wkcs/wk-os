@@ -393,7 +393,7 @@ struct task_struct_t *find_task_by_name(char *name)
     }
 
     list_for_each_entry(task_temp, &task_list, tlist) {
-        if (!rt_strcmp(name, task_temp->name))
+        if (!strcmp(name, task_temp->name))
             return task_temp;
     }
 
