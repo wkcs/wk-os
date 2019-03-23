@@ -18,17 +18,9 @@ int usart_send(char *ptr, int len)
 {
     int i = 0;
 	
-    while (*ptr && (i < len))
-    {
-        usart_send_blocking(*ptr);
-
-        if (*ptr == '\n')
-        {
-            usart_send_blocking('\r');
-        }
-
+    while (i < len && ptr[i]) {
+        usart_send_blocking(ptr[i]);
         i++;
-        ptr++;
     }
 
     return i;
@@ -52,18 +44,19 @@ int uart_config(struct uart_config_t *config)
 	    gpio_config(&(*config->gpio_config)[num]);
 
 	USART_Init(config->uart, &config->init_type);
-	USART_Cmd(config->uart, ENABLE);
-
-    if (config->irq_config) {
-        irq_config(config->irq_config);
-        USART_ITConfig(config->uart, config->irq_type, ENABLE);
-    }
 
 #ifdef UART_DMA
     if (config->dma_config) {
         USART_DMACmd(config->uart, config->dma_tx_rx, ENABLE);
     }
 #endif
+
+    if (config->irq_config) {
+        irq_config(config->irq_config);
+        USART_ITConfig(config->uart, config->irq_type, ENABLE);
+    }
+
+    USART_Cmd(config->uart, ENABLE);
     
     return 0;
 }

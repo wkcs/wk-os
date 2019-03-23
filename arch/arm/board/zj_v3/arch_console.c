@@ -10,6 +10,7 @@
 #include <wk/log.h>
 #include <wk/irq.h>
 #include <wk/cpu.h>
+#include <wk/console.h>
 
 #include "board.h"
 
@@ -68,4 +69,47 @@ void DMA1_Channel4_IRQHandler(void)
  	DMA_Cmd(uart_log_dev.dma_config->ch, ENABLE);
 
     wk_interrupt_leave();
+}
+
+static char cmd_buf[256];
+static uint8_t cmd_num;
+void USART1_IRQHandler(void)
+{
+    char res;
+    wk_interrupt_enter();
+    if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+        res = USART_ReceiveData(USART1);
+        if (res == '\r') {
+            cmd_buf[cmd_num + 1] = 0;
+            cmd_buf_deal(cmd_buf, cmd_num);
+            cmd_num = 0;
+            usart_send("\r\n", 2);
+        } else if (res != 0x09 && res != 0x1b) {
+            if (res == '\b') {
+                if (cmd_num > 0) {
+                    cmd_num--;
+                    cmd_buf[cmd_num] = 0;
+                    usart_send(&res, 1);
+                    usart_send(" ", 1);
+                    usart_send(&res, 1);
+                }
+            } else {
+                cmd_buf[cmd_num] = res;
+                cmd_num++;
+                usart_send(&res, 1);
+            }
+        }
+        if (cmd_num == 255) {
+            cmd_buf_deal(cmd_buf, cmd_num);
+            cmd_num = 0;
+            usart_send("\r\n", 2);
+        }
+    }
+
+    wk_interrupt_leave();
+}
+
+int console_send_data(char *buf, size_t len)
+{
+    return usart_send(buf, len);
 }

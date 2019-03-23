@@ -361,3 +361,16 @@ __printf(2, 3) uint32_t sprintf(char *buf, const char *format, ...)
 
     return n;
 }
+
+__printf(1, 2) void printf(const char *fmt, ...)
+{
+    char buf[256];
+    va_list arg_ptr;
+    size_t n;
+
+    va_start(arg_ptr, fmt);
+    n = vsprintf(buf, fmt, arg_ptr);
+    va_end(arg_ptr);
+
+    usart_send(buf, n);
+}

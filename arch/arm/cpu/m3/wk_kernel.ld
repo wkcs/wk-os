@@ -38,6 +38,10 @@ SECTIONS
     *(.init_task)
     __init_task_data_end = .;
     . = ALIGN(4);
+    __cmd_list_data_start = .;
+    *(.cmd_list)
+    __cmd_list_data_end = .;
+    . = ALIGN(4);
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
