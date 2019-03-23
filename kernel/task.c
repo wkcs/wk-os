@@ -71,10 +71,12 @@ int __task_create(struct task_struct_t *task,
     register addr_t level;
     size_t len;
 
+#if (MAX_PRIORITY <= 0xff)
     if (priority >= MAX_PRIORITY) {
         pr_err("%s: Priority should be less than %d\r\n", __func__, MAX_PRIORITY);
         return -EINVAL;
     }
+#endif
 
     INIT_LIST_HEAD(&task->list);
     INIT_LIST_HEAD(&task->tlist);
@@ -140,10 +142,12 @@ struct task_struct_t * task_create(const char *name,
     addr_t *stack_start;
     wk_pid_t pid;
 
+#if (MAX_PRIORITY <= 0xff)
     if (priority >= MAX_PRIORITY) {
         pr_err("%s: Priority should be less than %d\r\n", __func__, MAX_PRIORITY);
         return NULL;
     }
+#endif
 
     stack_start = (addr_t *)stack_alloc(stack_size);
     if (!stack_start)
