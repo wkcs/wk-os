@@ -48,6 +48,7 @@ inline int skip_atoi(const char **s)
 #define LEFT (1 << 4)
 #define SPECIAL (1 << 5)
 #define LARGE (1 << 6)
+#define FLOAT (1 << 7)
 
 static char *print_number(char *buf, char *end, int num, int base, int s, int type)
 {
@@ -130,9 +131,91 @@ static char *print_number(char *buf, char *end, int num, int base, int s, int ty
     return buf;
 }
 
+static char *print_float(char *buf, char *end, double num, int s, int type)
+{
+    char c, sign;
+    char tmp[32];
+    const char digits[] = "0123456789.";
+    register int i, m;
+    register int size;
+    int integer = (int)num;
+    double decimal = num - (int)num;
+
+    size = s;
+
+    c = (type & ZEROPAD) ? '0' : ' ';
+
+    i = 0;
+    if (integer == 0)
+        tmp[7 + i++] = '0';
+    else {
+        while (integer != 0)
+            tmp[7 + i++] = digits[divide(&integer, 10)];
+    }
+    if (type & LEFT)
+        size = 0;
+    else
+        size -= i;
+    tmp[6] = '.';
+    i++;
+    for (m = 0; m < 6; m++) {
+        decimal *= 10;
+        tmp[5 - m] = digits[(int)decimal];
+        i++;
+        decimal -= (int)decimal;
+    }
+
+    /* get sign */
+    sign = 0;
+    if (type & SIGN) {
+        if (num < 0)
+            sign = '-';
+        else if (type & PLUS)
+            sign = '+';
+        else if (type & SPACE)
+            sign = ' ';
+    }
+
+    if (!(type & (ZEROPAD | LEFT))) {
+        if ((sign) && (size > 0))
+            size--;
+        while (size-- > 0) {
+            if (buf <= end)
+                *buf = ' ';
+            ++buf;
+        }
+    }
+    if (sign) {
+        if (buf <= end) {
+            *buf = sign;
+            --size;
+        }
+        ++buf;
+    }
+
+    /* no align to the left */
+    if (!(type & LEFT)) {
+        while (size-- > 0) {
+            if (buf <= end)
+                *buf = c;
+            ++buf;
+        }
+    }
+
+    /* put number in the temporary buffer */
+    while (i-- > 0) {
+        if (buf <= end)
+            *buf = tmp[i];
+        ++buf;
+    }
+
+    return buf;
+}
+
 __printf(3, 0) uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 {
     uint32_t num;
+    double num_f;
     int i, len;
     char *str, *end, c;
     const char *s;
@@ -290,6 +373,9 @@ __printf(3, 0) uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_li
             flags |= SIGN;
         case 'u':
             break;
+        case 'f':
+            flags |= FLOAT;
+            break;
 
         default:
             if (str <= end)
@@ -306,20 +392,25 @@ __printf(3, 0) uint32_t vsnprintf(char *buf, size_t size, const char *fmt, va_li
             continue;
         }
 
-        if (qualifier == 'l') {
-            num = va_arg(args, uint32_t);
-            if (flags & SIGN)
-                num = (int32_t)num;
-        } else if (qualifier == 'h') {
-            num = (uint16_t)va_arg(args, int32_t);
-            if (flags & SIGN)
-                num = (int16_t)num;
+        if (flags & FLOAT) {
+            num_f = va_arg(args, double);
+            str = print_float(str, end, num_f, field_width, flags);
         } else {
-            num = va_arg(args, uint32_t);
-            if (flags & SIGN)
-                num = (int32_t)num;
+            if (qualifier == 'l') {
+                num = va_arg(args, uint32_t);
+                if (flags & SIGN)
+                    num = (int32_t)num;
+            } else if (qualifier == 'h') {
+                num = (uint16_t)va_arg(args, int32_t);
+                if (flags & SIGN)
+                    num = (int16_t)num;
+            } else {
+                num = va_arg(args, uint32_t);
+                if (flags & SIGN)
+                    num = (int32_t)num;
+            }
+            str = print_number(str, end, num, base, field_width, flags);
         }
-        str = print_number(str, end, num, base, field_width, flags);
     }
 
     if (str <= end)
