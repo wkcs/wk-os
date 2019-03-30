@@ -8,7 +8,7 @@
 
 DEBUG_DIR += $(TOP_DIR)/debug/drivers
 
-#include $(TOP_DIR)/drivers/usb/Makefile
+include $(TOP_DIR)/drivers/usb/Makefile
 
 C_SRCS += 
 

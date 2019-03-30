@@ -12,7 +12,7 @@
 #include <wk/kernel.h>
 #include <wk/list.h>
 
-#define CONFIG_DEBUG_MUTEXES
+#define CONFIG_DEBUG_MUTEXES 'y'
 
 struct mutex {
     int count;

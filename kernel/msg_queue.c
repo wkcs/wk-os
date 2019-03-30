@@ -41,6 +41,7 @@ int __msg_q_init(struct msg_q *msg_q,
 {
     void *addr;
     int rc;
+    register addr_t level;
 
     if (msg_q == NULL) {
         pr_err("%s[%d]:msg_q is NULL\r\n", __func__, __LINE__);
@@ -75,9 +76,9 @@ int __msg_q_init(struct msg_q *msg_q,
         goto msg_pool_init_err;
     }
 
-    mutex_lock(&msg_q->lock);
+    level = disable_irq_save();
     list_add_tail(&msg_q->list, &msg_q_list);
-    mutex_unlock(&msg_q->lock);
+    enable_irq_save(level);
 
     return 0;
 

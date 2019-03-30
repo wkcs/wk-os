@@ -2,6 +2,8 @@
 #ifndef _USBDEVICE_CLASS_HID_H_
 #define _USBDEVICE_CLASS_HID_H_
 
+#define USB_DEVICE_HID_KEYBOARD_NUMBER 4 
+
 #define HID_DESCRIPTOR_TYPE             0x21
 #define HID_DESCRIPTOR_SIZE             0x09
 #define HID_OFF_HID_DESC                0x12

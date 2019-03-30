@@ -50,15 +50,18 @@ void mutex_lock(struct mutex *lock)
         return;
     } else {
         struct task_struct_t *task = get_current_task();
-        struct task_struct_t *task_temp;
+        struct task_struct_t *task_temp = NULL;
 
         list_del(&task->wait_list);
-
-        list_for_each_entry(task_temp, &lock->wait_list, wait_list) {
-            if (task->current_priority > task_temp->current_priority)
-                break;
+        if (list_empty(&lock->wait_list))
+            list_add_tail(&task->wait_list, &lock->wait_list);
+        else {
+            list_for_each_entry(task_temp, &lock->wait_list, wait_list) {
+                if (task->current_priority > task_temp->current_priority)
+                    break;
+            }
+            list_add_tail(&task->wait_list, &task_temp->wait_list);
         }
-        list_add_tail(&task->wait_list, &task_temp->wait_list);
 
         if (task->current_priority < lock->owner->current_priority)
             task_ctrl(lock->owner, CMD_TASK_SET_CURR_PRIO, &task->current_priority);

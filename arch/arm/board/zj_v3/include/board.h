@@ -15,6 +15,7 @@
 #include "arch_gpio.h"
 #include "arch_irq.h"
 #include "arch_uart.h"
+#include "arch_usb.h"
 
 #define UART_LOG_DMA_BUF_SIZE 256
 

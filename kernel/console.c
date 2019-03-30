@@ -84,7 +84,7 @@ static void console_task_handle(__maybe_unused void *para)
 
 int console_task_init(void)
 {
-    console_task = task_create("console", console_task_handle, NULL, 512, 1, 10, NULL, NULL);
+    console_task = task_create("console", console_task_handle, NULL, 1024, 1, 10, NULL, NULL);
 
     if (console_task)
         task_ready(console_task);

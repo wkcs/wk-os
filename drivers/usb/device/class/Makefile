@@ -12,4 +12,4 @@ C_SRCS += $(TOP_DIR)/drivers/usb/device/class/hid.c
 
 ASM_SRCS += 
 
-INC_DIR += -I $(TOP_DIR)/drivers/inc
+INC_DIR += -I $(TOP_DIR)/drivers/usb/device/class/

@@ -38,11 +38,15 @@ static void __sem_get(sem_t *sem)
 
     level = disable_irq_save();
     list_del(&task->wait_list);
-    list_for_each_entry(task_temp, &sem->wait_list, wait_list) {
-        if (task->current_priority > task_temp->current_priority)
+    if (list_empty(&sem->wait_list))
+        list_add_tail(&task->wait_list, &sem->wait_list);
+    else {
+        list_for_each_entry(task_temp, &sem->wait_list, wait_list) {
+            if (task->current_priority > task_temp->current_priority)
             break;
+        }
+        list_add_tail(&task->wait_list, &task_temp->wait_list);
     }
-    list_add_tail(&task->wait_list, &task_temp->wait_list);
     enable_irq_save(level);
 }
 

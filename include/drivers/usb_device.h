@@ -8,6 +8,9 @@
 #include <lib/string.h>
 #include <drivers/usb_common.h>
 
+#define USB_DEVICE_HID_KEYBOARD 'y'
+#define USB_DEVICE_COMPOSITE 'y'
+
 /* Vendor ID */
 #ifdef USB_VENDOR_ID
 #define _VENDOR_ID                  USB_VENDOR_ID
@@ -112,7 +115,7 @@ typedef struct uendpoint* uep_t;
 
 struct udcd
 {
-    struct rt_device parent;
+    int (*init)(void);
     const struct udcd_ops* ops;
     struct uendpoint ep0;
     uep0_stage_t stage;
@@ -242,7 +245,7 @@ uep_t usbd_endpoint_new(uep_desc_t ep_desc, udep_handler_t handler);
 ualtsetting_t usbd_altsetting_new(size_t desc_size);
 
 int usbd_core_init(void);
-int usb_device_init(void);
+int usb_device_init(udcd_t udc);
 int usbd_event_signal(struct udev_msg* msg);
 int usbd_device_set_controller(udevice_t device, udcd_t dcd);
 int usbd_device_set_descriptor(udevice_t device, udev_desc_t dev_desc);
@@ -397,50 +400,9 @@ inline int dcd_ep_clear_stall(udcd_t dcd, uint8_t address)
 
     return dcd->ops->ep_clear_stall(address);
 }
-inline void usbd_os_proerty_descriptor_send(ufunction_t func, ureq_t setup, usb_os_proerty_t usb_os_proerty, uint8_t number_of_proerty)
-{
-    struct usb_os_property_header header;
-    static uint8_t * data;
-    uint8_t * pdata;
-    uint8_t index,i;
-    if(data == NULL)
-    {
-        header.dwLength = sizeof(struct usb_os_property_header);
-        header.bcdVersion = 0x0100;
-        header.wIndex = 0x05;
-        header.wCount = number_of_proerty;
-        for(index = 0;index < number_of_proerty;index++)
-        {
-            header.dwLength += usb_os_proerty[index].dwSize;
-        }
-        data = (uint8_t *)wk_malloc(header.dwLength, 0, 0);
-        WK_ERROR(data != NULL);
-        pdata = data;
-        memcpy((void *)pdata,(void *)&header,sizeof(struct usb_os_property_header));
-        pdata += sizeof(struct usb_os_property_header);
-        for(index = 0;index < number_of_proerty;index++)
-        {
-            memcpy((void *)pdata,(void *)&usb_os_proerty[index],10);
-            pdata += 10;
-            for(i = 0;i < usb_os_proerty[index].wPropertyNameLength/2;i++)
-            {
-                *pdata = usb_os_proerty[index].bPropertyName[i];
-                pdata++;
-                *pdata = 0;
-                pdata++;
-            }
-            *((uint32_t *)pdata) = usb_os_proerty[index].dwPropertyDataLength;
-            pdata += 4;
-            for(i = 0;i < usb_os_proerty[index].dwPropertyDataLength/2;i++)
-            {
-                *pdata = usb_os_proerty[index].bPropertyData[i];
-                pdata++;
-                *pdata = 0;
-                pdata++;
-            }
-        }
-    }
-    usbd_ep0_write(func->device, data, setup->wLength);
-}
+
+void usbd_os_proerty_descriptor_send(ufunction_t func, ureq_t setup,
+                                     usb_os_proerty_t usb_os_proerty,
+                                     uint8_t number_of_proerty);
 
 #endif

@@ -136,7 +136,7 @@ debug_dir:
 debug: $(SECONDARY_ELF)
 	@echo   GDB DEBUG $<
 	$(Q)$(GDB) -iex 'target extended | $(OOCD) $(OOCDFLAGS) -c "gdb_port pipe"' \
-	-iex 'monitor reset halt' -ex 'load' -ex 'break rc_test_loop' -ex 'c' $(SECONDARY_ELF)
+	-iex 'monitor reset halt' -ex 'load' -ex 'break wkos_start' -ex 'c' $(SECONDARY_ELF)
 
 -include $(DEPS)
 
