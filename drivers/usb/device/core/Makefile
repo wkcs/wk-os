@@ -6,11 +6,5 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/drivers/usb/device/core
-
-C_SRCS += $(TOP_DIR)/drivers/usb/device/core/core.c
-C_SRCS += $(TOP_DIR)/drivers/usb/device/core/usbdevice.c
-
-ASM_SRCS += 
-
-INC_DIR +=
+obj-y = core.o
+obj-y += usbdevice.o

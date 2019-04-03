@@ -6,26 +6,22 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/kernel
+obj-y = task.o
+obj-y += clk.o
+obj-y += sch.o
+obj-y += kernel.o
+obj-y += pid.o
+obj-y += timer.o
+obj-y += mutex.o
+obj-y += msg_queue.o
+obj-y += delay.o
+obj-y += cpu.o
+obj-y += sem.o
+obj-y += console.o
 
-include $(TOP_DIR)/kernel/irq/Makefile
-include $(TOP_DIR)/kernel/printk/Makefile
-include $(TOP_DIR)/kernel/base/Makefile
-include $(TOP_DIR)/kernel/cmd/Makefile
-
-C_SRCS += $(TOP_DIR)/kernel/task.c
-C_SRCS += $(TOP_DIR)/kernel/clk.c
-C_SRCS += $(TOP_DIR)/kernel/sch.c
-C_SRCS += $(TOP_DIR)/kernel/kernel.c
-C_SRCS += $(TOP_DIR)/kernel/pid.c
-C_SRCS += $(TOP_DIR)/kernel/timer.c
-C_SRCS += $(TOP_DIR)/kernel/mutex.c
-C_SRCS += $(TOP_DIR)/kernel/msg_queue.c
-C_SRCS += $(TOP_DIR)/kernel/delay.c
-C_SRCS += $(TOP_DIR)/kernel/cpu.c
-C_SRCS += $(TOP_DIR)/kernel/sem.c
-C_SRCS += $(TOP_DIR)/kernel/console.c
-
-ASM_SRCS +=
+dir-y = base
+dir-y += cmd
+dir-y += irq
+dir-y += printk
 
 

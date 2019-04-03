@@ -6,13 +6,11 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/kernel/cmd
-
-C_SRCS += $(TOP_DIR)/kernel/cmd/cmd.c
-C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_clear.c
-C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_ls.c
-C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_log.c
-C_SRCS += $(TOP_DIR)/kernel/cmd/cmd_task_show.c
+obj-y = cmd.o
+obj-y += cmd_clear.o
+obj-y += cmd_ls.o
+obj-y += cmd_log.o
+obj-y += cmd_task_show.o
 
 ASM_SRCS +=
 

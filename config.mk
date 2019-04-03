@@ -32,7 +32,6 @@ endif
 
 OPTSRC = -O2
 
-
 #定义工具链
 PREFIX		:= arm-none-eabi-
 CC		    := $(PREFIX)gcc
@@ -46,7 +45,7 @@ SIZE        := $(PREFIX)size
 GDB		    := $(PREFIX)gdb
 
 #下载工具
-STFLASH = 
+STFLASH =
 JFLASH = JFlash
 
 ifndef $(ARCH)

@@ -6,10 +6,7 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/mm
+obj-y += mm_core.o
+obj-y += mm_init.o
+obj-y += mm.o
 
-C_SRCS += $(TOP_DIR)/mm/mm_core.c
-C_SRCS += $(TOP_DIR)/mm/mm_init.c
-C_SRCS += $(TOP_DIR)/mm/mm.c
-
-ASM_SRCS +=

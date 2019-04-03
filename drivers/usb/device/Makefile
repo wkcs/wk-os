@@ -6,13 +6,5 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/drivers/usb/device
-
-include $(TOP_DIR)/drivers/usb/device/class/Makefile
-include $(TOP_DIR)/drivers/usb/device/core/Makefile
-
-C_SRCS += 
-
-ASM_SRCS += 
-
-INC_DIR +=
+dir-y = class
+dir-y += core

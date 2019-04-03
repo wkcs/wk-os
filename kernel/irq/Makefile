@@ -6,10 +6,6 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/kernel/irq
-
-C_SRCS += $(TOP_DIR)/kernel/irq/irq.c
-
-ASM_SRCS +=
+obj-y = irq.o
 
 

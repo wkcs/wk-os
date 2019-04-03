@@ -6,12 +6,8 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/init
-
-C_SRCS += $(TOP_DIR)/init/system.c
-C_SRCS += $(TOP_DIR)/init/main.c
-C_SRCS += $(TOP_DIR)/init/init.c
-
-ASM_SRCS += 
+obj-y = init.o
+obj-y += main.o
+obj-y += system.o
 
 

@@ -6,10 +6,4 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/drivers/usb/device/class
-
-C_SRCS += $(TOP_DIR)/drivers/usb/device/class/hid.c
-
-ASM_SRCS += 
-
-INC_DIR += -I $(TOP_DIR)/drivers/usb/device/class/
+obj-y = hid.o

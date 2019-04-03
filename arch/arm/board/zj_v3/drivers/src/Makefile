@@ -6,31 +6,28 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/arch/arm/board/zj_v3/drivers/src
+obj-y = misc.o
+obj-y += stm32f10x_adc.o
+obj-y += stm32f10x_bkp.o
+obj-y += stm32f10x_can.o
+obj-y += stm32f10x_cec.o
+obj-y += stm32f10x_crc.o
+obj-y += stm32f10x_dac.o
+obj-y += stm32f10x_dbgmcu.o
+obj-y += stm32f10x_dma.o
+obj-y += stm32f10x_exti.o
+obj-y += stm32f10x_flash.o
+obj-y += stm32f10x_fsmc.o
+obj-y += stm32f10x_gpio.o
+obj-y += stm32f10x_i2c.o
+obj-y += stm32f10x_iwdg.o
+obj-y += stm32f10x_pwr.o
+obj-y += stm32f10x_rcc.o
+obj-y += stm32f10x_rtc.o
+obj-y += stm32f10x_sdio.o
+obj-y += stm32f10x_spi.o
+obj-y += stm32f10x_tim.o
+obj-y += stm32f10x_usart.o
+obj-y += stm32f10x_wwdg.o
 
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/misc.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_adc.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_bkp.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_can.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_cec.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_crc.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_dac.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_dbgmcu.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_dma.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_exti.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_flash.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_fsmc.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_gpio.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_i2c.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_iwdg.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_pwr.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_rcc.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_rtc.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_sdio.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_spi.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_tim.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_usart.c
-C_SRCS += $(TOP_DIR)/arch/arm/board/zj_v3/drivers/src/stm32f10x_wwdg.c
-
-ASM_SRCS +=
 

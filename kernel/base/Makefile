@@ -6,12 +6,8 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/kernel/base
-
-C_SRCS += $(TOP_DIR)/kernel/base/bus.c
-C_SRCS += $(TOP_DIR)/kernel/base/device.c
-C_SRCS += $(TOP_DIR)/kernel/base/driver.c
-
-ASM_SRCS +=
+obj-y = bus.o
+obj-y += device.o
+obj-y += driver.o
 
 

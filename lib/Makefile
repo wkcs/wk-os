@@ -6,10 +6,8 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-DEBUG_DIR += $(TOP_DIR)/debug/lib
+obj-y += string.o
+obj-y += vsprintf.o
+obj-y += fifo_buf.o
 
-C_SRCS += $(TOP_DIR)/lib/string.c
-C_SRCS += $(TOP_DIR)/lib/vsprintf.c
-C_SRCS += $(TOP_DIR)/lib/fifo_buf.c
 
-ASM_SRCS +=

@@ -1,0 +1,56 @@
+##############################################
+# Copyright (C) 2019 胡启航<Hu Qihang>
+#
+# Author: wkcs
+# 
+# Email: hqh2030@gmail.com, huqihan@live.com
+##############################################
+
+build-dir := $(project-dir)/scripts
+
+#宏定义
+DEFINES :=
+
+include $(build-dir)/Makefile.config
+include $(project-dir)/arch/$(ARCH)/Makefile.config
+include $(project-dir)/arch/$(ARCH)/board/$(BOARD)/Makefile.config
+include $(dir)/Makefile
+
+dir-obj-now := $(dir:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
+
+obj-all-t = $(obj-y:%=$(dir)/%)
+obj-all := $(obj-all-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
+
+objs-all-t = $(objs-y:%=$(dir)/%)
+objs-all := $(objs-all-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
+
+obj-dir-t = $(dir-y:%=$(dir)/%)
+obj-dir := $(obj-dir-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
+
+.PHONY: all size obj-done
+
+
+
+obj-done:$(objs-all) $(obj-all) $(dir-y)
+#	@echo "CC       DONE"
+
+defs-all := $(objs-all:%.o=%.d)
+defs-all += $(obj-all:%.o=%.d)
+-include $(defs-all)
+
+$(objs-all):$(project-dir)/$(out-dir)/%.o:$(project-dir)/%.S
+	@echo "AS       $(@:$(dir-obj-now)/%=%)"
+	$(Q)$(CC) $(ASFLAGS) -o $@ $<
+
+$(obj-all):$(project-dir)/$(out-dir)/%.o:$(project-dir)/%.c
+	@echo "CC       $(@:$(dir-obj-now)/%=%)"
+	$(Q)$(CC) $(CCFLAGS) -o $@ $<
+
+$(dir-y):$(obj-dir)
+	$(Q)make $(N) -f $(project-dir)/scripts/Makefile.build dir=$(dir)/$@ \
+	out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) project-dir=$(project-dir) obj-done
+
+$(obj-dir):
+	$(Q)-mkdir $@
+
+

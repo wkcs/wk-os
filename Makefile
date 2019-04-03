@@ -1,146 +1,103 @@
 ##############################################
-# Copyright (C) 2018 胡启航<Hu Qihang>
+# Copyright (C) 2018-2019 胡启航<Hu Qihang>
 #
 # Author: wkcs
 # 
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-#读取当前工作目录
-TOP_DIR = .
+#打开显示选项
+ifneq ($(V),1)
+Q := @
+endif
 
-include config.mk
+ifneq ($(MV), 1)
+N := --no-print-directory
+endif
 
-# 宏定义
-DEFS =
+ifndef $(ARCH)
+    ARCH := arm
+endif
 
-#设定包含文件目录
-INC_DIR = -I $(TOP_DIR)/include
+ifndef $(BOARD)
+    BOARD := zj_v3
+endif
 
-DEBUG_DIR = $(TOP_DIR)/debug
+dir-y = app
+dir-y += arch
+dir-y += drivers
+dir-y += fs
+dir-y += init
+dir-y += kernel
+dir-y += lib
+dir-y += mm
+dir-y += net
+dir-y += test
+
+dir-run := $(dir-y:%=%-run)
+project-dir = $(shell pwd)
+out-dir = debug
+obj-dir-t = $(dir-y:%=$(project-dir)/%)
+obj-dir := $(dir-y:%=$(project-dir)/$(out-dir)/%)
 
 #链接脚本
-LDSCRIPT = 
+LDSCRIPT :=
 
-# 展开工作子目录
-include $(TOP_DIR)/arch/Makefile
-include $(TOP_DIR)/drivers/Makefile
-include $(TOP_DIR)/fs/Makefile
-include $(TOP_DIR)/init/Makefile
-include $(TOP_DIR)/kernel/Makefile
-include $(TOP_DIR)/lib/Makefile
-include $(TOP_DIR)/mm/Makefile
-include $(TOP_DIR)/net/Makefile
-include $(TOP_DIR)/scripts/Makefile
-include $(TOP_DIR)/test/Makefile
-include $(TOP_DIR)/app/Makefile
+include $(project-dir)/scripts/Makefile.config
+include $(project-dir)/arch/$(ARCH)/board/$(BOARD)/Makefile.config
 
-C_OBJS = $(C_SRCS:./%.c=$(TOP_DIR)/debug/%.o)
-ASM_OBJS = $(ASM_SRCS:./%.S=$(TOP_DIR)/debug/%.o)
-OBJS = $(C_OBJS)
-OBJS += $(ASM_OBJS)
-DEPS = $(OBJS:%.o=%.d)
-
-# OpenOCD specific variables
 OOCD		:= openocd
 OOCD_INTERFACE	:= flossjtag
-OOCD_TARGET	:= stm32f1x
-OOCDFLAGS := -f openocd.cfg
-           
 
-CCFLAGS += $(INC_DIR)
-CCFLAGS += $(DEFS)
+LDFLAGS += $(LDSCRIPT:%=-T%)
 
+.PHONY: all flash debug clean
 
+all:$(TARGET_LIST) $(TARGET_BIN) $(TARGET_HEX) $(TARGET_ELF) size
 
-ASFLAGS += $(INC_DIR)
-ASFLAGS += $(DEFS)
+size:$(TARGET_ELF)
+	@echo "SIZE     $<"
+	$(Q)$(SIZE) --format=berkeley $<
+	@echo build done
 
+$(TARGET_HEX): $(TARGET_ELF)
+	@echo "OBJCOPY  $@"
+	$(Q)$(OBJCOPY) $<  $@ -Oihex
 
-LDFLAGS += -T $(LDSCRIPT)
+$(TARGET_BIN): $(TARGET_ELF)
+	@echo "OBJCOPY  $@"
+	$(Q)$(OBJCOPY) $<  $@ -Obinary
 
-SECONDARY_FLASH = $(TOP_DIR)/debug/$(TARGET).hex
-SECONDARY_SIZE = $(TOP_DIR)/debug/$(TARGET).size
-SECONDARY_BIN = $(TOP_DIR)/debug/$(TARGET).bin
-SECONDARY_ELF = $(TOP_DIR)/debug/$(TARGET).elf
-SECONDARY_LIST = $(TOP_DIR)/debug/$(TARGET).list
+$(TARGET_LIST): $(TARGET_ELF)
+	@echo "OBJDUMP  $@"
+	$(Q)$(OBJDUMP) -S $< > $@
 
+$(TARGET_ELF):$(dir-run) $(LDSCRIPT)
+	@echo "LD       $@"
+	$(Q)$(CC) $(LDFLAGS) -o $@ $(shell find $(project-dir)/$(out-dir) -name "*.o")
 
-.PHONY: all clean size bin hex debug stlink-flash flash debug_file
+$(dir-run):%-run:% $(project-dir)/$(out-dir) $(obj-dir)
+	$(Q)make $(N) -f $(project-dir)/scripts/Makefile.build dir=$(project-dir)/$< \
+	out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) project-dir=$(project-dir) obj-done
 
+$(project-dir)/$(out-dir):
+	$(Q)-mkdir $@
 
-all: $(TARGET).images debug_file
-	@echo   building done
-
-size: $(SECONDARY_ELF)
-	@echo   SIZE    $(SECONDARY_ELF)
-	$(Q)$(SIZE) --format=berkeley "$(SECONDARY_ELF)"
-
-bin: $(SECONDARY_BIN)
-
-hex: $(SECONDARY_FLASH)
-
-
-$(TARGET).images: $(SECONDARY_BIN) $(SECONDARY_FLASH) $(SECONDARY_LIST)
-	$(Q)echo   images generated
-
-
-$(SECONDARY_ELF): debug_dir $(OBJS) $(LDSCRIPT)
-	@echo   LD      $(SECONDARY_ELF)
-	$(Q)$(CC) $(LDFLAGS) -o "$(SECONDARY_ELF)" $(C_OBJS) $(ASM_OBJS)
-	@echo   SIZE    $(SECONDARY_ELF)
-	$(Q)$(SIZE) --format=berkeley "$(SECONDARY_ELF)"
-
-
-
-$(SECONDARY_FLASH): $(SECONDARY_ELF)
-	@echo   OBJCOPY $(SECONDARY_FLASH)
-	$(Q)$(OBJCOPY) $(SECONDARY_ELF)  $(SECONDARY_FLASH) -Oihex
-
-
-$(SECONDARY_BIN): $(SECONDARY_ELF)
-	@echo   OBJCOPY $(SECONDARY_BIN)
-	$(Q)$(OBJCOPY) $(SECONDARY_ELF)  $(SECONDARY_BIN) -Obinary
-
-$(SECONDARY_LIST): $(SECONDARY_ELF)
-	@echo   OBJDUMP $(SECONDARY_LIST)
-	$(Q)$(OBJDUMP) -S $(SECONDARY_ELF) > $(SECONDARY_LIST)
-
-
-$(C_OBJS):$(TOP_DIR)/debug/%.o:$(TOP_DIR)/%.c 
-	@echo   CC      $<
-	$(Q)$(CC) $(CCFLAGS) -o $@ $<
-
-$(ASM_OBJS):$(TOP_DIR)/debug/%.o:$(TOP_DIR)/%.S 
-	@echo   AS      $<
-	$(Q)$(CC) $(ASFLAGS) -o $@ $<
-
-#libs:
-#	$(MAKE) -C $(LIB_MAKE_DIR) $@
-
-# 使用stlink驱动下载bin程序
-stlink-flash: $(SECONDARY_BIN)
-	@echo   ST-link FLASH  $<
-	$(Q)$(STFLASH) write $(SECONDARY_BIN) 0x8000000
+$(obj-dir):
+	$(Q)-mkdir $@
 
 # 使用OpenOCD下载hex程序
-flash: $(SECONDARY_FLASH)
-	@echo   OPEN_OCD FLASH $<
-	$(Q)$(OOCD) $(OOCDFLAGS) -c "program $(SECONDARY_FLASH) verify reset exit" 
-
-debug_dir:
-	@echo   Create debug directory
-	$(Q)-mkdir $(DEBUG_DIR)
+flash: $(TARGET_HEX)
+	@echo "OPEN_OCD FLASH $<"
+	$(Q)$(OOCD) $(OOCDFLAGS) -c "program $< verify reset exit" 
 
 # 使用GDB 通过sdtin/out管道与OpenOCD连接 并在main函数处打断点后运行
-debug: $(SECONDARY_ELF)
-	@echo   GDB DEBUG $<
+debug: $(TARGET_ELF)
+	@echo "GDB DEBUG $<"
 	$(Q)$(GDB) -iex 'target extended | $(OOCD) $(OOCDFLAGS) -c "gdb_port pipe"' \
-	-iex 'monitor reset halt' -ex 'load' -ex 'break wkos_start' -ex 'c' $(SECONDARY_ELF)
-
--include $(DEPS)
+	-iex 'monitor reset halt' -ex 'load' -ex 'break wkos_start' -ex 'c' $<
 
 clean:
-	@echo   CLEAN
-	$(Q)-$(RM) $(TOP_DIR)/debug
+	$(Q)-$(RM) $(project-dir)/$(out-dir)
+	@echo "clean done"
 	
