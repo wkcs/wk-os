@@ -42,7 +42,6 @@ struct bus_type {
 
 struct subsys_private {
 	struct mutex mutex;
-
 	struct list_head devices_list;
 	struct list_head drivers_list;
 	struct bus_type *bus;
@@ -51,9 +50,7 @@ struct subsys_private {
 struct device_driver {
 	const char		*name;
 	struct bus_type		*bus;
-
 	const struct of_device_id	*of_match_table;
-
 	int (*probe) (struct device *dev);
 	int (*remove) (struct device *dev);
 	void (*shutdown) (struct device *dev);
@@ -72,26 +69,15 @@ struct driver_private {
 
 struct device {
 	struct device		*parent;
-
 	struct device_private	*p;
-
-	const char		*init_name; /* initial name of the device */
-
-	struct mutex		mutex;	/* mutex to synchronize calls to
-					 * its driver.
-					 */
-
-	struct bus_type	*bus;		/* type of bus device is on */
-	struct device_driver *driver;	/* which driver has allocated this
-					   device */
-	void		*platform_data;	/* Platform specific data, device
-					   core doesn't touch it */
-	void		*driver_data;	/* Driver data, set and get with
-					   dev_set/get_drvdata */
-
-	struct device_node	*of_node; /* associated device tree node */
-
-	struct list_head	devres_head;
+	const char		*name;
+	struct mutex		mutex;
+	struct bus_type	*bus;
+	struct device_driver *driver;
+	void	*platform_data;	
+	void	*driver_data;
+	struct device_node	*of_node;
+	struct list_head devres_head;
 	struct list_head list;
 	struct list_head dlist;
 };
@@ -101,5 +87,12 @@ struct device_private {
 	struct list_head parent_list;
 	struct device *device;
 };
+
+int bus_register(struct bus_type *bus);
+int bus_unregister(struct bus_type *bus);
+int dev_register(struct device *dev);
+int dev_unregister(struct device *dev);
+int drv_register(struct device_driver *drv);
+int drv_unregister(struct device_driver *drv);
 
 #endif

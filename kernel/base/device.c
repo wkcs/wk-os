@@ -45,16 +45,14 @@ int dev_register(struct device *dev)
     list_add_tail(&dev->list, &bus->p->devices_list);
 
     list_for_each_entry(drv_temp, &bus->p->drivers_list, list) {
-        if (bus->match(dev, drv_temp)) {
+        if (bus->match(dev, drv_temp) == 0) {
             list_add_tail(&dev->dlist, &drv_temp->p->devices_list);
             dev->driver = drv_temp;
-            break;
         }
     }
 
     enable_irq_save(level);
-
-    if (drv_temp->probe)
+    if (dev->driver != NULL && dev->driver->probe != NULL)
         drv_temp->probe(dev);
 
     return 0;

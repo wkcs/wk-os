@@ -34,16 +34,14 @@ int drv_register(struct device_driver *drv)
     list_add_tail(&drv->list, &bus->p->drivers_list);
 
     list_for_each_entry(dev_temp, &bus->p->devices_list, list) {
-        if (bus->match(dev_temp, drv)) {
+        if (bus->match(dev_temp, drv) == 0) {
             list_add_tail(&dev_temp->dlist, &drv->p->devices_list);
             dev_temp->driver = drv;
-            break;
         }
     }
 
     enable_irq_save(level);
-
-    if (drv->probe)
+    if (dev_temp->driver != NULL && drv->probe != NULL)
         drv->probe(dev_temp);
 
     return 0;
@@ -54,16 +52,14 @@ int drv_unregister(struct device_driver *drv)
     struct device *dev_temp;
     register addr_t level;
 
+    level = disable_irq_save();
     if (drv->remove) {
         list_for_each_entry(dev_temp, &drv->p->devices_list, dlist) {
             drv->remove(dev_temp);
+            dev_temp->driver = NULL;
         }
     }
-
     list_del(&drv->list);
-
-    level = disable_irq_save();
-
     enable_irq_save(level);
 
     wk_free(drv->p);

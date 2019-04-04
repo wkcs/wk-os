@@ -6,5 +6,4 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-dir-y = usb
-dir-y = i2c 
+obj-y = i2c-core.o
