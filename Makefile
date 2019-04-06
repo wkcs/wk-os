@@ -35,16 +35,16 @@ dir-y += net
 dir-y += test
 
 dir-run := $(dir-y:%=%-run)
-project-dir = $(shell pwd)
-out-dir = debug
+project-dir = .
+out-dir = out
 obj-dir-t = $(dir-y:%=$(project-dir)/%)
 obj-dir := $(dir-y:%=$(project-dir)/$(out-dir)/%)
 
 #链接脚本
 LDSCRIPT :=
 
-include $(project-dir)/scripts/Makefile.config
-include $(project-dir)/arch/$(ARCH)/board/$(BOARD)/Makefile.config
+include scripts/Makefile.config
+include arch/$(ARCH)/board/$(BOARD)/Makefile.config
 
 OOCD		:= openocd
 OOCD_INTERFACE	:= flossjtag
@@ -56,31 +56,34 @@ LDFLAGS += $(LDSCRIPT:%=-T%)
 all:$(TARGET_LIST) $(TARGET_BIN) $(TARGET_HEX) $(TARGET_ELF) size
 
 size:$(TARGET_ELF)
-	@echo "SIZE     $<"
-	$(Q)$(SIZE) --format=berkeley $<
+	@echo "SIZE     $(@:$(out-dir)/%=%)"
+	$(Q)$(SIZE) --format=berkeley $(<:$(project-dir)/%=%)
 	@echo build done
 
 $(TARGET_HEX): $(TARGET_ELF)
-	@echo "OBJCOPY  $@"
+	@echo "OBJCOPY  $(@:$(out-dir)/%=%)"
 	$(Q)$(OBJCOPY) $<  $@ -Oihex
 
 $(TARGET_BIN): $(TARGET_ELF)
-	@echo "OBJCOPY  $@"
+	@echo "OBJCOPY  $(@:$(out-dir)/%=%)"
 	$(Q)$(OBJCOPY) $<  $@ -Obinary
 
 $(TARGET_LIST): $(TARGET_ELF)
-	@echo "OBJDUMP  $@"
+	@echo "OBJDUMP  $(@:$(out-dir)/%=%)"
 	$(Q)$(OBJDUMP) -S $< > $@
 
 $(TARGET_ELF):$(dir-run) $(LDSCRIPT)
-	@echo "LD       $@"
+	@echo "LD       $(@:$(out-dir)/%=%)"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $(shell find $(project-dir)/$(out-dir) -name "*.o")
 
-$(dir-run):%-run:% $(project-dir)/$(out-dir) $(obj-dir)
-	$(Q)make $(N) -f $(project-dir)/scripts/Makefile.build dir=$(project-dir)/$< \
-	out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) project-dir=$(project-dir) obj-done
+$(dir-run):%-run:% $(out-dir) $(obj-dir)
+	$(Q)for dir_in in $(dir-y); \
+    do \
+        make $(N) -f $(project-dir)/scripts/Makefile.build dir=$(project-dir)/"$$dir_in" \
+		out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) project-dir=$(project-dir) obj-done; \
+    done
 
-$(project-dir)/$(out-dir):
+$(out-dir):
 	$(Q)-mkdir $@
 
 $(obj-dir):

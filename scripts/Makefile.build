@@ -16,13 +16,9 @@ include $(project-dir)/arch/$(ARCH)/Makefile.config
 include $(project-dir)/arch/$(ARCH)/board/$(BOARD)/Makefile.config
 include $(dir)/Makefile
 
-dir-obj-now := $(dir:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
-
-obj-all-t = $(obj-y:%=$(dir)/%)
-obj-all := $(obj-all-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
-
-objs-all-t = $(objs-y:%=$(dir)/%)
-objs-all := $(objs-all-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
+dir-obj-now := $(dir:$(project-dir)/%=$(out-dir)/%)
+obj-all := $(obj-y:%=$(dir-obj-now)/%)
+objs-all := $(objs-y:%=$(dir-obj-now)/%)
 
 obj-dir-t = $(dir-y:%=$(dir)/%)
 obj-dir := $(obj-dir-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
@@ -31,8 +27,12 @@ obj-dir := $(obj-dir-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
 
 
 
-obj-done:$(objs-all) $(obj-all) $(dir-y)
-#	@echo "CC       DONE"
+obj-done:$(objs-all) $(obj-all) $(obj-dir)
+	$(Q)for dir_in in $(dir-y); \
+    do \
+        make $(N) -f $(project-dir)/scripts/Makefile.build dir=$(dir)/"$$dir_in" \
+		out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) project-dir=$(project-dir) obj-done; \
+    done
 
 defs-all := $(objs-all:%.o=%.d)
 defs-all += $(obj-all:%.o=%.d)
@@ -45,10 +45,6 @@ $(objs-all):$(project-dir)/$(out-dir)/%.o:$(project-dir)/%.S
 $(obj-all):$(project-dir)/$(out-dir)/%.o:$(project-dir)/%.c
 	@echo "CC       $(@:$(dir-obj-now)/%=%)"
 	$(Q)$(CC) $(CCFLAGS) -o $@ $<
-
-$(dir-y):$(obj-dir)
-	$(Q)make $(N) -f $(project-dir)/scripts/Makefile.build dir=$(dir)/$@ \
-	out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) project-dir=$(project-dir) obj-done
 
 $(obj-dir):
 	$(Q)-mkdir $@

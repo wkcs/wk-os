@@ -23,8 +23,8 @@ int test_app_task_init(void)
     test_app_task = task_create("test_app", test_app_entry, NULL, 512, 35, 3, NULL, NULL);
     task_ready(test_app_task);
 
-    //usbd_hid_class_register();
-    //stm_usbd_register();
+    usbd_hid_class_register();
+    stm_usbd_register();
     i2c_core_init();
     __i2c_init();
     return 0;

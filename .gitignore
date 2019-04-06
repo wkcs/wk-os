@@ -5,6 +5,7 @@
 *.list
 *.size
 debug
+out
 *~
 *.o
 *.a
