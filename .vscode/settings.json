@@ -2,6 +2,11 @@
     "files.associations": {
         "usb_device.h": "c",
         "err.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "stm32f1xx_hal_def.h": "c",
+        "stm32f4xx_hal_def.h": "c",
+        "stm32f4xx_hal_pcd.h": "c",
+        "stm32f1xx_ll_usb.h": "c",
+        "stm32f1xx_hal_pcd.h": "c"
     }
 }

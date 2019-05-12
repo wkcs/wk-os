@@ -8,7 +8,6 @@
 
 dir-y = board
 dir-y += boot
-dir-y += cmsis
 dir-y += cpu
 dir-y += config
 

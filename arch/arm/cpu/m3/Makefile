@@ -8,9 +8,9 @@
 
 obj-y += cpu_c.o
 obj-y += asm_irq.o
+obj-y += core_cm3.o
 
 objs-y += cpu_s.o
-objs-y += start.o
 
 
 

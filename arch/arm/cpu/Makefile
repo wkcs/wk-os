@@ -6,7 +6,8 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-dir-y = m3
+dir-$(CONFIG-CORTEX-M3) = m3
+dir-$(CONFIG-CORTEX-M4) = m4
 
 
 
