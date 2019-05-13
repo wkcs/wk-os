@@ -9,5 +9,4 @@
 dir-y = board
 dir-y += boot
 dir-y += cpu
-dir-y += config
 

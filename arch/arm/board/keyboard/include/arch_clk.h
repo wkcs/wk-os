@@ -17,20 +17,28 @@ struct clk_config_t {
     uint32_t clk[CLK_GROUP_NUM];
 #define CLK_GROUP_APB1 0
 #define CLK_GROUP_APB2 1
-#define CLK_GROUP_AHB 2
+#define CLK_GROUP_AHB1 2
+#define CLK_GROUP_AHB2 3
+#define CLK_GROUP_AHB3 4
 };
 
 inline int clk_enable (uint32_t clk, uint8_t group)
 {
     switch (group) {
         case CLK_GROUP_APB1:
-            RCC_AHB1PeriphClockCmd(clk, ENABLE);
+            RCC_APB1PeriphClockCmd(clk, ENABLE);
             break;
         case CLK_GROUP_APB2:
             RCC_APB2PeriphClockCmd(clk, ENABLE);
             break;
-        case CLK_GROUP_AHB:
-            RCC_AHBPeriphClockCmd(clk, ENABLE);
+        case CLK_GROUP_AHB1:
+            RCC_AHB1PeriphClockCmd(clk, ENABLE);
+            break;
+        case CLK_GROUP_AHB2:
+            RCC_AHB2PeriphClockCmd(clk, ENABLE);
+            break;
+        case CLK_GROUP_AHB3:
+            RCC_AHB3PeriphClockCmd(clk, ENABLE);
             break;
         default:
             return -1;
@@ -49,8 +57,14 @@ inline int clk_disable (uint32_t clk, uint8_t group)
         case CLK_GROUP_APB2:
             RCC_APB2PeriphClockCmd(clk, DISABLE);
             break;
-        case CLK_GROUP_AHB:
-            RCC_AHBPeriphClockCmd(clk, DISABLE);
+        case CLK_GROUP_AHB1:
+            RCC_AHB1PeriphClockCmd(clk, DISABLE);
+            break;
+        case CLK_GROUP_AHB2:
+            RCC_AHB2PeriphClockCmd(clk, DISABLE);
+            break;
+        case CLK_GROUP_AHB3:
+            RCC_AHB3PeriphClockCmd(clk, DISABLE);
             break;
         default:
             return -1;

@@ -20,6 +20,6 @@ struct dma_config_t {
 };
 
 int dma_config(struct dma_config_t *config);
-void dma_start(DMA_Channel_TypeDef *ch, uint16_t len);
+void dma_start(DMA_Stream_TypeDef *stream, uint16_t len);
 
 #endif

@@ -1,5 +1,4 @@
- 
-/* Includes ------------------------------------------------------------------*/
+#include <wk/delay.h>
 #include "stm32f4xx_ll_usb.h"
 #include "stm32f4xx_hal_pcd.h"
 
@@ -118,7 +117,7 @@ HAL_StatusTypeDef USB_SetCurrentMode(USB_OTG_GlobalTypeDef *USBx , USB_OTG_ModeT
   {
     USBx->GUSBCFG |= USB_OTG_GUSBCFG_FDMOD; 
   }
-  HAL_Delay(50U);
+  delay_usec(50);
   
   return HAL_OK;
 }
@@ -797,7 +796,7 @@ HAL_StatusTypeDef USB_WritePacket(USB_OTG_GlobalTypeDef *USBx, uint8_t *src, uin
     count32b =  (len + 3U) / 4U;
     for (i = 0U; i < count32b; i++, src += 4U)
     {
-      USBx_DFIFO(ch_ep_num) = *((__packed uint32_t *)src);
+      USBx_DFIFO(ch_ep_num) = *((uint32_t *)src);
     }
   }
   return HAL_OK;
@@ -823,7 +822,7 @@ void *USB_ReadPacket(USB_OTG_GlobalTypeDef *USBx, uint8_t *dest, uint16_t len)
   
   for ( i = 0U; i < count32b; i++, dest += 4U )
   {
-    *(__packed uint32_t *)dest = USBx_DFIFO(0U);
+    *(uint32_t *)dest = USBx_DFIFO(0U);
     
   }
   return ((void *)dest);
@@ -936,7 +935,7 @@ HAL_StatusTypeDef  USB_SetDevAddress (USB_OTG_GlobalTypeDef *USBx, uint8_t addre
 HAL_StatusTypeDef  USB_DevConnect (USB_OTG_GlobalTypeDef *USBx)
 {
   USBx_DEVICE->DCTL &= ~USB_OTG_DCTL_SDIS ;
-  HAL_Delay(3U);
+  delay_usec(3);
   
   return HAL_OK;  
 }
@@ -949,7 +948,7 @@ HAL_StatusTypeDef  USB_DevConnect (USB_OTG_GlobalTypeDef *USBx)
 HAL_StatusTypeDef  USB_DevDisconnect (USB_OTG_GlobalTypeDef *USBx)
 {
   USBx_DEVICE->DCTL |= USB_OTG_DCTL_SDIS ;
-  HAL_Delay(3U);
+  delay_usec(3);
   
   return HAL_OK;  
 }
@@ -1181,7 +1180,7 @@ HAL_StatusTypeDef USB_HostInit (USB_OTG_GlobalTypeDef *USBx, USB_OTG_CfgTypeDef 
   /* Enable VBUS driving */
   USB_DriveVbus(USBx, 1U);
   
-  HAL_Delay(200U);
+  delay_usec(200);
   
   /* Disable all interrupts. */
   USBx->GINTMSK = 0U;
@@ -1261,7 +1260,7 @@ HAL_StatusTypeDef USB_ResetPort(USB_OTG_GlobalTypeDef *USBx)
     USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG );
   
   USBx_HPRT0 = (USB_OTG_HPRT_PRST | hprt0);  
-  HAL_Delay (10U);                                /* See Note #1 */
+  delay_usec(10);                                /* See Note #1 */
   USBx_HPRT0 = ((~USB_OTG_HPRT_PRST) & hprt0); 
   return HAL_OK;
 }

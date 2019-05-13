@@ -11,12 +11,12 @@
 #include "board.h"
 
 static struct clk_config_t uart_log_dev_dma_clk = {
-    .clk[CLK_GROUP_AHB] = RCC_AHB1Periph_DMA2
+    .clk[CLK_GROUP_AHB1] = RCC_AHB1Periph_DMA2
 };
 
 static struct irq_config_t uart_log_dev_dma_irq = {
     .init_type = {
-        .NVIC_IRQChannel = DMA1_Channel4_IRQn,
+        .NVIC_IRQChannel = DMA2_Stream7_IRQn,
         .NVIC_IRQChannelPreemptionPriority = 3,
         .NVIC_IRQChannelSubPriority = 3,
         .NVIC_IRQChannelCmd = ENABLE
@@ -48,7 +48,7 @@ static struct dma_config_t uart_log_dev_dma = {
 };
 
 static struct clk_config_t uart_log_dev_gpio_clk = {
-    .clk[CLK_GROUP_APB2] = RCC_APB2Periph_GPIOA
+    .clk[CLK_GROUP_AHB1] = RCC_AHB1Periph_GPIOA
 };
 
 static struct gpio_config_t uart_log_dev_gpio[2] = {
@@ -65,8 +65,8 @@ static struct gpio_config_t uart_log_dev_gpio[2] = {
         },
         .mux_enable = true,
         .gpio_mux = {
-            mux_func = GPIO_AF_USART1,
-            mux_pin = GPIO_PinSource9,
+            .mux_func = GPIO_AF_USART1,
+            .mux_pin = GPIO_PinSource9,
         },
     },
     {
@@ -82,8 +82,8 @@ static struct gpio_config_t uart_log_dev_gpio[2] = {
         },
         .mux_enable = true,
         .gpio_mux = {
-            mux_func = GPIO_AF_USART1,
-            mux_pin = GPIO_PinSource10,
+            .mux_func = GPIO_AF_USART1,
+            .mux_pin = GPIO_PinSource10,
         },
     }
 };

@@ -6,8 +6,7 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-dir-$(CONFIG-CORTEX-M3) = m3
-dir-$(CONFIG-CORTEX-M4) = m4
+dir-y = $(CPU_TYPE)
 
 
 

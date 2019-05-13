@@ -6,47 +6,60 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-build-dir := $(project-dir)/scripts
+build-dir := scripts
 
 #宏定义
 DEFINES :=
 
 include $(build-dir)/Makefile.config
-include $(project-dir)/arch/$(ARCH)/Makefile.config
-include $(project-dir)/arch/$(ARCH)/board/$(BOARD)/Makefile.config
+include arch/$(ARCH)/Makefile.config
+include arch/$(ARCH)/board/$(BOARD)/Makefile.config
+-include .config
 include $(dir)/Makefile
 
-dir-obj-now := $(dir:$(project-dir)/%=$(out-dir)/%)
+dir-obj-now := $(dir:%=$(out-dir)/%)
 obj-all := $(obj-y:%=$(dir-obj-now)/%)
 objs-all := $(objs-y:%=$(dir-obj-now)/%)
 
 obj-dir-t = $(dir-y:%=$(dir)/%)
-obj-dir := $(obj-dir-t:$(project-dir)/%=$(project-dir)/$(out-dir)/%)
+obj-dir := $(obj-dir-t:%=$(out-dir)/%)
 
-.PHONY: all size obj-done
+ifndef $(TARGET)
+    TARGET := built-in.o
+endif
 
+.PHONY: built-in.o obj-done
 
+built-in.o:obj-done
+	$(Q)if [ -n "$(objs-all)" ] || [ -n "$(obj-all)" ] || \
+		[ -n "$(foreach dir-tmp,$(obj-dir), $(wildcard $(dir-tmp)/built-in.o))" ]; then \
+		echo "LD       $(TARGET)"; \
+		$(LD) -EL -r -o $(dir-obj-now)/$(TARGET) $(objs-all) $(obj-all) \
+			$(foreach dir-tmp,$(obj-dir),$(wildcard $(dir-tmp)/built-in.o)); \
+	fi
 
 obj-done:$(objs-all) $(obj-all) $(obj-dir)
-	$(Q)for dir_in in $(dir-y); \
-    do \
-        make $(N) -f $(project-dir)/scripts/Makefile.build dir=$(dir)/"$$dir_in" \
-		out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) project-dir=$(project-dir) obj-done; \
+	$(Q)for dir_in in $(dir-y); do \
+        $(MAKE) $(N) -f scripts/Makefile.build dir=$(dir)/"$$dir_in" \
+		out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) \
+		TARGET=built-in.o built-in.o; \
     done
 
 defs-all := $(objs-all:%.o=%.d)
 defs-all += $(obj-all:%.o=%.d)
 -include $(defs-all)
 
-$(objs-all):$(project-dir)/$(out-dir)/%.o:$(project-dir)/%.S
+$(objs-all):$(out-dir)/%.o:%.S
 	@echo "AS       $(@:$(dir-obj-now)/%=%)"
 	$(Q)$(CC) $(ASFLAGS) -o $@ $<
 
-$(obj-all):$(project-dir)/$(out-dir)/%.o:$(project-dir)/%.c
+$(obj-all):$(out-dir)/%.o:%.c
 	@echo "CC       $(@:$(dir-obj-now)/%=%)"
 	$(Q)$(CC) $(CCFLAGS) -o $@ $<
 
 $(obj-dir):
-	$(Q)-mkdir $@
+	$(Q)if [ ! -d $@ ]; then \
+		mkdir $@; \
+	fi
 
 

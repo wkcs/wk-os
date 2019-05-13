@@ -18,7 +18,6 @@ obj-y += board_config.o
 obj-y += board_init.o
 obj-y += arch_console.o
 obj-y += arch_usb.o
-obj-y += stm32f4xx_it.o
 obj-y += system_stm32f4xx.o
 
 objs-y += start.o

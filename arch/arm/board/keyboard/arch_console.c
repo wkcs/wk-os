@@ -57,7 +57,7 @@ void DMA2_Stream7_IRQHandler(void)
 
     wk_interrupt_enter();
 
-    DMA_ClearITPendingBit(DMA_FLAG_TCIF7);
+    DMA_ClearITPendingBit(uart_log_dev.dma_config->stream, DMA_FLAG_TCIF7);
     len = read_log(log_buf, UART_LOG_DMA_BUF_SIZE);
     if (!len) {
         dma_transport = false;

@@ -67,7 +67,7 @@
 struct gpio_mux_t {
     uint8_t mux_func;
     uint16_t mux_pin;
-}
+};
 
 struct gpio_config_t {
     struct clk_config_t *clk_config;
@@ -78,7 +78,7 @@ struct gpio_config_t {
     GPIO_TypeDef *gpio;
     GPIO_InitTypeDef init_type;
     bool mux_enable;
-    struct gpio_mux_t gpio_mux
+    struct gpio_mux_t gpio_mux;
 };
 
 int gpio_config(struct gpio_config_t *config);

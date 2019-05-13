@@ -472,7 +472,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
         latency to the Data FIFO */
         
         /* Get hclk frequency value */
-        hclk = HAL_RCC_GetHCLKFreq();
+        hclk = SystemCoreClock;
         
         if((hclk >= 14200000U)&&(hclk < 15000000U))
         {
@@ -678,7 +678,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
   * @param  epnum endpoint number
   * @retval None
   */
- __weak void HAL_PCD_ISOOUTIncompleteCallback(__maybe_unused PCD_HandleTypeDef *hpcd, uint8_t epnum)
+ __weak void HAL_PCD_ISOOUTIncompleteCallback(__maybe_unused PCD_HandleTypeDef *hpcd, __maybe_unused uint8_t epnum)
 {
 }
 
@@ -1097,7 +1097,7 @@ static HAL_StatusTypeDef PCD_WriteEmptyTxFifo(PCD_HandleTypeDef *hpcd, uint32_t 
 {
   USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;  
   USB_OTG_EPTypeDef *ep;
-  int32_t len = 0U;
+  uint32_t len = 0U;
   uint32_t len32b;
   uint32_t fifoemptymsk = 0U;
 

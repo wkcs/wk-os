@@ -2,7 +2,7 @@
 #define __STM32F4XX_HAL_DEF
 
 #include <wk/kernel.h>
-#include "stm32f404xc.h"
+#include "stm32f401xc.h"
 
 typedef enum 
 {
