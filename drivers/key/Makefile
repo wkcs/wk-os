@@ -6,6 +6,4 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-dir-y = usb
-dir-y += i2c
-dir-y += key
+obj-y = key-keyboard.o
