@@ -182,6 +182,7 @@ int key_keyboard_init(void)
         pr_err("creat key task err\n");
         return -1;
     }
+    task_ready(key_task);
 
     for (i = 0; i < 61; i++)
         key_info[i].type = i;

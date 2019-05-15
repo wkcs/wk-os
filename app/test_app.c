@@ -8,7 +8,7 @@
 
 static void test_app_entry(__maybe_unused void* parameter)
 {
-    __i2c_remove();
+    //__i2c_remove();
     while (1)
     {
         pr_info("test app running\r\n");
@@ -20,13 +20,13 @@ int test_app_task_init(void)
 {
     struct task_struct_t *test_app_task;
 
-    test_app_task = task_create("test_app", test_app_entry, NULL, 512, 35, 3, NULL, NULL);
+    test_app_task = task_create("test_app", test_app_entry, NULL, 512, 20, 3, NULL, NULL);
     task_ready(test_app_task);
 
     usbd_hid_class_register();
     stm_usbd_register();
-    i2c_core_init();
-    __i2c_init();
+    //i2c_core_init();
+    //__i2c_init();
     return 0;
 
 }

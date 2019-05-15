@@ -27,6 +27,7 @@ static struct ep_id _ep_pool[] =
 void OTG_FS_IRQHandler(void)
 {
     wk_interrupt_enter();
+    pr_info("usbd: usb irq entry\r\n");
     HAL_PCD_IRQHandler(&_stm_pcd);
     wk_interrupt_leave();
 }

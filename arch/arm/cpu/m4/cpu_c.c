@@ -54,10 +54,10 @@ struct cpu_dump_type {
 addr_t *stack_init(void *task_entry, void *parameter, addr_t *stack_addr, void *task_exit)
 {
     struct stack_frame *stack_frame;
-    addr_t *stk;
+    uint8_t *stk;
     uint8_t i;
 
-    stk = stack_addr + sizeof(addr_t);
+    stk = (uint8_t *)stack_addr + sizeof(addr_t);
     stk -= sizeof(struct stack_frame);
     stack_frame = (struct stack_frame *)stk;
 
@@ -77,7 +77,7 @@ addr_t *stack_init(void *task_entry, void *parameter, addr_t *stack_addr, void *
     stack_frame->flag = 0;
 #endif
 
-    return stk;
+    return (addr_t *)stk;
 }
 
 void NMI_Handler(void)
