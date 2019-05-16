@@ -9,3 +9,5 @@
 dir-y = usb
 dir-y += i2c
 dir-y += key
+dir-y += misc
+dir-y += spi

@@ -6,4 +6,4 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-obj-$(CONFIG-KEYBOARD) = key-keyboard.o
+obj-$(CONFIG-STM32PWM) = stm32_pwm.o
