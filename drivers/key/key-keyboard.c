@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 胡坯航<Hu Qihang>
+ * Copyright (C) 2019 胡启航 <Hu Qihang>
  *
  * Author: wkcs
  * 
@@ -49,6 +49,10 @@
 #define LALT   55
 #define RALT   56
 #define RRCTRL 57
+
+#define DEF_LAYER 0
+#define FN_LAYER  1
+#define PN_LATER  2
 
 static char *key_name[61] = {
     "esc", "1/!", "2/@", "3/#", "4/$", "5/%%", "6/^", "7/&", "8/*", "9/(",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 胡启航<Hu Qihang>
+ * Copyright (C) 2018 胡坯航<Hu Qihang>
  *
  * Author: wkcs
  * 
@@ -81,6 +81,7 @@ int __task_create(struct task_struct_t *task,
     INIT_LIST_HEAD(&task->list);
     INIT_LIST_HEAD(&task->tlist);
     INIT_LIST_HEAD(&task->wait_list);
+    INIT_LIST_HEAD(&task->listen_list);
 
     memset(task->name, 0, WK_NAME_MAX);
     len = strlen(name);

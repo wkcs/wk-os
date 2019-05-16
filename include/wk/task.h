@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 胡启航<Hu Qihang>
+ * Copyright (C) 2018 胡坯航<Hu Qihang>
  *
  * Author: wkcs
  * 
@@ -55,7 +55,8 @@ struct task_struct_t {
 
     struct list_head list;
     struct list_head tlist;
-    struct list_head wait_list;                         
+    struct list_head wait_list;
+    struct list_head listen_list;
 };
 
 enum task_cmd_t {
