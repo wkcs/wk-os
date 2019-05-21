@@ -195,3 +195,9 @@ void SysTick_Handler(void)
     /* leave interrupt */
     wk_interrupt_leave();
 }
+
+void cpu_reboot(void)
+{
+    __set_FAULTMASK(1);
+    NVIC_SystemReset();
+}

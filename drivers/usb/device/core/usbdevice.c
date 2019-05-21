@@ -118,7 +118,7 @@ int usbd_class_register(udclass_t udclass)
         return -1;
     }
 #endif
-    list_add(&class_list, &udclass->list);
+    list_add(&udclass->list, &class_list);
     return 0;
 }
 
@@ -149,8 +149,6 @@ int usb_device_init(udcd_t udc)
 
     usbd_device_set_os_comp_id_desc(udevice, &usb_comp_id_desc);
 
-    //pr_info("&class_list = 0x%p\r\n", &class_list);
-    //pr_info("class_list.next = 0x%p\r\n", class_list.next);
     list_for_each_entry(udclass, &class_list, list) {
         /* create a function object */
         func = udclass->usbd_function_create(udevice);
@@ -159,7 +157,7 @@ int usb_device_init(udcd_t udc)
     }
     /* set device descriptor to the device */
 #ifdef USB_DEVICE_COMPOSITE
-    //pr_info("step 1-1\r\n");
+    pr_info("composite device config\r\n");
     usbd_device_set_descriptor(udevice, &compsit_desc);
     usbd_device_set_string(udevice, ustring);
     if(udevice->dcd->device_is_hs)

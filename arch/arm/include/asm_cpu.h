@@ -44,5 +44,6 @@ extern void context_switch_to(addr_t to);
 extern void asm_irq_init(void);
 void asm_cpu_init(void);
 void cpu_delay_usec(uint32_t usec);
+void cpu_reboot(void);
 
 #endif

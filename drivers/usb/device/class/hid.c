@@ -274,14 +274,14 @@ static const struct uhid_comm_descriptor _hid_comm_desc =
         USB_DYNAMIC,
         0x01,
         0x03,                       /* bInterfaceClass: HID */
-#if defined(RT_USB_DEVICE_HID_KEYBOARD)||defined(RT_USB_DEVICE_HID_MOUSE)
+#if defined(USB_DEVICE_HID_KEYBOARD)||defined(USB_DEVICE_HID_MOUSE)
         USB_HID_SUBCLASS_BOOT,    /* bInterfaceSubClass : 1=BOOT, 0=no boot */
 #else
         USB_HID_SUBCLASS_NOBOOT,    /* bInterfaceSubClass : 1=BOOT, 0=no boot */
 #endif
-#if !defined(RT_USB_DEVICE_HID_KEYBOARD)||!defined(RT_USB_DEVICE_HID_MOUSE)||!defined(RT_USB_DEVICE_HID_MEDIA)
+#if !defined(USB_DEVICE_HID_KEYBOARD)||!defined(USB_DEVICE_HID_MOUSE)||!defined(USB_DEVICE_HID_MEDIA)
         USB_HID_PROTOCOL_NONE,      /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
-#elif !defined(RT_USB_DEVICE_HID_MOUSE)
+#elif !defined(USB_DEVICE_HID_MOUSE)
         USB_HID_PROTOCOL_KEYBOARD,  /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
 #else
         USB_HID_PROTOCOL_MOUSE,     /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
@@ -297,14 +297,14 @@ static const struct uhid_comm_descriptor _hid_comm_desc =
         0x00,                       /* bAlternateSetting: Alternate setting */
         0x02,                       /* bNumEndpoints */
         0x03,                       /* bInterfaceClass: HID */
-#if defined(RT_USB_DEVICE_HID_KEYBOARD)||defined(RT_USB_DEVICE_HID_MOUSE)
+#if defined(USB_DEVICE_HID_KEYBOARD)||defined(USB_DEVICE_HID_MOUSE)
         USB_HID_SUBCLASS_BOOT,    /* bInterfaceSubClass : 1=BOOT, 0=no boot */
 #else
         USB_HID_SUBCLASS_NOBOOT,    /* bInterfaceSubClass : 1=BOOT, 0=no boot */
 #endif
-#if !defined(RT_USB_DEVICE_HID_KEYBOARD)||!defined(RT_USB_DEVICE_HID_MOUSE)||!defined(RT_USB_DEVICE_HID_MEDIA)
+#if !defined(USB_DEVICE_HID_KEYBOARD)||!defined(USB_DEVICE_HID_MOUSE)||!defined(USB_DEVICE_HID_MEDIA)
         USB_HID_PROTOCOL_NONE,      /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
-#elif !defined(RT_USB_DEVICE_HID_MOUSE)
+#elif !defined(USB_DEVICE_HID_MOUSE)
         USB_HID_PROTOCOL_KEYBOARD,  /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
 #else
         USB_HID_PROTOCOL_MOUSE,     /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
@@ -600,7 +600,6 @@ static size_t _hid_write(struct hid_s *hiddev, addr_t pos, const void *buffer, s
         return size;
     }
 
-    pr_err("wkcs: hid write err\r\n");
     return 0;
 }
 __weak void HID_Report_Received(hid_report_t report)
@@ -634,6 +633,12 @@ static void usb_hid_init(struct ufunction *func)
     hiddev->func = func;
 
     hid_task = task_create("hidd", hid_task_entry, (void *)hiddev, 512, 20, 20, NULL, NULL);
+    if (hid_task == NULL) {
+        pr_err("hid task creat err\r\n");
+        return;
+    } else {
+        pr_info("hid task creat ok\r\n");
+    }
     __msg_q_init(&hiddev->hid_mq, "hidd", hid_task);
     task_ready(hid_task);
 }
@@ -712,7 +717,6 @@ struct udclass hid_class =
 int usbd_hid_class_register(void)
 {
     INIT_LIST_HEAD(&hid_class.list);
-    pr_info("usbd_function_create = 0x%p\r\n", hid_class.usbd_function_create);
     usbd_class_register(&hid_class);
     pr_info("hid register ok\r\n");
     return 0;

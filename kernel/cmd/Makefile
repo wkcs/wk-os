@@ -11,6 +11,7 @@ obj-y += cmd_clear.o
 obj-y += cmd_ls.o
 obj-y += cmd_log.o
 obj-y += cmd_task_show.o
+obj-y += cmd_reboot.o
 
 ASM_SRCS +=
 
