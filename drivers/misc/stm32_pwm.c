@@ -9,10 +9,95 @@
 #include <wk/err.h>
 #include <wk/delay.h>
 #include <init/init.h>
+#include <wk/task.h>
 #include <gpio.h>
 #include <board.h>
 
 #include "keyboard.h"
+
+void pwm_set_val(enum led_ch ch, uint8_t val)
+{
+    switch (ch) {
+        case LED1:
+            TIM_SetCompare1(TIM5, val);
+            break;
+        case LED2:
+            TIM_SetCompare2(TIM5, val);
+            break;
+        case LED3:
+            TIM_SetCompare3(TIM5, val);
+            break;
+        case LED4:
+            TIM_SetCompare4(TIM5, val);
+            break;
+        case LED5:
+            TIM_SetCompare1(TIM3, val);
+            break;
+        case LED6:
+            TIM_SetCompare2(TIM3, val);
+            break;
+        case LED7:
+            TIM_SetCompare3(TIM3, val);
+            break;
+        case LED8:
+            TIM_SetCompare4(TIM3, val);
+            break;
+        case LED9:
+            TIM_SetCompare1(TIM4, val);
+            break;
+        case LED10:
+            TIM_SetCompare2(TIM4, val);
+            break;
+        case LED11:
+            TIM_SetCompare3(TIM4, val);
+            break;
+        case LED12:
+            TIM_SetCompare4(TIM4, val);
+            break;
+        case LED13:
+            TIM_SetCompare1(TIM2, val);
+            break;
+        case LED14:
+            TIM_SetCompare3(TIM2, val);
+            break;
+    }
+}
+
+void pwm_set_led_off(void)
+{
+    TIM_SetCompare1(TIM5, 0);
+    TIM_SetCompare2(TIM5, 0);
+    TIM_SetCompare3(TIM5, 0);
+    TIM_SetCompare4(TIM5, 0);
+    TIM_SetCompare1(TIM3, 0);
+    TIM_SetCompare2(TIM3, 0);
+    TIM_SetCompare3(TIM3, 0);
+    TIM_SetCompare4(TIM3, 0);
+    TIM_SetCompare1(TIM4, 0);
+    TIM_SetCompare2(TIM4, 0);
+    TIM_SetCompare3(TIM4, 0);
+    TIM_SetCompare4(TIM4, 0);
+    TIM_SetCompare1(TIM2, 0);
+    TIM_SetCompare3(TIM2, 0);
+}
+
+void pwm_set_led_data(uint8_t buf[14])
+{
+    TIM_SetCompare1(TIM5, buf[0]);
+    TIM_SetCompare2(TIM5, buf[1]);
+    TIM_SetCompare3(TIM5, buf[2]);
+    TIM_SetCompare4(TIM5, buf[3]);
+    TIM_SetCompare1(TIM3, buf[4]);
+    TIM_SetCompare2(TIM3, buf[5]);
+    TIM_SetCompare3(TIM3, buf[6]);
+    TIM_SetCompare4(TIM3, buf[7]);
+    TIM_SetCompare1(TIM4, buf[8]);
+    TIM_SetCompare2(TIM4, buf[9]);
+    TIM_SetCompare3(TIM4, buf[10]);
+    TIM_SetCompare4(TIM4, buf[11]);
+    TIM_SetCompare1(TIM2, buf[12]);
+    TIM_SetCompare3(TIM2, buf[13]);
+}
 
 int stm32_pwm_init(void)
 {
@@ -20,7 +105,7 @@ int stm32_pwm_init(void)
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef  TIM_OCInitStructure;
 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
@@ -55,9 +140,9 @@ int stm32_pwm_init(void)
         GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 	  
-	TIM_TimeBaseStructure.TIM_Prescaler = 27;
+	TIM_TimeBaseStructure.TIM_Prescaler = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseStructure.TIM_Period = 255;
+	TIM_TimeBaseStructure.TIM_Period = 1023;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
 	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseStructure);
     TIM_TimeBaseInit(TIM3,&TIM_TimeBaseStructure);
@@ -113,53 +198,9 @@ int stm32_pwm_init(void)
     TIM_Cmd(TIM3, ENABLE);
     TIM_Cmd(TIM4, ENABLE);
     TIM_Cmd(TIM5, ENABLE);
+
+    pwm_set_led_off();
+
+    return 0;
 }
 task_init(stm32_pwm_init);
-
-void pwm_set_val(enum led_ch ch, uint8_t val)
-{
-    switch (ch) {
-        case LED1:
-            TIM_SetCompare1(TIM5, val);
-            break;
-        case LED2:
-            TIM_SetCompare2(TIM5, val);
-            break;
-        case LED3:
-            TIM_SetCompare3(TIM5, val);
-            break;
-        case LED4:
-            TIM_SetCompare4(TIM5, val);
-            break;
-        case LED5:
-            TIM_SetCompare1(TIM3, val);
-            break;
-        case LED6:
-            TIM_SetCompare2(TIM3, val);
-            break;
-        case LED7:
-            TIM_SetCompare3(TIM3, val);
-            break;
-        case LED8:
-            TIM_SetCompare4(TIM3, val);
-            break;
-        case LED9:
-            TIM_SetCompare1(TIM4, val);
-            break;
-        case LED10:
-            TIM_SetCompare2(TIM4, val);
-            break;
-        case LED11:
-            TIM_SetCompare3(TIM4, val);
-            break;
-        case LED12:
-            TIM_SetCompare4(TIM4, val);
-            break;
-        case LED13:
-            TIM_SetCompare1(TIM2, val);
-            break;
-        case LED14:
-            TIM_SetCompare3(TIM2, val);
-            break;
-    }
-}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 胡启航<Hu Qihang>
+ * Copyright (C) 2019 胡坯航<Hu Qihang>
  *
  * Author: wkcs
  * 
@@ -10,6 +10,7 @@
 #include <wk/err.h>
 #include <wk/delay.h>
 #include <init/init.h>
+#include <lib/string.h>
 #include <gpio.h>
 #include <board.h>
 
@@ -35,11 +36,19 @@
 #define KEY_Y14 PCin(13)
 
 #define KEY_TASK_PRIO       3
-#define KEY_TASK_STACK_SIZE 256
+#define KEY_TASK_STACK_SIZE 512
 #define KEY_TASK_TICK       3
 
 #define KEY_UP   0
 #define KEY_DOWN 1
+
+#define LSHIFT 41
+#define RSHIFT 52
+#define LCTRL  53
+#define LWIN   54
+#define LALT   55
+#define RALT   56
+#define RRCTRL 57
 
 static char *key_name[61] = {
     "esc", "1/!", "2/@", "3/#", "4/$", "5/%%", "6/^", "7/&", "8/*", "9/(",
@@ -50,12 +59,12 @@ static char *key_name[61] = {
     "Lalt", "space", "Ralt", "pn", "Rctrl", "fn"
 };
 
-static uint8_t position_index[5][14] = {
+static int position_index[5][14] = {
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13},
     {14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27},
-    {28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 0, 40},
-    {41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 52},
-    {53, 54, 55, 0, 0, 56, 0, 0, 0, 57, 58, 59, 0 ,60},
+    {28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, -1, 40},
+    {41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, 52},
+    {53, 54, 55, -1, -1, 56, -1, -1, -1, 57, 58, 59, -1 ,60},
 };
 
 struct key_info_t {
@@ -63,7 +72,69 @@ struct key_info_t {
     uint8_t val;
 };
 
-struct key_info_t key_info[61];
+static struct key_info_t key_info[61] = {
+    {0x29, 0}, // esc
+    {0x1e, 0}, // 1
+    {0x1f, 0}, // 2
+    {0x20, 0}, // 3
+    {0x21, 0}, // 4
+    {0x22, 0}, // 5
+    {0x23, 0}, // 6
+    {0x24, 0}, // 7
+    {0x25, 0}, // 8
+    {0x26, 0}, // 9
+    {0x27, 0}, // 0
+    {0x2d, 0}, // -
+    {0x2e, 0}, // =
+    {0x2a, 0}, // backspack
+    {0x2b, 0}, // tab
+    {0x14, 0}, // q
+    {0x1a, 0}, // w
+    {0x08, 0}, // e
+    {0x15, 0}, // r
+    {0x17, 0}, // t
+    {0x1c, 0}, // y
+    {0x18, 0}, // u
+    {0x0c, 0}, // i
+    {0x12, 0}, // o
+    {0x13, 0}, // p
+    {0x2f, 0}, // [
+    {0x30, 0}, // ]
+    {0x31, 0}, // |
+    {0x39, 0}, // caps
+    {0x04, 0}, // a
+    {0x16, 0}, // s
+    {0x07, 0}, // d
+    {0x09, 0}, // f
+    {0x0a, 0}, // g
+    {0x0b, 0}, // h
+    {0x0d, 0}, // j
+    {0x0e, 0}, // k
+    {0x0f, 0}, // l
+    {0x33, 0}, // ;
+    {0x34, 0}, // '
+    {0x28, 0}, // enter
+    {0x00, 0}, // lshift
+    {0x1d, 0}, // z
+    {0x1b, 0}, // x
+    {0x06, 0}, // c
+    {0x19, 0}, // v
+    {0x05, 0}, // b
+    {0x11, 0}, // n
+    {0x10, 0}, // m
+    {0x36, 0}, // ,
+    {0x37, 0}, // .
+    {0x38, 0}, // /
+    {0x00, 0}, // rshift
+    {0x00, 0}, // lctrl
+    {0x00, 0}, // lwin
+    {0x00, 0}, // lalt
+    {0x2c, 0}, // space
+    {0x00, 0}, // ralt
+    {0x00, 0}, // fn
+    {0x00, 0}, // menu
+    {0x00, 0}, // rctrl
+};
 
 static struct task_struct_t *key_task;
 
@@ -106,19 +177,30 @@ static inline int key_get_y_val(uint8_t y)
     }
 }
 
+extern void hid_write_test(const void *buffer, size_t size);
+
 static void key_task_entry(__maybe_unused void* parameter)
 {
     int x, y;
     int num;
+    uint8_t data[8];
+    uint8_t data_len;
+    bool last_is_down = false;
+    bool key_down;
 
     while (1) {
+        memset(data, 0, 8);
+        data_len = 0;
+        key_down = false;
         for (x = 0; x < 5; x++) {
             key_set_x_out(x, KEY_DOWN);
             for (y = 0; y < 14; y ++) {
+                if (position_index[x][y] < 0)
+                    continue;
                 if (key_get_y_val(y) == KEY_DOWN)
                     key_info[position_index[x][y]].val = KEY_DOWN;
                 else
-                    key_info[position_index[x][y]].val = KEY_UP;    
+                    key_info[position_index[x][y]].val = KEY_UP;
             }
             key_set_x_out(x, KEY_UP);
         }
@@ -126,6 +208,8 @@ static void key_task_entry(__maybe_unused void* parameter)
         for (x = 0; x < 5; x++) {
             key_set_x_out(x, KEY_DOWN);
             for (y = 0; y < 14; y ++) {
+                if (position_index[x][y] < 0)
+                    continue;
                 if (key_get_y_val(y) == KEY_DOWN && key_info[position_index[x][y]].val == KEY_DOWN)
                     key_info[position_index[x][y]].val = KEY_DOWN;
                 else
@@ -133,10 +217,48 @@ static void key_task_entry(__maybe_unused void* parameter)
             }
             key_set_x_out(x, KEY_UP);
         }
-
         for (num = 0; num < 61; num++) {
-            if (key_info[num].val == KEY_DOWN)
+            if (key_info[num].val == KEY_DOWN) {
+                key_down = true;
+                switch (num) {
+                    case LSHIFT:
+                        data[0] |= (1 << 1);
+                        break;
+                    case RSHIFT:
+                        data[0] |= (1 << 5);
+                        break;
+                    case LCTRL:
+                        data[0] |= 1;
+                        break;
+                    case LWIN:
+                        data[0] |= (1 << 3);
+                        break;
+                    case LALT:
+                        data[0] |= (1 << 2);
+                        break;
+                    case RALT:
+                        data[0] |= (1 << 6);
+                        break;
+                    case RRCTRL:
+                        data[0] |= (1 << 4);
+                        break;
+                    default:
+                        if (key_info[num].type != 0) {
+                            if (data_len < 6) {
+                                data[2 + data_len] = key_info[num].type;
+                                data_len++;
+                            }
+                        }
+                }
                 pr_info("key[\"%s\"] is down\r\n", key_name[key_info[num].type]);
+            }
+        }
+        if (key_down) {
+            hid_write_test(data, 8);
+            last_is_down = true;
+        } else if (last_is_down) {
+            hid_write_test(data, 8);
+            last_is_down = false;
         }
         delay_msec(20);
     }
@@ -144,7 +266,6 @@ static void key_task_entry(__maybe_unused void* parameter)
 
 int key_keyboard_init(void)
 {
-    int i;
     GPIO_InitTypeDef  GPIO_InitStructure;
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
@@ -183,9 +304,6 @@ int key_keyboard_init(void)
         return -1;
     }
     task_ready(key_task);
-
-    for (i = 0; i < 61; i++)
-        key_info[i].type = i;
     
     return 0;
 }

@@ -8,24 +8,24 @@
 
 #打开显示选项
 ifneq ($(V),1)
-Q := @
+	Q := @
 endif
 
 ifneq ($(MV), 1)
-N := --no-print-directory
+	N := --no-print-directory
 endif
 
 ifndef $(ARCH)
     ARCH := arm
 endif
 
-ifndef $(BOARD)
-    BOARD := zj_v3
-endif
+#ifndef $(BOARD)
+#    BOARD := zj_v3
+#endif
 
-ifndef $(CONFIG)
-    CONFIG := zj_v3_config
-endif
+#ifndef $(CONFIG)
+#    CONFIG := zj_v3_config
+#endif
 
 dir-y = app
 dir-y += arch
@@ -67,7 +67,7 @@ OOCD_INTERFACE	:= flossjtag
 
 LDFLAGS += $(LDSCRIPT:%=-T%)
 
-.PHONY: all flash debug clean config size $(obj-all)
+.PHONY: all flash debug clean config size $(obj-all) stflash
 
 all:$(TARGET_LIST) $(TARGET_BIN) $(TARGET_HEX) $(TARGET_ELF) size
 
@@ -108,9 +108,14 @@ $(out-dir):
 	fi
 
 # 使用OpenOCD下载hex程序
-flash: $(TARGET_HEX)
-	@echo "OPEN_OCD FLASH $<"
-	$(Q)$(OOCD) $(OOCDFLAGS) -c "program $< verify reset exit" 
+flash:
+	@echo "OPEN_OCD FLASH $(TARGET_HEX:$(out-dir)/%=%)"
+	$(Q)$(OOCD) $(OOCDFLAGS) -c "program $(TARGET_HEX) verify reset exit"
+
+# 使用st-link下载bin程序
+stflash:
+	@echo "ST-FLASH     $(TARGET_BIN:$(out-dir)/%=%)"
+	$(Q)st-flash write $(TARGET_BIN) 0x08000000
 
 # 使用GDB 通过sdtin/out管道与OpenOCD连接 并在main函数处打断点后运行
 debug: $(TARGET_ELF)

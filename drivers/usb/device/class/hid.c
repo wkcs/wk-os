@@ -19,6 +19,8 @@ struct hid_s
     struct msg_q hid_mq;
 };
 
+static struct hid_s *hid_dev;
+
 /* CustomHID_ConfigDescriptor */
 __aligned(4)
 const uint8_t _report_desc[]=
@@ -586,7 +588,6 @@ static int _hid_descriptor_config(__maybe_unused uhid_comm_desc_t hid, __maybe_u
 static size_t _hid_write(struct hid_s *hiddev, addr_t pos, const void *buffer, size_t size)
 {
     struct hid_report report;
-    pr_info("wkcs:device state = %d\r\n", hiddev->func->device->state);
     if (hiddev->func->device->state == USB_STATE_CONFIGURED)
     {
         report.report_id = pos;
@@ -596,11 +597,10 @@ static size_t _hid_write(struct hid_s *hiddev, addr_t pos, const void *buffer, s
         hiddev->ep_in->request.size = (size+1) > 64 ? 64 : size+1;
         hiddev->ep_in->request.req_type = UIO_REQUEST_WRITE;
         usbd_io_request(hiddev->func->device, hiddev->ep_in, &hiddev->ep_in->request);
-        pr_info("wkcs:hid write %d bytes\r\n", size);
         return size;
     }
 
-    pr_info("wkcs:hid write err\r\n");
+    pr_err("wkcs: hid write err\r\n");
     return 0;
 }
 __weak void HID_Report_Received(hid_report_t report)
@@ -668,6 +668,7 @@ ufunction_t usbd_function_hid_create(udevice_t device)
 
     /* allocate memory for cdc vcom data */
     data = (struct hid_s*)wk_alloc(sizeof(struct hid_s), 0, 0);
+    hid_dev = data;
     memset(data, 0, sizeof(struct hid_s));
     func->user_data = (void*)data;
 
@@ -715,4 +716,9 @@ int usbd_hid_class_register(void)
     usbd_class_register(&hid_class);
     pr_info("hid register ok\r\n");
     return 0;
+}
+
+void hid_write_test(const void *buffer, size_t size)
+{
+    hid_dev->write(hid_dev, 1, buffer, size);
 }
