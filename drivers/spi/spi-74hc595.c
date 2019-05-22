@@ -10,20 +10,25 @@
 #include <wk/err.h>
 #include <wk/delay.h>
 #include <wk/cpu.h>
+#include <wk/irq.h>
 #include <init/init.h>
 #include <lib/string.h>
 #include <gpio.h>
 #include <board.h>
 #include "keyboard.h"
 
+#define LUM_MAX 30
+
 static uint8_t display_buf[15][14];
+static uint8_t backlight_on_off = BACKLIGHT_ON;
+static uint8_t backlight_lum = LUM_MAX;
 
 #define SPI_595_EN  PBout(12)
 #define HC_595_CLK  PBout(13)
 #define HC_595_DATA PBout(15)
 
 static inline void hc_595_load(void)  
-{  
+{
     SPI_595_EN = 0;
 	delay_usec(1);
     SPI_595_EN = 1;
@@ -60,7 +65,32 @@ static void HC_595_send_bit(uint8_t data)
 
 void led_write_display_buf(uint8_t *buf)
 {
+	uint8_t i, m;
+	register addr_t level = disable_irq_save();
 	memcpy(display_buf, buf, 15 * 14);
+	for (i = 0; i < 15; i++) {
+		for (m = 0; m < 14; m++)
+			display_buf[i][m] = display_buf[i][m] * backlight_lum / LUM_MAX;
+	}
+
+	enable_irq_save(level);
+}
+
+void led_backlight_on_off(uint8_t on)
+{
+	if (on == BACKLIGHT_ON) {
+		TIM_Cmd(TIM9, ENABLE);
+	} else {
+		HC_595_send(0);
+		TIM_Cmd(TIM9, DISABLE);
+	}
+}
+
+void led_backlight_set_lum(uint8_t lum)
+{
+	if (lum > LUM_MAX)
+		backlight_lum = LUM_MAX;
+	backlight_lum = lum;
 }
 
 static void tim7_int_init(void)
@@ -78,7 +108,10 @@ static void tim7_int_init(void)
 	TIM_TimeBaseInit(TIM9, &TIM_TimeBaseInitStructure);
 	
 	TIM_ITConfig(TIM9, TIM_IT_Update, ENABLE);
-	TIM_Cmd(TIM9, ENABLE);
+	if (backlight_on_off == BACKLIGHT_ON)
+		TIM_Cmd(TIM9, ENABLE);
+	else
+		TIM_Cmd(TIM9, DISABLE);
 	
 	NVIC_InitStructure.NVIC_IRQChannel = TIM1_BRK_TIM9_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x03;
@@ -114,6 +147,7 @@ task_init(spi_74hc595_init);
 static uint8_t led_index = 0;
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
+	wk_interrupt_enter();
 	if(TIM_GetITStatus(TIM9, TIM_IT_Update) == SET) {
 		pwm_set_led_off();
 		if (led_index == 0)
@@ -126,4 +160,5 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 			led_index = 0;
 	}
 	TIM_ClearITPendingBit(TIM9, TIM_IT_Update);
+	wk_interrupt_leave();
 }

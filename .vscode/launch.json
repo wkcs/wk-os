@@ -29,7 +29,7 @@
                     "ignoreFailures": false
                 },
                 {
-                    "text": "file /home/wkcs/projects/wk-os/debug/wk_os.elf",
+                    "text": "file /home/wkcs/projects/wk-os/out/wk_os.elf",
                     "description": "load symbols",
                     "ignoreFailures": false
                 },
@@ -45,7 +45,7 @@
                 },
             ],
             "launchCompleteCommand": "None",
-            "program": "${workspaceRoot}/debug/wk_os.elf",
+            "program": "${workspaceRoot}/out/wk_os.elf",
             "args": [
                 "target remote localhost:3333"
             ],
@@ -63,7 +63,7 @@
                 "miDebuggerPath": "arm-none-eabi-gdb",
                 "serverStarted": "target halted due to debug-request, current mode: Thread",
                 "debugServerPath": "openocd",
-                "debugServerArgs": "-f \"/home/wkcs/projects/wk-os/openocd.cfg\" -c init -c \"reset halt\""
+                "debugServerArgs": "-f \"/home/wkcs/projects/wk-os/arch/arm/board/keyboard/openocd.cfg\" -c init -c \"reset halt\""
             }
         }
     ]

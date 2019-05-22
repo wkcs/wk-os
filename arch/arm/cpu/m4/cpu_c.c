@@ -82,6 +82,7 @@ addr_t *stack_init(void *task_entry, void *parameter, addr_t *stack_addr, void *
 
 void NMI_Handler(void)
 {
+    pr_fatal("%s entry\r\n", __func__);
     while(1) {
     }
 }
@@ -120,6 +121,7 @@ void cpu_hard_fault(struct cpu_dump_type *cpu_dump_type)
  
 void MemManage_Handler(void)
 {
+    pr_fatal("%s entry\r\n", __func__);
     /* Go to infinite loop when Memory Manage exception occurs */
     while (1) {
     }
@@ -128,6 +130,7 @@ void MemManage_Handler(void)
  
 void BusFault_Handler(void)
 {
+    pr_fatal("%s entry\r\n", __func__);
     /* Go to infinite loop when Bus Fault exception occurs */
     while (1) {
     }
@@ -135,6 +138,7 @@ void BusFault_Handler(void)
  
 void UsageFault_Handler(void)
 {
+    pr_fatal("%s entry\r\n", __func__);
     /* Go to infinite loop when Usage Fault exception occurs */
     while (1) {
     }
@@ -142,10 +146,12 @@ void UsageFault_Handler(void)
  
 void SVC_Handler(void)
 {
+    pr_fatal("%s entry\r\n", __func__);
 }
  
 void DebugMon_Handler(void)
 {
+    pr_fatal("%s entry\r\n", __func__);
 }
 
 extern uint32_t SystemCoreClock;

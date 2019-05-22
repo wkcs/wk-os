@@ -50,7 +50,6 @@ static void led_task_entry(__maybe_unused void* parameter)
 {
     static uint8_t m = 0;
 	uint8_t i, n, u;
-	addr_t level;
 
     while (1) {
 		for (u = 0; u < 14; u++) {
@@ -61,9 +60,7 @@ static void led_task_entry(__maybe_unused void* parameter)
 				display_buf[i * 3][u] = led_test_buf[n][0];
 				display_buf[i * 3 + 1][u] = led_test_buf[n][1];
 				display_buf[i * 3 + 2][u] = led_test_buf[n][2];
-                level = disable_irq_save();
                 led_write_display_buf((uint8_t *)display_buf);
-				enable_irq_save(level);
 			}
 		}
 		m++;
