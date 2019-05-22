@@ -447,8 +447,9 @@ static int _interface_handler(ufunction_t func, ureq_t setup)
 
     struct hid_s *data = (struct hid_s *) func->user_data;
 
-    if(setup->wIndex != 0)
+    /* if(setup->wIndex != 0) {
         return -EIO;
+    } */
 
     switch (setup->bRequest)
     {
@@ -679,6 +680,7 @@ ufunction_t usbd_function_hid_create(udevice_t device)
 
     /* create an interface object */
     hid_intf = usbd_interface_new(device, _interface_handler);
+    pr_info("hid_intf->intf_num = %d\r\n", hid_intf->intf_num);
 
     /* create an alternate setting object */
     hid_setting = usbd_altsetting_new(sizeof(struct uhid_comm_descriptor));

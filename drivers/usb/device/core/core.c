@@ -450,13 +450,9 @@ static int _request_interface(struct udevice* device, ureq_t setup)
 
     intf = usbd_find_interface(device, setup->wIndex & 0xFF, &func);
     if (intf != NULL)
-    {
         ret = intf->handler(func, setup);
-    }
     else
-    {
         ret = -1;
-    }
     
     return ret;
 }
@@ -1357,7 +1353,6 @@ uconfig_t usbd_find_config(udevice_t device, uint8_t value)
  */
 uintf_t usbd_find_interface(udevice_t device, uint8_t value, ufunction_t *pfunc)
 {
-    struct list_head *i, *j;
     ufunction_t func;
     uintf_t intf;
 
@@ -1368,15 +1363,9 @@ uintf_t usbd_find_interface(udevice_t device, uint8_t value, ufunction_t *pfunc)
     WK_ERROR(value < device->nr_intf);
 
     /* search an interface in the current configuration */
-    for (i=device->curr_cfg->func_list.next;
-            i!=&device->curr_cfg->func_list; i=i->next)
-    {
-        func = (ufunction_t)list_entry(i, struct ufunction, list);
-        for(j=func->intf_list.next; j!=&func->intf_list; j=j->next)
-        {
-            intf = (uintf_t)list_entry(j, struct uinterface, list);
-            if(intf->intf_num == value)
-            {
+    list_for_each_entry(func, &device->curr_cfg->func_list, list) {
+        list_for_each_entry(intf, &func->intf_list, list) {
+            if(intf->intf_num == value) {
                 if (pfunc != NULL)
                     *pfunc = func;
                 return intf;
