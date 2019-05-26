@@ -49,7 +49,7 @@ int com_read_data(uint8_t *buf, size_t size)
     com_data->dev->ops.read(com_data->dev, 0, buf, size);
     ret = sem_get_timeout(com_data->read_sem, sec_to_tick(2));
     if (ret != 0) {
-        pr_err("winusb read data timedout\r\n");
+        //pr_err("winusb read data timedout\r\n");
         return -ETIMEDOUT;
     }
 
@@ -63,7 +63,7 @@ int com_write_data(const uint8_t *buf, size_t size)
     com_data->dev->ops.write(com_data->dev, 0, buf, size);
     ret = sem_get_timeout(com_data->write_sem, sec_to_tick(2));
     if (ret != 0) {
-        pr_err("winusb write data timedout\r\n");
+        //pr_err("winusb write data timedout\r\n");
         return -ETIMEDOUT;
     }
 

@@ -47,13 +47,16 @@
 #define LCTRL  53
 #define LWIN   54
 #define LALT   55
-#define RALT   56
-#define RRCTRL 57
+#define RALT   57
+#define RCTRL  59
+#define FN     60
+#define PN     58
 
 #define DEF_LAYER 0
 #define FN_LAYER  1
 #define PN_LATER  2
 
+#if 0
 static char *key_name[61] = {
     "esc", "1/!", "2/@", "3/#", "4/$", "5/%%", "6/^", "7/&", "8/*", "9/(",
     "0/)", "-/_", "=/+", "back", "tab", "q", "w", "e", "r", "t", "y",
@@ -62,6 +65,7 @@ static char *key_name[61] = {
     "c", "v", "b", "n", "m", ",/<", "./>", "//?", "Rshift", "Lctrl", "win",
     "Lalt", "space", "Ralt", "pn", "Rctrl", "fn"
 };
+#endif
 
 static int position_index[5][14] = {
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13},
@@ -76,68 +80,194 @@ struct key_info_t {
     uint8_t val;
 };
 
-static struct key_info_t key_info[61] = {
-    {0x29, 0}, // esc
-    {0x1e, 0}, // 1
-    {0x1f, 0}, // 2
-    {0x20, 0}, // 3
-    {0x21, 0}, // 4
-    {0x22, 0}, // 5
-    {0x23, 0}, // 6
-    {0x24, 0}, // 7
-    {0x25, 0}, // 8
-    {0x26, 0}, // 9
-    {0x27, 0}, // 0
-    {0x2d, 0}, // -
-    {0x2e, 0}, // =
-    {0x2a, 0}, // backspack
-    {0x2b, 0}, // tab
-    {0x14, 0}, // q
-    {0x1a, 0}, // w
-    {0x08, 0}, // e
-    {0x15, 0}, // r
-    {0x17, 0}, // t
-    {0x1c, 0}, // y
-    {0x18, 0}, // u
-    {0x0c, 0}, // i
-    {0x12, 0}, // o
-    {0x13, 0}, // p
-    {0x2f, 0}, // [
-    {0x30, 0}, // ]
-    {0x31, 0}, // |
-    {0x39, 0}, // caps
-    {0x04, 0}, // a
-    {0x16, 0}, // s
-    {0x07, 0}, // d
-    {0x09, 0}, // f
-    {0x0a, 0}, // g
-    {0x0b, 0}, // h
-    {0x0d, 0}, // j
-    {0x0e, 0}, // k
-    {0x0f, 0}, // l
-    {0x33, 0}, // ;
-    {0x34, 0}, // '
-    {0x28, 0}, // enter
-    {0x00, 0}, // lshift
-    {0x1d, 0}, // z
-    {0x1b, 0}, // x
-    {0x06, 0}, // c
-    {0x19, 0}, // v
-    {0x05, 0}, // b
-    {0x11, 0}, // n
-    {0x10, 0}, // m
-    {0x36, 0}, // ,
-    {0x37, 0}, // .
-    {0x38, 0}, // /
-    {0x00, 0}, // rshift
-    {0x00, 0}, // lctrl
-    {0x00, 0}, // lwin
-    {0x00, 0}, // lalt
-    {0x2c, 0}, // space
-    {0x00, 0}, // ralt
-    {0x00, 0}, // fn
-    {0x00, 0}, // menu
-    {0x00, 0}, // rctrl
+static struct key_info_t key_info[3][61] = {
+    {   /* default layer */
+        {0x29, 0}, // esc
+        {0x1e, 0}, // 1
+        {0x1f, 0}, // 2
+        {0x20, 0}, // 3
+        {0x21, 0}, // 4
+        {0x22, 0}, // 5
+        {0x23, 0}, // 6
+        {0x24, 0}, // 7
+        {0x25, 0}, // 8
+        {0x26, 0}, // 9
+        {0x27, 0}, // 0
+        {0x2d, 0}, // -
+        {0x2e, 0}, // =
+        {0x2a, 0}, // backspack
+        {0x2b, 0}, // tab
+        {0x14, 0}, // q
+        {0x1a, 0}, // w
+        {0x08, 0}, // e
+        {0x15, 0}, // r
+        {0x17, 0}, // t
+        {0x1c, 0}, // y
+        {0x18, 0}, // u
+        {0x0c, 0}, // i
+        {0x12, 0}, // o
+        {0x13, 0}, // p
+        {0x2f, 0}, // [
+        {0x30, 0}, // ]
+        {0x31, 0}, // |
+        {0x39, 0}, // caps
+        {0x04, 0}, // a
+        {0x16, 0}, // s
+        {0x07, 0}, // d
+        {0x09, 0}, // f
+        {0x0a, 0}, // g
+        {0x0b, 0}, // h
+        {0x0d, 0}, // j
+        {0x0e, 0}, // k
+        {0x0f, 0}, // l
+        {0x33, 0}, // ;
+        {0x34, 0}, // '
+        {0x28, 0}, // enter
+        {0x00, 0}, // lshift
+        {0x1d, 0}, // z
+        {0x1b, 0}, // x
+        {0x06, 0}, // c
+        {0x19, 0}, // v
+        {0x05, 0}, // b
+        {0x11, 0}, // n
+        {0x10, 0}, // m
+        {0x36, 0}, // ,
+        {0x37, 0}, // .
+        {0x38, 0}, // /
+        {0x00, 0}, // rshift
+        {0x00, 0}, // lctrl
+        {0x00, 0}, // lwin
+        {0x00, 0}, // lalt
+        {0x2c, 0}, // space
+        {0x00, 0}, // ralt
+        {0x00, 0}, // pn
+        {0x00, 0}, // rctrl
+        {0x00, 0}, // fn
+    }, {  /* fn layer */
+        {0x32, 0}, // ~
+        {0x3a, 0}, // F1
+        {0x3b, 0}, // F2
+        {0x3c, 0}, // F3
+        {0x3d, 0}, // F4
+        {0x3e, 0}, // F5
+        {0x3f, 0}, // F6
+        {0x40, 0}, // F7
+        {0x41, 0}, // F8
+        {0x42, 0}, // F9
+        {0x43, 0}, // F10
+        {0x44, 0}, // F11
+        {0x45, 0}, // F12
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x4c, 0}, // delete
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x52, 0}, // up
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x50, 0}, // left
+        {0x51, 0}, // down
+        {0x4f, 0}, // right
+        {0x00, 0},
+    }, {  /* pn layer */
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+        {0x00, 0},
+    }
 };
 
 static struct task_struct_t *key_task;
@@ -189,6 +319,8 @@ static void key_task_entry(__maybe_unused void* parameter)
     int num;
     uint8_t data[8];
     uint8_t data_len;
+    uint8_t layer = 0;
+    uint8_t data_buf = 0;
     bool last_is_down = false;
     bool key_down;
 
@@ -201,10 +333,17 @@ static void key_task_entry(__maybe_unused void* parameter)
             for (y = 0; y < 14; y ++) {
                 if (position_index[x][y] < 0)
                     continue;
-                if (key_get_y_val(y) == KEY_DOWN)
-                    key_info[position_index[x][y]].val = KEY_DOWN;
-                else
-                    key_info[position_index[x][y]].val = KEY_UP;
+                if (key_get_y_val(y) == KEY_DOWN) {
+                    key_info[0][position_index[x][y]].val = KEY_DOWN;
+                    if (position_index[x][y] == FN && layer == 0)
+                        layer = 1;
+                    else if (position_index[x][y] == PN && layer == 0)
+                        layer = 2;
+                    else
+                        layer = 0;
+                } else {
+                    key_info[0][position_index[x][y]].val = KEY_UP;
+                }
             }
             key_set_x_out(x, KEY_UP);
         }
@@ -214,47 +353,168 @@ static void key_task_entry(__maybe_unused void* parameter)
             for (y = 0; y < 14; y ++) {
                 if (position_index[x][y] < 0)
                     continue;
-                if (key_get_y_val(y) == KEY_DOWN && key_info[position_index[x][y]].val == KEY_DOWN)
-                    key_info[position_index[x][y]].val = KEY_DOWN;
+                if (key_get_y_val(y) == KEY_DOWN && key_info[0][position_index[x][y]].val == KEY_DOWN)
+                    key_info[0][position_index[x][y]].val = KEY_DOWN;
                 else
-                    key_info[position_index[x][y]].val = KEY_UP;    
+                    key_info[0][position_index[x][y]].val = KEY_UP;    
             }
             key_set_x_out(x, KEY_UP);
         }
         for (num = 0; num < 61; num++) {
-            if (key_info[num].val == KEY_DOWN) {
+            if (key_info[0][num].val == KEY_DOWN) {
                 key_down = true;
                 switch (num) {
                     case LSHIFT:
-                        data[0] |= (1 << 1);
+                        if (layer == 0) {
+                            data[0] |= (1 << 1);
+                        } else {
+                            if (data_buf & (uint8_t)(1 << 1)) {
+                                data[0] |= (1 << 1);
+                            } else {
+                                if (key_info[layer][num].type != 0) {
+                                    if (data_len < 6) {
+                                        data[2 + data_len] = key_info[layer][num].type;
+                                        data_len++;
+                                    }
+                                }
+                                layer = 0;
+                            }
+                        }
                         break;
                     case RSHIFT:
-                        data[0] |= (1 << 5);
+                        if (layer == 0) {
+                           data[0] |= (1 << 5);
+                        } else {
+                            if (data_buf & (uint8_t)(1 << 5)) {
+                                data[0] |= (1 << 5);
+                            } else {
+                                if (key_info[layer][num].type != 0) {
+                                    if (data_len < 6) {
+                                        data[2 + data_len] = key_info[layer][num].type;
+                                        data_len++;
+                                    }
+                                }
+                                layer = 0;
+                            }
+                        }
                         break;
                     case LCTRL:
-                        data[0] |= 1;
+                        if (layer == 0) {
+                           data[0] |= 1;
+                        } else {
+                            if (data_buf & (uint8_t)1) {
+                                data[0] |= 1;
+                            } else {
+                                if (key_info[layer][num].type != 0) {
+                                    if (data_len < 6) {
+                                        data[2 + data_len] = key_info[layer][num].type;
+                                        data_len++;
+                                    }
+                                }
+                                layer = 0;
+                            }
+                        }
                         break;
                     case LWIN:
-                        data[0] |= (1 << 3);
+                        if (layer == 0) {
+                           data[0] |= (1 << 3);
+                        } else {
+                            if (data_buf & (uint8_t)(1 << 3)) {
+                                data[0] |= (1 << 3);
+                            } else {
+                                if (key_info[layer][num].type != 0) {
+                                    if (data_len < 6) {
+                                        data[2 + data_len] = key_info[layer][num].type;
+                                        data_len++;
+                                    }
+                                }
+                                layer = 0;
+                            }
+                        }
                         break;
                     case LALT:
-                        data[0] |= (1 << 2);
+                        if (layer == 0) {
+                           data[0] |= (1 << 2);
+                        } else {
+                            if (data_buf & (uint8_t)(1 << 2)) {
+                                data[0] |= (1 << 2);
+                            } else {
+                                if (key_info[layer][num].type != 0) {
+                                    if (data_len < 6) {
+                                        data[2 + data_len] = key_info[layer][num].type;
+                                        data_len++;
+                                    }
+                                }
+                                layer = 0;
+                            }
+                        }
                         break;
                     case RALT:
-                        data[0] |= (1 << 6);
+                        if (layer == 0) {
+                           data[0] |= (1 << 6);
+                        } else {
+                            if (data_buf & (uint8_t)(1 << 6)) {
+                                data[0] |= (1 << 6);
+                            } else {
+                                if (key_info[layer][num].type != 0) {
+                                    if (data_len < 6) {
+                                        data[2 + data_len] = key_info[layer][num].type;
+                                        data_len++;
+                                    }
+                                }
+                                layer = 0;
+                            }
+                        }
                         break;
-                    case RRCTRL:
-                        data[0] |= (1 << 4);
+                    case RCTRL:
+                        if (layer == 0) {
+                           data[0] |= (1 << 4);
+                        } else {
+                            if (data_buf & (uint8_t)(1 << 4)) {
+                                data[0] |= (1 << 4);
+                            } else {
+                                if (key_info[layer][num].type != 0) {
+                                    if (data_len < 6) {
+                                        data[2 + data_len] = key_info[layer][num].type;
+                                        data_len++;
+                                    }
+                                }
+                                layer = 0;
+                            }
+                        }
+                        break;
+                    case FN:
+                        if (layer == 2) {
+                            if (key_info[layer][FN].type != 0) {
+                                if (data_len < 6) {
+                                    data[2 + data_len] = key_info[layer][FN].type;
+                                    data_len++;
+                                }
+                            }
+                            layer = 0;
+                        }
+                        break;
+                    case PN:
+                        if (layer == 1) {
+                            if (key_info[layer][PN].type != 0) {
+                                if (data_len < 6) {
+                                    data[2 + data_len] = key_info[layer][PN].type;
+                                    data_len++;
+                                }
+                            }
+                            layer = 0;
+                        }
                         break;
                     default:
-                        if (key_info[num].type != 0) {
+                        if (key_info[layer][num].type != 0) {
                             if (data_len < 6) {
-                                data[2 + data_len] = key_info[num].type;
+                                data[2 + data_len] = key_info[layer][num].type;
                                 data_len++;
                             }
                         }
+                        layer = 0;
+                    break;
                 }
-                pr_info("key[\"%s\"] is down\r\n", key_name[key_info[num].type]);
             }
         }
         if (key_down) {
@@ -264,6 +524,7 @@ static void key_task_entry(__maybe_unused void* parameter)
             hid_write_test(data, 8);
             last_is_down = false;
         }
+        data_buf = data[0];
         delay_msec(20);
     }
 }

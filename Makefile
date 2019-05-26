@@ -90,7 +90,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 
 $(TARGET_IMG): $(TARGET_BIN)
 	@echo "CREATE   $(@:$(out-dir)/%=%)"
-	$(PYTHON) scripts/create_img.py $< $(VERSION) $(PATCHLEVEL) $(SUBLEVEL) 1 $@
+	$(Q)$(PYTHON) scripts/create_img.py $< $(VERSION) $(PATCHLEVEL) $(SUBLEVEL) 1 $@
 
 $(TARGET_LIST): $(TARGET_ELF)
 	@echo "OBJDUMP  $(@:$(out-dir)/%=%)"
