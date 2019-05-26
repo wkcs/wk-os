@@ -547,7 +547,7 @@ typedef struct ustorage_csw* ustorage_csw_t;
  */
 /* the stack size of USB thread */
 #ifndef USBD_THREAD_STACK_SZ
-#define USBD_THREAD_STACK_SZ 512
+#define USBD_THREAD_STACK_SZ 1024
 #endif
 
 /* the priority of USB thread */

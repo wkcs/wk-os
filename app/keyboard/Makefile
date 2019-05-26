@@ -8,4 +8,6 @@
 
 obj-y = key_led.o
 
+dir-y = com
+
 

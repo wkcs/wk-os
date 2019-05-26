@@ -12,8 +12,8 @@
 #include <lib/string.h>
 
 struct list_head ready_task_list[MAX_PRIORITY];
-static struct task_struct_t *current_task;
-uint8_t current_priority;
+struct task_struct_t *current_task;
+volatile uint8_t current_priority;
 static uint32_t scheduler_lock_nest;
 
 extern volatile uint8_t interrupt_nest;
@@ -181,7 +181,7 @@ void del_task_to_ready_list(struct task_struct_t *task)
     enable_irq_save(level);
 }
 
-inline struct task_struct_t *get_current_task(void)
+struct task_struct_t *get_current_task(void)
 {
     return current_task;
 }

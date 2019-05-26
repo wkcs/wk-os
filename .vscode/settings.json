@@ -8,6 +8,9 @@
         "stm32f4xx_hal_pcd.h": "c",
         "stm32f1xx_ll_usb.h": "c",
         "stm32f1xx_hal_pcd.h": "c",
-        "init.h": "c"
+        "init.h": "c",
+        "mutex.h": "c",
+        "mm.h": "c",
+        "sch.h": "c"
     }
 }

@@ -6,7 +6,7 @@
 
 #include "keyboard.h"
 
-#define LED_TASK_PRIO       3
+#define LED_TASK_PRIO       16
 #define LED_TASK_STACK_SIZE 256
 #define LED_TASK_TICK       3
 

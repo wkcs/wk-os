@@ -6,4 +6,4 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-obj-y = i2c-core.o
+obj-$(I2C-CORE) = i2c-core.o

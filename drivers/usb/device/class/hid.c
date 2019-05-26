@@ -1,15 +1,15 @@
 #include <wk/task.h>
 #include <wk/msg_queue.h>
 #include <wk/err.h>
+#include <wk/device.h>
 
 #include <drivers/usb_common.h>
 #include <drivers/usb_device.h>
 
 #include "hid.h"
 
-struct hid_s
-{
-    size_t (*write)(struct hid_s *, addr_t, const void *r, size_t);
+struct hid_s {
+    struct device dev;
     struct ufunction *func;
     uep_t ep_in;
     uep_t ep_out;
@@ -18,8 +18,6 @@ struct hid_s
     uint8_t report_buf[MAX_REPORT_SIZE];
     struct msg_q hid_mq;
 };
-
-static struct hid_s *hid_dev;
 
 /* CustomHID_ConfigDescriptor */
 __aligned(4)
@@ -380,15 +378,15 @@ static int _ep_out_handler(ufunction_t func, size_t size)
     struct hid_report report;
     msg_t hid_msg;
     static uint8_t buf[sizeof(report)];
+
     WK_ERROR(func != NULL);
     WK_ERROR(func->device != NULL);
     data = (struct hid_s *) func->user_data;
     hid_msg.addr = (void *)buf;
     hid_msg.len = sizeof(report);
 
-    if(size != 0)
-    {
-        memcpy((void *)&report,(void*)data->ep_out->buffer,size);
+    if (size != 0) {
+        memcpy((void *)&report,(void*)data->ep_out->buffer, size);
         report.size = size-1;
         memcpy((void *)buf, (void *)&report, sizeof(report));
 
@@ -408,7 +406,6 @@ static int _ep_in_handler(ufunction_t func, __always_unused size_t size)
     WK_ERROR(func != NULL);
     WK_ERROR(func->device != NULL);
 
-    pr_info("%s entry\r\n", __func__);
     data = (struct hid_s *) func->user_data;
     /*if(data->parent.tx_complete != NULL)
     {
@@ -586,18 +583,21 @@ static int _hid_descriptor_config(__maybe_unused uhid_comm_desc_t hid, __maybe_u
 
     return 0;
 }
-static size_t _hid_write(struct hid_s *hiddev, addr_t pos, const void *buffer, size_t size)
+static size_t _hid_write(struct device *dev, addr_t pos, const void *buffer, size_t size)
 {
+    struct hid_s *hid_dev;
     struct hid_report report;
-    if (hiddev->func->device->state == USB_STATE_CONFIGURED)
+
+    hid_dev = wk_container_of(dev, struct hid_s, dev);
+    if (hid_dev->func->device->state == USB_STATE_CONFIGURED)
     {
         report.report_id = pos;
         memcpy((void *)report.report,(void *)buffer,size);
         report.size = size;
-        hiddev->ep_in->request.buffer = (void *)&report;
-        hiddev->ep_in->request.size = (size+1) > 64 ? 64 : size+1;
-        hiddev->ep_in->request.req_type = UIO_REQUEST_WRITE;
-        usbd_io_request(hiddev->func->device, hiddev->ep_in, &hiddev->ep_in->request);
+        hid_dev->ep_in->request.buffer = (void *)&report;
+        hid_dev->ep_in->request.size = (size+1) > 64 ? 64 : size+1;
+        hid_dev->ep_in->request.req_type = UIO_REQUEST_WRITE;
+        usbd_io_request(hid_dev->func->device, hid_dev->ep_in, &hid_dev->ep_in->request);
         return size;
     }
 
@@ -630,10 +630,14 @@ static void usb_hid_init(struct ufunction *func)
     struct hid_s *hiddev;
     hiddev = (struct hid_s *)func->user_data;
 
-    hiddev->write = _hid_write;
     hiddev->func = func;
 
-    hid_task = task_create("hidd", hid_task_entry, (void *)hiddev, 512, 20, 20, NULL, NULL);
+    device_init(&hiddev->dev);
+    hiddev->dev.name = "hidd";
+    hiddev->dev.ops.write = _hid_write;
+    device_register(&hiddev->dev);
+
+    hid_task = task_create("hidd", hid_task_entry, (void *)hiddev, 512, 5, 10, NULL, NULL);
     if (hid_task == NULL) {
         pr_err("hid task creat err\r\n");
         return;
@@ -674,7 +678,6 @@ ufunction_t usbd_function_hid_create(udevice_t device)
 
     /* allocate memory for cdc vcom data */
     data = (struct hid_s*)wk_alloc(sizeof(struct hid_s), 0, 0);
-    hid_dev = data;
     memset(data, 0, sizeof(struct hid_s));
     func->user_data = (void*)data;
 
@@ -726,5 +729,8 @@ int usbd_hid_class_register(void)
 
 void hid_write_test(const void *buffer, size_t size)
 {
-    hid_dev->write(hid_dev, 1, buffer, size);
+    struct device *dev;
+
+    dev = device_find_by_name("hidd");
+    dev->ops.write(dev, 1, buffer, size);
 }

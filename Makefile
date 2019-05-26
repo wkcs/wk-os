@@ -6,6 +6,10 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
+VERSION = 1
+PATCHLEVEL = 0
+SUBLEVEL = 6
+
 #打开显示选项
 ifneq ($(V),1)
 	Q := @
@@ -19,13 +23,13 @@ ifndef $(ARCH)
     ARCH := arm
 endif
 
-#ifndef $(BOARD)
-#    BOARD := zj_v3
-#endif
+ifndef $(BOARD)
+    BOARD := keyboard
+endif
 
-#ifndef $(CONFIG)
-#    CONFIG := zj_v3_config
-#endif
+ifndef $(CONFIG)
+    CONFIG := keyboard_config
+endif
 
 dir-y = app
 dir-y += arch
@@ -69,7 +73,7 @@ LDFLAGS += $(LDSCRIPT:%=-T%)
 
 .PHONY: all flash debug clean config size $(obj-all) stflash
 
-all:$(TARGET_LIST) $(TARGET_BIN) $(TARGET_HEX) $(TARGET_ELF) size
+all:$(TARGET_LIST) $(TARGET_BIN) $(TARGET_HEX) $(TARGET_ELF) $(TARGET_IMG) size
 
 size: $(TARGET_ELF)
 	@echo "SIZE     $(<:$(out-dir)/%=%)"
@@ -84,10 +88,13 @@ $(TARGET_BIN): $(TARGET_ELF)
 	@echo "OBJCOPY  $(@:$(out-dir)/%=%)"
 	$(Q)$(OBJCOPY) $<  $@ -Obinary
 
+$(TARGET_IMG): $(TARGET_BIN)
+	@echo "CREATE   $(@:$(out-dir)/%=%)"
+	$(PYTHON) scripts/create_img.py $< $(VERSION) $(PATCHLEVEL) $(SUBLEVEL) 1 $@
+
 $(TARGET_LIST): $(TARGET_ELF)
 	@echo "OBJDUMP  $(@:$(out-dir)/%=%)"
 	$(Q)$(OBJDUMP) -S $< > $@
-
 $(TARGET_ELF):$(obj-all) $(LDSCRIPT)
 	@echo "LD       $(@:$(out-dir)/%=%)"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $(obj-all)

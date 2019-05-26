@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 胡启航<Hu Qihang>
+ * Copyright (C) 2018-2019 胡启航<Hu Qihang>
  *
  * Author: wkcs
  * 
@@ -12,8 +12,11 @@
 #include <wk/list.h>
 #include <wk/of.h>
 #include <wk/mutex.h>
+#include <wk/pid.h>
+#include <wk/mm.h>
 #include <asm/types.h>
 
+#if 0
 struct device;
 struct device_private;
 struct device_driver;
@@ -94,5 +97,41 @@ int dev_register(struct device *dev);
 int dev_unregister(struct device *dev);
 int drv_register(struct device_driver *drv);
 int drv_unregister(struct device_driver *drv);
+
+#endif
+
+extern struct list_head sys_device_list;
+
+struct device;
+struct device_ops;
+
+struct device_ops {
+	int (*init)(struct device *dev);
+    int (*open)(struct device *dev, uint16_t oflag);
+    int (*close)(struct device *dev);
+    size_t (*read)(struct device *dev, addr_t pos, void *buffer, size_t size);
+    size_t (*write)(struct device *dev, addr_t pos, const void *buffer, size_t size);
+    int (*control)(struct device *dev, int cmd, void *args);
+	void (*read_complete)(struct device *dev, size_t size);
+	void (*write_complete)(struct device *dev, const void *buffer);
+};
+
+struct device {
+	const char		  *name;
+	struct device_ops ops;
+	struct mutex	  mutex;
+	struct list_head  list;
+	uint32_t          ref_count;
+
+};
+
+struct device *device_alloc(mm_flag_t flag, wk_pid_t pid);
+int device_free(struct device *dev);
+int device_init(struct device *dev);
+void device_put(struct device *dev);
+void device_inc(struct device *dev);
+int device_register(struct device *dev);
+int device_unregister(struct device *dev);
+struct device *device_find_by_name(const char *name);
 
 #endif

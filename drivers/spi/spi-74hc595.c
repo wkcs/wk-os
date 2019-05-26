@@ -11,6 +11,7 @@
 #include <wk/delay.h>
 #include <wk/cpu.h>
 #include <wk/irq.h>
+#include <wk/device.h>
 #include <init/init.h>
 #include <lib/string.h>
 #include <gpio.h>

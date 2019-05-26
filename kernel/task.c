@@ -253,8 +253,9 @@ int task_resume(struct task_struct_t *task)
     }
 
     if (task->status != TASK_WAIT) {
-        pr_err("%s[%d]:task status is not TASK_WAIT\r\n", __func__, __LINE__);
-        return -1;
+        pr_err("%s[%d]:task(=%s) status(=%d) is not TASK_WAIT\r\n", __func__, __LINE__, task->name, task->status);
+        //return -1;
+        task->status = TASK_WAIT;
     }
 
     level = disable_irq_save();

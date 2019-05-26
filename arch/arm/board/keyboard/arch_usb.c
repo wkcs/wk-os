@@ -7,13 +7,15 @@
  */
 
 #include <wk/irq.h>
+#include <wk/err.h>
+#include <wk/device.h>
 #include <drivers/usb_device.h>
 #include <lib/string.h>
 #include "board.h"
+
 static PCD_HandleTypeDef _stm_pcd;
 static struct udcd _stm_udc;
-static struct ep_id _ep_pool[] =
-{
+static struct ep_id _ep_pool[] = {
     {0x0,  USB_EP_ATTR_CONTROL,     USB_DIR_INOUT,  64, ID_ASSIGNED  },
     {0x1,  USB_EP_ATTR_BULK,        USB_DIR_IN,     64, ID_UNASSIGNED},
     {0x1,  USB_EP_ATTR_BULK,        USB_DIR_OUT,    64, ID_UNASSIGNED},
@@ -250,6 +252,9 @@ static const struct udcd_ops _udc_ops =
 int stm_usbd_register(void)
 {
     memset((void *)&_stm_udc, 0, sizeof(struct udcd));
+    device_init(&_stm_udc.dev);
+    _stm_udc.dev.name = "usbd";
+    device_register(&_stm_udc.dev);
     _stm_udc.init = _init;
     _stm_udc.ops = &_udc_ops;
     /* Register endpoint infomation */

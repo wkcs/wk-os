@@ -78,16 +78,11 @@ static int __mm_free(struct mm_list_t *list)
 
     num = list->block_num;
 
-    /*list->pid = 0;
-    list->size = 0;
-    list->block_num = 0;
-    list->flag = 0;*/
-
+    list_del(&list->list);
     __mm_init((addr_t)list, (addr_t)list + num * MM_BLOCK_SIZE, &head_new);
     if (list_empty(&head_new)) {
         return -1;
     }
-
 
     list_splice(&head_new, head_main);
 
@@ -119,7 +114,7 @@ int wk_free(void *addr)
         return -1;
     }
 
-    list_temp = (struct mm_list_t *)((addr_t)addr - sizeof(struct mm_list_t));
+    list_temp = (struct mm_list_t *)((addr_t)addr - sizeof(*list_temp));
 
     level = disable_irq_save();
 

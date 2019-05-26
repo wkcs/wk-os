@@ -5,6 +5,8 @@
 
 #include <wk/kernel.h>
 #include <wk/mm.h>
+#include <wk/kernel.h>
+#include <wk/device.h>
 #include <lib/string.h>
 #include <drivers/usb_common.h>
 
@@ -28,7 +30,11 @@
 #define USB_BCD_VERSION             0x0200   /* USB 2.0 */
 #define EP0_IN_ADDR                 0x80
 #define EP0_OUT_ADDR                0x00
-#define EP_HANDLER(ep, func, size)  WK_ERROR(ep != NULL); ep->handler(func, size)
+#define EP_HANDLER(ep, func, size) \
+    do { \
+        WK_ERROR(ep != NULL); \
+        ep->handler(func, size); \
+    } while(0)
 #define EP_ADDRESS(ep)              ep->ep_desc->bEndpointAddress
 #define EP_MAXPACKET(ep)            ep->ep_desc->wMaxPacketSize
 #define FUNC_ENABLE(func)           do{                                             \
@@ -107,7 +113,7 @@ struct uendpoint
     struct uio_request request;
     uint8_t* buffer;
     bool stalled;
-    struct ep_id* id;
+    struct ep_id *id;
     udep_handler_t handler;
     int (*rx_indicate)(struct udevice* dev, size_t size);
 };
@@ -115,6 +121,7 @@ typedef struct uendpoint* uep_t;
 
 struct udcd
 {
+    struct device dev;
     int (*init)(void);
     const struct udcd_ops* ops;
     struct uendpoint ep0;

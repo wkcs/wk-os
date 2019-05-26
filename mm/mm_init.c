@@ -22,7 +22,7 @@ void __mm_init(addr_t start, addr_t end, struct list_head *head)
     if ((end - start) % MM_BLOCK_SIZE != 0)
         return;
     
-    for (addr = start + MM_BLOCK_SIZE; addr < end; addr += MM_BLOCK_SIZE)
+    for (addr = start; addr < end; addr += MM_BLOCK_SIZE)
     {
         list = (struct mm_list_t *)addr;
         list->pid = 0;

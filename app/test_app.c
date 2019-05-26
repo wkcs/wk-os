@@ -6,13 +6,15 @@
 #include <drivers/usb_device.h>
 #include "arch_usb.h"
 
+extern void winusb_read_test(void);
+extern void winusb_write_test(void);
 static void test_app_entry(__maybe_unused void* parameter)
 {
-    //__i2c_remove();
-    while (1)
-    {
-        pr_info("test app running\r\n");
-        delay_sec(1);
+    delay_sec(20);
+    while (1) {
+        //winusb_write_test();
+        //pr_info("test app running\r\n");
+        delay_msec(10);
     }
 }
 

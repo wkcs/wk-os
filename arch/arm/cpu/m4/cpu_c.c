@@ -10,6 +10,7 @@
 #include <wk/task.h>
 #include <wk/irq.h>
 #include <wk/clk.h>
+#include <cmd/cmd.h>
 
 #include <board.h>
 
@@ -51,6 +52,16 @@ struct cpu_dump_type {
     struct stack_frame stack_frame;
 };
 
+static void reboot_to_bootloader(void)
+{
+    uint8_t argc = 1;
+    char *argv[1];
+
+    argv[0] = "bootloader";
+
+    cmd_run("reboot", argc, argv);
+}
+
 addr_t *stack_init(void *task_entry, void *parameter, addr_t *stack_addr, void *task_exit)
 {
     struct stack_frame *stack_frame;
@@ -83,8 +94,7 @@ addr_t *stack_init(void *task_entry, void *parameter, addr_t *stack_addr, void *
 void NMI_Handler(void)
 {
     pr_fatal("%s entry\r\n", __func__);
-    while(1) {
-    }
+    reboot_to_bootloader();
 }
  
 void cpu_hard_fault(struct cpu_dump_type *cpu_dump_type)
@@ -115,16 +125,14 @@ void cpu_hard_fault(struct cpu_dump_type *cpu_dump_type)
     }
 
     dump_all_task();
-
-  while (1);
+    reboot_to_bootloader();
 }
  
 void MemManage_Handler(void)
 {
     pr_fatal("%s entry\r\n", __func__);
     /* Go to infinite loop when Memory Manage exception occurs */
-    while (1) {
-    }
+    reboot_to_bootloader();
 }
 
  
@@ -132,16 +140,14 @@ void BusFault_Handler(void)
 {
     pr_fatal("%s entry\r\n", __func__);
     /* Go to infinite loop when Bus Fault exception occurs */
-    while (1) {
-    }
+    reboot_to_bootloader();
 }
  
 void UsageFault_Handler(void)
 {
     pr_fatal("%s entry\r\n", __func__);
     /* Go to infinite loop when Usage Fault exception occurs */
-    while (1) {
-    }
+    reboot_to_bootloader();
 }
  
 void SVC_Handler(void)
@@ -167,27 +173,26 @@ __init void asm_cpu_init(void)
 void cpu_delay_usec(uint32_t usec)
 {
     register uint32_t ticks;
-	register uint32_t told, tnow;
-    register uint32_t tcnt=0;
-	register uint32_t reload = SysTick->LOAD;
+    register uint32_t told, tnow;
+    register uint32_t tcnt = 0;
+    register uint32_t reload = SysTick->LOAD;
 
-	ticks = usec * sys_tick_num_by_us;
-	tcnt = 0;
+    ticks = usec * sys_tick_num_by_us;
+    tcnt = 0;
 
     told = SysTick->VAL;
-	while(1) {
-		tnow = SysTick->VAL;	
-		if (tnow != told) {	    
-			if (tnow < told)
+    while (1) {
+        tnow = SysTick->VAL;
+        if (tnow != told) {
+            if (tnow < told)
                 tcnt += told - tnow;
-			else 
-                tcnt += reload - tnow + told;	    
-			told = tnow;
-			if (tcnt >= ticks) {
+            else
+                tcnt += reload - tnow + told;
+            told = tnow;
+            if (tcnt >= ticks)
                 break;
-            }
-		}  
-	}
+        }
+    }
 }
 
 void SysTick_Handler(void)

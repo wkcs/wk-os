@@ -14,7 +14,7 @@
 #include <lib/stdio.h>
 #include <lib/string.h>
 
-static const char task_show_help[] = "Usage: task_show\r\n    show all task";
+static const char task_show_help[] = "Usage: ps\r\n    show all task";
 
 static void show_all_task(void)
 {
@@ -36,7 +36,7 @@ static void show_all_task(void)
     sch_unlock();
 }
 
-int task_show_main(const uint8_t argc, char *argv[])
+int ps_main(const uint8_t argc, char *argv[])
 {
     if (argc > 1) {
         printf("Parameter error\r\n");
@@ -60,5 +60,5 @@ int task_show_main(const uint8_t argc, char *argv[])
     return 0;
 }
 
-cmd_init("task_show", task_show_main);
+cmd_init("ps", ps_main);
 

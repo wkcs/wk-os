@@ -6,8 +6,6 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-obj-y = bus.o
-obj-y += device.o
-obj-y += driver.o
+obj-y = device.o
 
 

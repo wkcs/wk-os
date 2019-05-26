@@ -4,7 +4,7 @@
 #include <drivers/usb_common.h>
 #include <drivers/usb_device.h>
 
-static struct list_head device_list;
+static struct list_head usb_device_list;
 
 static size_t usbd_ep_write(udevice_t device, uep_t ep, void *buffer, size_t size);
 static size_t usbd_ep_read_prepare(udevice_t device, uep_t ep, void *buffer, size_t size);
@@ -705,7 +705,8 @@ static int _vendor_request(udevice_t device, ureq_t setup)
     }
     return 0;
 }
-static int _dump_setup_packet(ureq_t setup)
+
+static __maybe_unused int _dump_setup_packet(ureq_t setup)
 {
     pr_info("[\r\n");
     pr_info("  setup_request : 0x%x\r\n",
@@ -733,7 +734,7 @@ static int _setup_request(udevice_t device, ureq_t setup)
     WK_ERROR(device != NULL);
     WK_ERROR(setup != NULL);
 
-    _dump_setup_packet(setup);
+    //_dump_setup_packet(setup);
 
     switch((setup->request_type & USB_REQ_TYPE_MASK))
     {
@@ -773,63 +774,41 @@ static int _data_notify(udevice_t device, struct ep_msg* ep_msg)
     WK_ERROR(ep_msg != NULL);
     
     if (device->state != USB_STATE_CONFIGURED)
-    {
         return -1;
-    }
     
     ep = usbd_find_endpoint(device, &func, ep_msg->ep_addr);
-    if(ep == NULL)
-    {        
+    if (ep == NULL) {        
         pr_err("invalid endpoint\r\n");
         return -1;
     }
 
-    if(EP_ADDRESS(ep) & USB_DIR_IN)
-    {
+    if (EP_ADDRESS(ep) & USB_DIR_IN) {
         size = ep_msg->size;
-        if(ep->request.remain_size >= EP_MAXPACKET(ep))
-        {
+        if(ep->request.remain_size >= EP_MAXPACKET(ep)) {
             dcd_ep_write(device->dcd, EP_ADDRESS(ep), ep->request.buffer, EP_MAXPACKET(ep));
             ep->request.remain_size -= EP_MAXPACKET(ep);
             ep->request.buffer += EP_MAXPACKET(ep);     
-        }
-        else if(ep->request.remain_size > 0)
-        {
+        } else if(ep->request.remain_size > 0) {
             dcd_ep_write(device->dcd, EP_ADDRESS(ep), ep->request.buffer, ep->request.remain_size);
             ep->request.remain_size = 0;
-        }
-        else
-        {
+        } else {
             EP_HANDLER(ep, func, size);
         }
-    }
-    else
-    {
+    } else {
         size = ep_msg->size;
         if(ep->request.remain_size == 0)
-        {
             return 0;            
-        }
-            
         if(size == 0)
-        {
             size = dcd_ep_read(device->dcd, EP_ADDRESS(ep), ep->request.buffer);
-        }
         ep->request.remain_size -= size;
         ep->request.buffer += size;
 
-        if(ep->request.req_type == UIO_REQUEST_READ_BEST)
-        {
+        if (ep->request.req_type == UIO_REQUEST_READ_BEST)
             EP_HANDLER(ep, func, size);
-        }
-        else if(ep->request.remain_size == 0)
-        {
+        else if (ep->request.remain_size == 0)
             EP_HANDLER(ep, func, ep->request.size);
-        }
         else
-        {
             dcd_ep_read_prepare(device->dcd, EP_ADDRESS(ep), ep->request.buffer, ep->request.remain_size > EP_MAXPACKET(ep) ? EP_MAXPACKET(ep) : ep->request.remain_size);
-        }
     }
 
     return 0;
@@ -958,7 +937,7 @@ static size_t usbd_ep_write(udevice_t device, uep_t ep, __maybe_unused void *buf
 
 static size_t usbd_ep_read_prepare(udevice_t device, uep_t ep, void *buffer, size_t size)
 {
-    WK_ERROR(device != NULL);	
+    WK_ERROR(device != NULL);
     WK_ERROR(device->dcd != NULL);
     WK_ERROR(ep != NULL);    
     WK_ERROR(buffer != NULL);
@@ -982,8 +961,7 @@ udevice_t usbd_device_new(void)
 
     /* allocate memory for the object */
     udevice = wk_alloc(sizeof(struct udevice), 0, 0);
-    if(udevice == NULL)
-    {
+    if (udevice == NULL) {
         pr_err("alloc memery failed\r\n");
         return NULL;
     }
@@ -993,7 +971,7 @@ udevice_t usbd_device_new(void)
     INIT_LIST_HEAD(&udevice->cfg_list);
 
     /* insert the device object to device list */
-    list_add(&udevice->list, &device_list);
+    list_add(&udevice->list, &usb_device_list);
 
     return udevice;
 }
@@ -1096,8 +1074,7 @@ uconfig_t usbd_config_new(void)
 
     /* allocate memory for the object */
     cfg = wk_alloc(sizeof(struct uconfig), 0, 0);
-    if(cfg == NULL)
-    {
+    if (cfg == NULL) {
         pr_err("alloc memery failed\r\n");
         return NULL;
     }
@@ -1135,8 +1112,7 @@ uintf_t usbd_interface_new(udevice_t device, uintf_handler_t handler)
 
     /* allocate memory for the object */
     intf = (uintf_t)wk_alloc(sizeof(struct uinterface), 0, 0);
-    if(intf == NULL)
-    {
+    if (intf == NULL) {
         pr_err("alloc memery failed\r\n");
         return NULL;
     }
@@ -1300,7 +1276,7 @@ udevice_t usbd_find_device(udcd_t dcd)
     WK_ERROR(dcd != NULL);
 
     /* search a device in the the device list */
-    for (node = device_list.next; node != &device_list; node = node->next)
+    for (node = usb_device_list.next; node != &usb_device_list; node = node->next)
     {
         device = (udevice_t)list_entry(node, struct udevice, list);
         if(device->dcd == dcd) return device;
@@ -1687,10 +1663,8 @@ size_t usbd_io_request(udevice_t device, uep_t ep, uio_request_t req)
     WK_ERROR(device != NULL);
     WK_ERROR(req != NULL);
 
-    if(ep->stalled == false)
-    {
-        switch(req->req_type)
-        {
+    if (ep->stalled == false) {
+        switch (req->req_type) {
         case UIO_REQUEST_READ_BEST:
         case UIO_REQUEST_READ_FULL:
             ep->request.remain_size = ep->request.size;
@@ -1704,9 +1678,7 @@ size_t usbd_io_request(udevice_t device, uep_t ep, uio_request_t req)
             pr_err("unknown request type\r\n");
             break;
         }
-    }
-    else
-    {
+    } else {
         list_add(&req->list, &ep->request_list);
         pr_info("suspend a request\r\n");
     }            
@@ -1726,12 +1698,9 @@ int usbd_set_feature(udevice_t device, uint16_t value, uint16_t index)
 {
     WK_ERROR(device != NULL);
 
-    if (value == USB_FEATURE_DEV_REMOTE_WAKEUP)
-    {
+    if (value == USB_FEATURE_DEV_REMOTE_WAKEUP) {
         pr_info("set feature remote wakeup\r\n");
-    }
-    else if (value == USB_FEATURE_ENDPOINT_HALT)
-    {
+    } else if (value == USB_FEATURE_ENDPOINT_HALT) {
         pr_info("set feature stall\r\n");    
         dcd_ep_set_stall(device->dcd, (uint32_t)(index & 0xFF));
     }
@@ -1751,12 +1720,9 @@ int usbd_clear_feature(udevice_t device, uint16_t value, uint16_t index)
 {
     WK_ERROR(device != NULL);
 
-    if (value == USB_FEATURE_DEV_REMOTE_WAKEUP)
-    {
+    if (value == USB_FEATURE_DEV_REMOTE_WAKEUP) {
         pr_info("clear feature remote wakeup\r\n");
-    }
-    else if (value == USB_FEATURE_ENDPOINT_HALT)
-    {
+    } else if (value == USB_FEATURE_ENDPOINT_HALT) {
         pr_info("clear feature stall\r\n");
         dcd_ep_clear_stall(device->dcd, (uint32_t)(index & 0xFF));
     }
@@ -1788,9 +1754,7 @@ int usbd_ep_set_stall(udevice_t device, uep_t ep)
 
     ret = dcd_ep_set_stall(device->dcd, EP_ADDRESS(ep));
     if(ret == 0)
-    {
         ep->stalled = true;
-    }
     
     return ret;
 }
@@ -1805,9 +1769,7 @@ int usbd_ep_clear_stall(udevice_t device, uep_t ep)
 
     ret = dcd_ep_clear_stall(device->dcd, EP_ADDRESS(ep));
     if(ret == 0)
-    {
         ep->stalled = false;
-    }
     
     return ret;
 }
@@ -1824,9 +1786,9 @@ static int usbd_ep_assign(udevice_t device, uep_t ep)
 
     while(device->dcd->ep_pool[i].addr != 0xFF)
     {
-        if(device->dcd->ep_pool[i].status == ID_UNASSIGNED && 
-            ep->ep_desc->bmAttributes == device->dcd->ep_pool[i].type && (EP_ADDRESS(ep) & 0x80) == device->dcd->ep_pool[i].dir)
-        {
+        if (device->dcd->ep_pool[i].status == ID_UNASSIGNED && 
+            ep->ep_desc->bmAttributes == device->dcd->ep_pool[i].type &&
+            (EP_ADDRESS(ep) & 0x80) == device->dcd->ep_pool[i].dir) {
             EP_ADDRESS(ep) |= device->dcd->ep_pool[i].addr;
             ep->id = &device->dcd->ep_pool[i];
             device->dcd->ep_pool[i].status = ID_ASSIGNED;
@@ -1834,7 +1796,6 @@ static int usbd_ep_assign(udevice_t device, uep_t ep)
             pr_info("assigned %d\r\n", device->dcd->ep_pool[i].addr);  
             return 0;
         }
-        
         i++;
     }
     
@@ -1854,25 +1815,21 @@ int usbd_ep_unassign(udevice_t device, uep_t ep)
     return 0;
 }
 
-int usbd_ep0_setup_handler(udcd_t dcd, struct urequest* setup)
+int usbd_ep0_setup_handler(udcd_t dcd, struct urequest *setup)
 {
     struct udev_msg msg;
     size_t size;
 
     WK_ERROR(dcd != NULL);
 
-    if(setup == NULL)
-    {
+    if (setup == NULL) {
         size = dcd_ep_read(dcd, EP0_OUT_ADDR, (void*)&msg.content.setup);
-        if(size != sizeof(struct urequest))
-        {
+        if (size != sizeof(*setup)) {
             pr_err("read setup packet error\r\n");
             return -1;
         }
-    }
-    else
-    {
-        memcpy((void*)&msg.content.setup, (void*)setup, sizeof(struct urequest));
+    } else {
+        memcpy((void*)&msg.content.setup, (void*)setup, sizeof(*setup));
     }    
     
     msg.type = USB_MSG_SETUP_NOTIFY;
@@ -2062,13 +2019,9 @@ size_t usbd_ep0_read(udevice_t device, void *buffer, size_t size,
     ep0->request.remain_size = size;
     ep0->rx_indicate = rx_ind;
     if(size >= ep0->id->maxpacket)
-    {
         read_size = ep0->id->maxpacket;
-    }
     else
-    {
         read_size = size;
-    }
     device->dcd->stage = STAGE_DOUT;
     dcd_ep_read_prepare(device->dcd, EP0_OUT_ADDR, buffer, read_size);
 
@@ -2087,28 +2040,26 @@ static struct msg_q usb_mq;
  */
 static void usbd_task_entry(__maybe_unused void* parameter)
 {
-    while(1)
+    while (1)
     {
         msg_t usb_msg;
         struct udev_msg msg;
         udevice_t device;
 
         /* receive message */
-        if(msg_q_recv(&usb_mq, &usb_msg) < 0)
+        if (msg_q_recv(&usb_mq, &usb_msg) < 0)
             continue;
         memcpy((void*)&msg, usb_msg.addr, usb_msg.len);
 
         device = usbd_find_device(msg.dcd);
-        if(device == NULL)
-        {
+        if (device == NULL) {
             pr_err("invalid usb device\r\n");
             continue;
         }
 
-        pr_info("message type %d\r\n", msg.type);
+        //pr_info("message type %d\r\n", msg.type);
         
-        switch (msg.type)
-        {
+        switch (msg.type) {
         case USB_MSG_SOF:
             _sof_notify(device);
             break;
@@ -2151,17 +2102,17 @@ static void usbd_task_entry(__maybe_unused void* parameter)
  *
  * @return the error code, 0 on successfully.
  */
-int usbd_event_signal(struct udev_msg* msg)
+int usbd_event_signal(struct udev_msg *msg)
 {
     msg_t usb_msg;
-    static uint8_t buf[sizeof(struct udev_msg)];
+    static uint8_t buf[sizeof(*msg)];
 
     WK_ERROR(msg != NULL);
 
     usb_msg.addr = (void *)buf;
-    usb_msg.len = sizeof(struct udev_msg);
+    usb_msg.len = sizeof(*msg);
 
-    memcpy((void*)buf, (void*)msg, sizeof(struct udev_msg));
+    memcpy((void*)buf, (void*)msg, sizeof(*msg));
 
     /* send message to usb message queue */
     return msg_q_send(&usb_mq, &usb_msg);
@@ -2178,10 +2129,10 @@ struct task_struct_t *usb_task;
  */
 int usbd_core_init(void)
 {
-    INIT_LIST_HEAD(&device_list);
+    INIT_LIST_HEAD(&usb_device_list);
 
     /* create usb device task */
-    usb_task = task_create("usbd", usbd_task_entry, NULL, USBD_THREAD_STACK_SZ, 15, 20, NULL, NULL);
+    usb_task = task_create("usbd", usbd_task_entry, NULL, USBD_THREAD_STACK_SZ, 5, 10, NULL, NULL);
 
     /* create an usb message queue */
     __msg_q_init(&usb_mq, "usbd", usb_task);
