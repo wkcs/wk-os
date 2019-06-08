@@ -1,0 +1,16 @@
+*.map
+*.elf
+*.bin
+*.hex
+*.list
+*.size
+debug
+out
+*~
+*.o
+*.a
+*.d
+*.ipch
+.config
+.patch
+.vscode
