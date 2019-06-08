@@ -140,9 +140,9 @@ int stm32_pwm_init(void)
         GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 	  
-	TIM_TimeBaseStructure.TIM_Prescaler = 0;
+	TIM_TimeBaseStructure.TIM_Prescaler = 4;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseStructure.TIM_Period = 511;
+	TIM_TimeBaseStructure.TIM_Period = 255;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
 	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseStructure);
     TIM_TimeBaseInit(TIM3,&TIM_TimeBaseStructure);
