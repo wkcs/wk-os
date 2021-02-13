@@ -1,3 +1,5 @@
+#include <autocfg.h>
+
 /* Entry Point */
 ENTRY(reset_handler)
 
@@ -11,8 +13,11 @@ _Min_Stack_Size = 0x200; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
+#ifdef CONFIG_SUPPORT_BOOTLOADER
     FLASH (rx)     : ORIGIN = 0x08008000, LENGTH = 224K
-    //FLASH (rx)     : ORIGIN = 0x08000000, LENGTH = 224K
+#else
+    FLASH (rx)     : ORIGIN = 0x08000000, LENGTH = 224K
+#endif
     RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 64K
 }
 

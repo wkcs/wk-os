@@ -12,6 +12,7 @@
 #include <wk/task.h>
 #include <wk/sch.h>
 #include <wk/timer.h>
+#include <lib/string.h>
 
 /*分配一个信号量*/
 sem_t *sem_alloc(uint8_t init_num, wk_pid_t pid)
@@ -56,7 +57,7 @@ void sem_get(sem_t *sem)
     struct task_struct_t *task = get_current_task();
 
     if (task->current_priority == MAX_PRIORITY - 1) {
-        //pr_err("idle task can't use sem\r\n");
+        pr_err("idle task can't use sem\r\n");
         return;
     }
 
@@ -80,7 +81,7 @@ int sem_get_timeout(sem_t *sem, uint32_t timedout)
 
     if (task->current_priority == MAX_PRIORITY - 1) {
         pr_err("idle task can't use sem\r\n");
-        //return -EINVAL;
+        return -EINVAL;
     }
 
     if (sem->count > 0) {
@@ -90,12 +91,10 @@ int sem_get_timeout(sem_t *sem, uint32_t timedout)
         return 0;
     }
 
-    __sem_get(sem);
-    if (timedout == 0) {
+    if (timedout == 0)
         return -EBUSY;
-    }
-    if (task->current_priority == 31)
-            pr_err("%s[%d]: hang idle\r\n", __func__, __LINE__);
+
+    __sem_get(sem);
     task_hang(task);
     timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &timedout);
     timer_start(&task->timer);
@@ -104,7 +103,6 @@ int sem_get_timeout(sem_t *sem, uint32_t timedout)
     if (task->flag == -ETIMEDOUT) {
         level = disable_irq_save();
         task->flag = 0;
-        list_del(&task->wait_list);
         enable_irq_save(level);
         return -ETIMEDOUT;
     }

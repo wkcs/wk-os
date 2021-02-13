@@ -69,7 +69,11 @@ include arch/$(ARCH)/board/$(BOARD)/Makefile.config
 OOCD		:= openocd
 OOCD_INTERFACE	:= flossjtag
 
-LDFLAGS += $(LDSCRIPT:%=-T%)
+LDSCRIPT_S := $(filter %.S,$(LDSCRIPT))
+LDSCRIPT_S := $(LDSCRIPT_S:%.S=$(out-dir)/%)
+LDSCRIPT_LD := $(filter-out %.S,$(LDSCRIPT))
+LDSCRIPT_LD := $(LDSCRIPT_LD:%=$(out-dir)/%)
+LDFLAGS += $(LDSCRIPT:%.S=-T$(out-dir)/%)
 
 .PHONY: all flash debug clean config size $(obj-all) stflash
 
@@ -90,16 +94,26 @@ $(TARGET_BIN): $(TARGET_ELF)
 
 $(TARGET_IMG): $(TARGET_BIN)
 	@echo "CREATE   $(@:$(out-dir)/%=%)"
+	$(Q)-$(RM) $@
 	$(Q)$(PYTHON) scripts/create_img.py $< $(VERSION) $(PATCHLEVEL) $(SUBLEVEL) 1 $@
 
 $(TARGET_LIST): $(TARGET_ELF)
 	@echo "OBJDUMP  $(@:$(out-dir)/%=%)"
 	$(Q)$(OBJDUMP) -S $< > $@
-$(TARGET_ELF):$(obj-all) $(LDSCRIPT)
+$(TARGET_ELF): $(obj-all) $(LDSCRIPT_S) $(LDSCRIPT_LD)
 	@echo "LD       $(@:$(out-dir)/%=%)"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $(obj-all)
 
-$(obj-all): $(obj-dir) .config
+$(LDSCRIPT_LD): $(out-dir)/%:%
+	@echo "CP       $(notdir $@)"
+	$(Q)cp $< $@
+
+
+$(LDSCRIPT_S): $(out-dir)/%:%.S
+	@echo "E        $(notdir $@)"
+	$(Q)$(CC) -E $(INC_DIR) $(DEFINES) -P -o $@ $<
+
+$(obj-all): $(obj-dir) .config include/autocfg.h
 	$(Q)$(MAKE) $(N) -f scripts/Makefile.build dir=$(@:$(out-dir)/%/$(notdir $@)=%) \
 		out-dir=$(out-dir) Q=$(Q) N=$(N) ARCH=$(ARCH) BOARD=$(BOARD) \
 		TARGET=$(notdir $@) built-in.o
@@ -130,11 +144,14 @@ debug: $(TARGET_ELF)
 	$(Q)$(GDB) -iex 'target extended | $(OOCD) $(OOCDFLAGS) -c "gdb_port pipe"' \
 	-iex 'monitor reset halt' -ex 'load' -ex 'break wkos_start' -ex 'c' $<
 
-config:
+config: $(obj-dir)
 	@echo "write to .config"
 	$(Q)cat arch/$(ARCH)/config/$(CONFIG) > .config
+	$(Q)$(PYTHON) scripts/autocfg.py .config include/autocfg.h
+	$(Q)cp $(OOCDCFG) $(out-dir)/
 
 clean:
 	$(Q)-$(RM) $(out-dir)
 	$(Q)-$(RM) .config
+	$(Q)-$(RM) inclue/autocfg.h
 	@echo "clean done"

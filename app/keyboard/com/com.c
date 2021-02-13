@@ -1,4 +1,5 @@
 #include <wk/task.h>
+#include <wk/sch.h>
 #include <wk/cpu.h>
 #include <wk/delay.h>
 #include <wk/err.h>
@@ -11,7 +12,7 @@
 #include "com.h"
 
 #define COM_TASK_PRIO       22
-#define COM_TASK_STACK_SIZE 512
+#define COM_TASK_STACK_SIZE 2048
 #define COM_TASK_TICK       10
 
 static struct task_struct_t *com_task;
@@ -27,12 +28,12 @@ struct com_data *com_data;
 
 void com_read_complete(__maybe_unused struct device *dev, __maybe_unused size_t size)
 {
-    //pr_info("%s entry\r\n", __func__);
+    // pr_info("%s entry\r\n", __func__);
     sem_send(com_data->read_sem, 1);
 }
 void com_write_complete(__maybe_unused struct device *dev, __maybe_unused const void *buffer)
 {
-    //pr_info("%s entry\r\n", __func__);
+    // pr_info("%s entry\r\n", __func__);
     sem_send(com_data->write_sem, 1);
 }
 
@@ -50,7 +51,7 @@ int com_read_data(uint8_t *buf, size_t size)
     ret = sem_get_timeout(com_data->read_sem, sec_to_tick(2));
     if (ret != 0) {
         //pr_err("winusb read data timedout\r\n");
-        return -ETIMEDOUT;
+        return -ret;
     }
 
     return 0;
@@ -70,16 +71,18 @@ int com_write_data(const uint8_t *buf, size_t size)
     return 0;
 }
 
-int com_send_ack(uint32_t val, uint8_t end)
+int com_send_ack(bool err)
 {
     int ret;
     struct com_cmd_package cmd_ack_pkg;
 
     cmd_ack_pkg.type = COM_ACK_PKG;
-    cmd_ack_pkg.data_type = DATA0;
+    if (err)
+        cmd_ack_pkg.data_type = DATA_ERR;
+    else
+        cmd_ack_pkg.data_type = DATA0;
     cmd_ack_pkg.index = 0;
-    cmd_ack_pkg.end = end;
-    cmd_ack_pkg.val = val;
+    cmd_ack_pkg.size = 0;
     ret = com_write_data((uint8_t *)&cmd_ack_pkg, sizeof(cmd_ack_pkg));
     if (ret != 0)
         pr_err("send ack timedout\r\n");
@@ -87,7 +90,7 @@ int com_send_ack(uint32_t val, uint8_t end)
     return ret;
 }
 
-int com_wait_ack(uint32_t *size)
+int com_wait_ack(void)
 {
     int ret;
     struct com_cmd_package cmd_ack_pkg;
@@ -102,8 +105,6 @@ int com_wait_ack(uint32_t *size)
         pr_err("ack package err\r\n");
         return -EINVAL;
     }
-    if (size !=NULL)
-        *size = cmd_ack_pkg.val;
 
     return 0;
 }
@@ -112,6 +113,8 @@ static void com_task_entry(__maybe_unused void* parameter)
 {
     int ret;
     struct com_cmd_package cmd_pkg;
+    uint8_t *data_buf = NULL;
+    static uint8_t data_type;
 
     flash_dev = device_find_by_name("spi-flash");
     if (flash_dev == NULL) {
@@ -121,30 +124,68 @@ static void com_task_entry(__maybe_unused void* parameter)
 
     while (1) {
         ret = com_read_data((uint8_t *)&cmd_pkg, sizeof(cmd_pkg));
-        if (ret != 0)
+        if (ret != 0) {
             continue;
-        pr_info("get com package ok, type = %d\r\n", cmd_pkg.type);
+        }
+        pr_info("get com package ok, type=%d, size=%d\r\n", cmd_pkg.type, cmd_pkg.size);
+        if (cmd_pkg.size != 0) {
+            data_buf = wk_alloc(cmd_pkg.size, 0, get_current_task()->pid);
+            if (data_buf == NULL) {
+                pr_info("can't alloc data buf\r\n");
+                continue;
+            }
+            ret = com_read_data(data_buf, cmd_pkg.size);
+            if (ret != 0) {
+                pr_err("can't get pkg data, rc=%d\r\n", ret);
+                continue;
+            }
+        }
         switch(cmd_pkg.type) {
             case COM_HEART_PKG:
-                com_send_ack(0, PKG_END);
+                com_send_ack(false);
+                data_type = DATA0;
                 break;
             case COM_SET_CONFIG_PKG:
                 pr_info("set config\r\n");
+                data_type = DATA0;
                 break;
             case COM_GET_CONFIG_PKG:
                 pr_info("get config\r\n");
+                data_type = DATA0;
                 break;
             case COM_GET_VERSION_PKG:
                 com_get_version();
+                data_type = DATA0;
                 break;
             case COM_DOWNLOAD_PKG:
-                com_download_img(&cmd_pkg);
+                switch (cmd_pkg.data_type) {
+                case DATA0:
+                    if (data_type != DATA0)
+                        pr_err("data type is error, type=%d, need=%d\r\n", cmd_pkg.data_type, data_type);
+                    else
+                        data_type = DATA1;
+                    break;
+                case DATA1:
+                    if (data_type != DATA1)
+                        pr_err("data type is error, type=%d, need=%d\r\n", cmd_pkg.data_type, data_type);
+                    else
+                        data_type = DATA0;
+                    break;
+                default:
+                    pr_err("data type is error, type=%d, need=%d\r\n", cmd_pkg.data_type, data_type);
+                    goto out;
+                }
+                com_download_img(data_buf, cmd_pkg.size, cmd_pkg.index);
+                break;
+            case COM_DATA_PKG:
                 break;
             default:
                 pr_err("unknown package(%x)\r\n", cmd_pkg.type);
                 break;
         }
-        delay_msec(10);
+out:
+        wk_free(data_buf);
+        //delay_msec(10);
     }
 }
 
@@ -193,7 +234,7 @@ int com_task_init(void)
     com_data->dev->ops.write_complete = com_write_complete;
 
     task_ready(com_task);
-    
+
     return 0;
 sem_err:
     wk_free((void *)com);

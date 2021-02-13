@@ -36,7 +36,7 @@
 #define KEY_Y14 PCin(13)
 
 #define KEY_TASK_PRIO       6
-#define KEY_TASK_STACK_SIZE 512
+#define KEY_TASK_STACK_SIZE 1024
 #define KEY_TASK_TICK       3
 
 #define KEY_UP   0

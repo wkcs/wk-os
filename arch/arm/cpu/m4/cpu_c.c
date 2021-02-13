@@ -125,7 +125,8 @@ void cpu_hard_fault(struct cpu_dump_type *cpu_dump_type)
     }
 
     dump_all_task();
-    reboot_to_bootloader();
+    //reboot_to_bootloader();
+    while(1);
 }
  
 void MemManage_Handler(void)

@@ -209,16 +209,14 @@ void sch_unlock(void)
 
     scheduler_lock_nest--;
 
-    if (scheduler_lock_nest <= 0)
-    {
+    if (scheduler_lock_nest <= 0) {
         scheduler_lock_nest = 0;
         /* enable interrupt */
         enable_irq_save(level);
 
-        switch_task();
-    }
-    else
-    {
+        if (kernel_running == 1)
+            switch_task();
+    } else {
         /* enable interrupt */
         enable_irq_save(level);
     }

@@ -7,7 +7,7 @@ int com_get_version(void)
     uint8_t buf[3] = {VERSION, PATCHLEVEL, SUBLEVEL};
     int ret;
 
-    ret = com_send_ack(3, PKG_END);
+    ret = com_send_ack(false);
     if (ret != 0)
         goto err;
     pr_info("%s: send ack ok\r\n", __func__);
@@ -15,7 +15,7 @@ int com_get_version(void)
     if (ret != 0)
         goto err;
     pr_info("%s: send data ok\r\n", __func__);
-    ret = com_wait_ack(NULL);
+    ret = com_wait_ack();
     if (ret != 0)
         goto err;
     pr_info("%s: wait ack ok\r\n", __func__);

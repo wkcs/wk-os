@@ -189,16 +189,21 @@ int device_unregister(struct device *dev)
 struct device *device_find_by_name(const char *name)
 {
     struct device *dev;
+    register addr_t level;
 
     if (name == NULL) {
         pr_err("%s[%d]:name addr is NULL\r\n", __func__, __LINE__);
         return NULL;
     }
 
+    level = disable_irq_save();
     list_for_each_entry(dev, &sys_device_list, list) {
-        if (!strcmp(name, dev->name))
+        if (!strcmp(name, dev->name)) {
+            enable_irq_save(level);
             return dev;
+        }
     }
+    enable_irq_save(level);
 
     return NULL;
 }

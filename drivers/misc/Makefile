@@ -6,4 +6,4 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-obj-$(CONFIG-STM32PWM) = stm32_pwm.o
+obj-$(CONFIG_STM32PWM) = stm32_pwm.o

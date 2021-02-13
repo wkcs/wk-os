@@ -175,11 +175,11 @@ void w25qxx_erase_chip(void)
 //擦除一个山区的最少时间:150ms
 void w25qxx_erase_sector(uint32_t Dst_Addr)
 {
-    pr_info("fe:%x\r\n", Dst_Addr);
+    //pr_info("fe:%x\r\n", Dst_Addr);
     Dst_Addr *= 4096;
     w25qxx_write_enable(); //SET WEL
     w25qxx_wait_busy();
-    pr_info("next\r\n");
+    //pr_info("next\r\n");
     W25QXX_CS = 0;                              //使能器件
     spi1_read_write_byte(W25X_SectorErase);       //发送扇区擦除指令
     spi1_read_write_byte((uint8_t)((Dst_Addr) >> 16)); //发送24bit地址

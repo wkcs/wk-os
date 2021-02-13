@@ -49,6 +49,7 @@ static void timeout(void *parameter)
     task->flag = -ETIMEDOUT;
 
     list_del(&task->list);
+    list_del(&task->wait_list);
 
     enable_irq_save(level);
 
@@ -223,12 +224,12 @@ int task_hang(struct task_struct_t *task)
 
     if (!task) {
         pr_err("%s[%d]:task struct is NULL\r\n", __func__, __LINE__);
-        return -1;
+        return -EPERM;
     }
 
     if (task->status != TASK_READY && task->status != TASK_RUNING) {
         pr_err("%s[%d]:task status is not TASK_READY or TASK_RUNING\r\n", __func__, __LINE__);
-        return -1;
+        return -EINVAL;
     }
 
     level = disable_irq_save();
@@ -293,6 +294,7 @@ int task_sleep(uint32_t tick)
     rc = task_hang(task);
     if (rc) {
         pr_err("%s[%d]:task hang err(%d)\r\n", __func__, __LINE__, rc);
+        enable_irq_save(level);
         return rc;
     }
     timer_ctrl(&task->timer, CMD_TIMER_SET_TICK, &tick);

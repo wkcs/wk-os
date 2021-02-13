@@ -6,5 +6,5 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-obj-$(CONFIG-SPI_595) = spi-74hc595.o
-obj-$(CONFIG-SPI_W25QXX) += spi-w25qxx.o
+obj-$(CONFIG_SPI_595) = spi-74hc595.o
+obj-$(CONFIG_SPI_W25QXX) += spi-w25qxx.o

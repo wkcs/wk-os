@@ -59,69 +59,52 @@ void write_reboot_flag(uint8_t reboot_flag)
     flash_dev->ops.write(flash_dev, REBOOT_FLASH_BASE, (void *)&reboot_flag, 1);
 }
 
-int com_download_img(struct com_cmd_package *cmd_pkg)
+int com_download_img(uint8_t *buf, uint32_t size, uint32_t index)
 {
-    struct com_cmd_package pkg_tmp;
-    uint8_t *img_buf;
-    uint32_t size;
-    uint32_t total_size = 0;
-    addr_t addr = 0;
-    uint8_t end = PKG_END;
-    uint8_t data_type;
-    uint8_t last_data_type = DATA_ERR;
-    uint8_t img_index;
-    int ret;
+    static uint32_t index_save;
+    static uint32_t total_size;
+    static addr_t addr;
+    static uint8_t img_index;
+    int rc;
 
-    size = cmd_pkg->val;
-    pr_info("download img start, size = %d\r\n", size);
-    img_buf = wk_alloc(size, 0, get_current_task()->pid);
-    if (img_buf == NULL) {
-        pr_err("alloc img buf err\r\n");
-        return -ENOMEM;
-    }
-    end = cmd_pkg->end;
-    data_type = cmd_pkg->data_type;
-    img_index = cmd_pkg->index;
-
-    while (1) {
-        ret = com_send_ack(0, PKG_END);
-        if (ret != 0)
-            goto err;
-        ret = com_read_data(img_buf, size);
-        if (ret != 0)
-            goto err;
-        write_img_to_flash(img_buf, size, addr, img_index);
-        if (data_type != last_data_type) {
-            addr += size;
-            total_size += size;
-            last_data_type = data_type;
+    if (index == 0) {
+        if (index_save != 0) {
+            pr_err("pkg error, exit flash\r\n");
+            index_save = 0;
+            //com_send_ack(true);
+            return -EINVAL;
         }
-        pr_info("write img(size=%d) to 0x%08x\r\n", size, addr);
-        ret = com_send_ack(0, PKG_END);
-        if (ret != 0)
-            goto err;
-        if (end != PKG_NOT_END) {
-            pr_info("download img ok, total size = %d\r\n", total_size);
-            break;
-        }
-        delay_msec(10);
-        ret = com_read_data((uint8_t *)&pkg_tmp, sizeof(pkg_tmp));
-        if (ret != 0 || pkg_tmp.type != COM_DOWNLOAD_PKG)
-            goto err;
-        end = pkg_tmp.end;
-        size = pkg_tmp.val;
-        data_type = pkg_tmp.data_type;
-        if (img_index != pkg_tmp.index)
-            goto err;
+        index_save++;
+        total_size = (uint32_t)(buf[3] << 24) | (uint32_t)(buf[2] << 16) | (uint32_t)(buf[1] << 8) | buf[0];
+        img_index = buf[4];
+        addr = 0;
+        pr_info("img size:%d\r\n", total_size);
+        //com_send_ack(false);
+        return 0;
     }
 
-    pr_info("download img success, reboot now\r\n");
-    write_reboot_flag(img_index);
-    cpu_reboot();
-    goto out;
-err:
-    pr_err("download img err, ret = %d\r\n", ret);
-out:
-    wk_free((void *)img_buf);
-    return ret;
+    pr_info("img index:%d, size:%d\r\n", index, size);
+    rc = write_img_to_flash(buf, size, addr, img_index);
+    if (rc < 0) {
+        pr_err("flash img error, rc=%d\r\n", rc);
+        //com_send_ack(true);
+        index_save = 0;
+        return rc;
+    }
+    /* if (index_save < index) {
+        pr_err("pkg error, exit flash, index=%d, need=%d\r\n",index, index_save);
+        index_save = 0;
+        //com_send_ack(true);
+        return -EINVAL;
+    } */
+    index_save++;
+    //com_send_ack(false);
+    addr += size;
+    if (addr == total_size) {
+        pr_info("download img success, reboot now\r\n");
+        write_reboot_flag(img_index);
+        cpu_reboot();
+    }
+
+    return 0;
 }

@@ -1,10 +1,12 @@
 #include <wk/task.h>
 #include <wk/msg_queue.h>
+#include <wk/mutex.h>
 
 #include <drivers/usb_common.h>
 #include <drivers/usb_device.h>
 
 static struct list_head usb_device_list;
+static struct mutex ep_write_lock;
 
 static size_t usbd_ep_write(udevice_t device, uep_t ep, void *buffer, size_t size);
 static size_t usbd_ep_read_prepare(udevice_t device, uep_t ep, void *buffer, size_t size);
@@ -917,21 +919,18 @@ static size_t usbd_ep_write(udevice_t device, uep_t ep, __maybe_unused void *buf
     WK_ERROR(device->dcd != NULL);
     WK_ERROR(ep != NULL);    
 
-    sch_lock();
+    mutex_lock(&ep_write_lock);
     maxpacket = EP_MAXPACKET(ep);
-    if(ep->request.remain_size >= maxpacket)
-    {
+    if(ep->request.remain_size >= maxpacket) {
         dcd_ep_write(device->dcd, EP_ADDRESS(ep), ep->request.buffer, maxpacket);
         ep->request.remain_size -= maxpacket;
         ep->request.buffer += maxpacket;    
-    }
-    else
-    {
+    } else {
         dcd_ep_write(device->dcd, EP_ADDRESS(ep), ep->request.buffer, 
             ep->request.remain_size);
         ep->request.remain_size = 0;
     }
-    sch_unlock();
+    mutex_unlock(&ep_write_lock);
     return size;
 }
 
@@ -2136,6 +2135,7 @@ int usbd_core_init(void)
 
     /* create an usb message queue */
     __msg_q_init(&usb_mq, "usbd", usb_task);
+    __mutex_init(&ep_write_lock, "ep_write_lock");
 
     task_ready(usb_task);
 

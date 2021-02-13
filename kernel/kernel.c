@@ -9,7 +9,7 @@
 #include <wk/kernel.h>
 
 /*kernel运行标记*/
-addr_t kernel_running = false;
+addr_t kernel_running = 0;
 
 /*位图*/
 #ifndef USE_CPU_FFS

@@ -260,6 +260,7 @@
   */
 
 #include "stm32f4xx.h"
+#include <autocfg.h>
 
 //#define STM32F40_41xxx
 
@@ -308,8 +309,13 @@
 /*!< Uncomment the following line if you need to relocate your vector Table in
      Internal SRAM. */
 /* #define VECT_TAB_SRAM */
+
+#ifdef CONFIG_SUPPORT_BOOTLOADER
+#define VECT_TAB_OFFSET  0x8000
+#else
 #define VECT_TAB_OFFSET  0x00 /*!< Vector Table base offset field. 
                                    This value must be a multiple of 0x200. */
+#endif
 /******************************************************************************/
 
 /************************* PLL Parameters *************************************/
@@ -450,12 +456,12 @@ void SystemInit(void)
   SetSysClock();
 
   /* Configure the Vector Table location add offset address ------------------*/
-// #ifdef VECT_TAB_SRAM
-//   SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
-// #else
-//   SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
-// #endif
-  SCB->VTOR = FLASH_BASE | 0x8000;
+#ifdef VECT_TAB_SRAM
+   SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+#else
+   SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
+#endif
+  //SCB->VTOR = FLASH_BASE | 0x8000;
 }
 
 /**

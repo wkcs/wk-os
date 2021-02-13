@@ -10,6 +10,7 @@
 #include <wk/task.h>
 #include <wk/sch.h>
 #include <wk/cpu.h>
+#include <lib/string.h>
 
 /*设置互斥体的拥有者*/
 static inline void mutex_set_owner(struct mutex *lock, struct task_struct_t *task)

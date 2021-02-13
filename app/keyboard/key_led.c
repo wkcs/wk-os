@@ -7,7 +7,7 @@
 #include "keyboard.h"
 
 #define LED_TASK_PRIO       16
-#define LED_TASK_STACK_SIZE 256
+#define LED_TASK_STACK_SIZE 1024
 #define LED_TASK_TICK       3
 
 static uint8_t display_buf[15][14];
@@ -49,7 +49,7 @@ static uint8_t led_test_buf[30][3] = {
 };
 #endif
 
-#define RGB_DIV     15
+#define RGB_DIV     30
 #define RGB_DIV_NUM (255 / RGB_DIV)
 #define RRG_NUM     (RGB_DIV_NUM * 3)
 static void led_task_entry(__maybe_unused void* parameter)
@@ -62,21 +62,20 @@ static void led_task_entry(__maybe_unused void* parameter)
     while (1) {
         for (x = 0; x < 14; x++) {
             num_tmp = num + x;
-            if (num_tmp >= RRG_NUM)
-                num_tmp = num_tmp - RRG_NUM;
+            num_tmp = num_tmp % RRG_NUM;
             tmp = num_tmp / RGB_DIV_NUM;
             if (tmp == 0) {
-                r = 255 - (num_tmp % RGB_DIV_NUM) * 5;
-                g = (num_tmp % RGB_DIV_NUM) * 5;
+                r = 255 - (num_tmp % RGB_DIV_NUM) * RGB_DIV;
+                g = (num_tmp % RGB_DIV_NUM) * RGB_DIV;
                 b = 0;
             } else if (tmp == 1) {
                 r = 0;
-                g = 255 - (num_tmp % RGB_DIV_NUM) * 5;
-                b = (num_tmp % RGB_DIV_NUM) * 5;
+                g = 255 - (num_tmp % RGB_DIV_NUM) * RGB_DIV;
+                b = (num_tmp % RGB_DIV_NUM) * RGB_DIV;
             } else {
-                r = (num_tmp % RGB_DIV_NUM) * 5;
+                r = (num_tmp % RGB_DIV_NUM) * RGB_DIV;
                 g = 0;
-                b = 255 - (num_tmp % RGB_DIV_NUM) * 5;
+                b = 255 - (num_tmp % RGB_DIV_NUM) * RGB_DIV;
             }
             for (y = 0; y < 5; y++) {
                 display_buf[y * 3][x] = r;
