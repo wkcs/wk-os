@@ -3,11 +3,12 @@
 #include <wk/delay.h>
 #include <wk/err.h>
 #include <init/init.h>
+#include <drivers/usb_common.h>
 
 #include "keyboard.h"
 
 #define LED_TASK_PRIO       16
-#define LED_TASK_STACK_SIZE 1024
+#define LED_TASK_STACK_SIZE 4096
 #define LED_TASK_TICK       3
 
 static uint8_t display_buf[15][14];
@@ -49,6 +50,30 @@ static uint8_t led_test_buf[30][3] = {
 };
 #endif
 
+static uint8_t caps_rgb[3] = { 0, 0, 0 };
+bool caps_is_lock = false;
+
+void HID_Report_Received(hid_report_t report)
+{
+    if (report->size == 1) {
+        if ((uint8_t)(*report->report) & 0x02) {
+            caps_is_lock = true;
+        } else {
+            caps_is_lock = false;
+        }
+    }
+}
+
+void caps_lock(void)
+{
+    caps_is_lock = true;
+}
+
+void caps_unlock(void)
+{
+    caps_is_lock = false;
+}
+
 #define RGB_DIV     30
 #define RGB_DIV_NUM (255 / RGB_DIV)
 #define RRG_NUM     (RGB_DIV_NUM * 3)
@@ -81,6 +106,11 @@ static void led_task_entry(__maybe_unused void* parameter)
                 display_buf[y * 3][x] = r;
                 display_buf[y * 3 + 1][x] = g;
                 display_buf[y * 3 + 2][x] = b;
+                if (caps_is_lock && x == 0 && y == 2) {
+                    display_buf[y * 3][x] = caps_rgb[0];
+                    display_buf[y * 3 + 1][x] = caps_rgb[1];
+                    display_buf[y * 3 + 2][x] = caps_rgb[2];
+                }
             }
         }
         num++;

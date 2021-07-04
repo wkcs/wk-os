@@ -342,11 +342,33 @@ enum key_code {
     KC_##K40, KC_##K41, KC_##K42,                               KC_##K46,                               KC_##K4A, KC_##K4B, KC_##K4C, KC_##K4D  \
 }
 
+enum key_action {
+    KA_NO,
+    KA_LED,
+    KA_CAPS,
+    KA_MACRO,
+};
+
+#define ACTION_MAP( \
+    K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, \
+    K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K1A, K1B, K1C, K1D, \
+    K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K2A, K2B,      K2D, \
+    K30, K31, K32, K33, K34, K35, K36, K37, K38, K39, K3A,           K3D, \
+    K40, K41, K42,                K46,                K4A, K4B, K4C, K4D  \
+) { \
+    KA_##K00, KA_##K01, KA_##K02, KA_##K03, KA_##K04, KA_##K05, KA_##K06, KA_##K07, KA_##K08, KA_##K09, KA_##K0A, KA_##K0B, KA_##K0C, KA_##K0D, \
+    KA_##K10, KA_##K11, KA_##K12, KA_##K13, KA_##K14, KA_##K15, KA_##K16, KA_##K17, KA_##K18, KA_##K19, KA_##K1A, KA_##K1B, KA_##K1C, KA_##K1D, \
+    KA_##K20, KA_##K21, KA_##K22, KA_##K23, KA_##K24, KA_##K25, KA_##K26, KA_##K27, KA_##K28, KA_##K29, KA_##K2A, KA_##K2B,           KA_##K2D, \
+    KA_##K30, KA_##K31, KA_##K32, KA_##K33, KA_##K34, KA_##K35, KA_##K36, KA_##K37, KA_##K38, KA_##K39, KA_##K3A,                     KA_##K3D, \
+    KA_##K40, KA_##K41, KA_##K42,                               KA_##K46,                               KA_##K4A, KA_##K4B, KA_##K4C, KA_##K4D  \
+}
+
 struct key_info {
     uint8_t code;
     uint8_t val;
-    uint8_t special_key;
+    uint8_t action;
 };
 
+int key_action_run(enum key_action action);
 
 #endif /* __KEYBOARD_H__ */

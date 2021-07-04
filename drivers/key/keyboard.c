@@ -13,6 +13,7 @@
 #include <lib/string.h>
 #include <gpio.h>
 #include <board.h>
+#include <cmd/cmd.h>
 #include "keyboard.h"
 
 #define KEY_NUM 61
@@ -42,7 +43,7 @@
 #define KEY_Y14 PCin(13)
 
 #define KEY_TASK_PRIO       6
-#define KEY_TASK_STACK_SIZE 1024
+#define KEY_TASK_STACK_SIZE 4096
 #define KEY_TASK_TICK       3
 
 #define KEY_UP   0
@@ -73,8 +74,29 @@ static int def_key_code_layout[3][KEY_NUM] = {
         GRV, F1,  F2,  F3,  F4,  F5,  F6,  F7,  F8,  F9,  F10, F11, F12, DEL, \
         NO,  NO , UP,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  INS, \
         NO,  LEFT,DOWN,RGHT,NO,  NO,  PSCR,SLCK,PAUS,NO,  NO,  END,      NO,  \
-        NO,  NO , NO,  NO,  NO,  NO,  NO,  NO,  PGUP,PGDN,NO,            NO,  \
+        NO,  NO , NO,  NO,  NO,  NO,  NO,  NO,  NO  ,NO  ,NO,            NO,  \
         NO,  NO,  NO,            NO,                      NO,  NO,  NO,  NO   ),
+};
+
+static int def_action_layout[3][KEY_NUM] = {
+    ACTION_MAP(
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,   \
+        CAPS,NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,       NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,            NO,   \
+        NO,  NO,  NO,            NO,                      NO,  NO,  NO,  NO    ),
+    ACTION_MAP(
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,       NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,            NO,   \
+        NO,  NO,  NO,            NO,                      NO,  NO,  NO,  NO    ),
+    ACTION_MAP(
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,  NO,       NO,   \
+        NO,  NO,  NO,  NO,  NO,  NO,  LED, NO,  NO,  NO,  NO,            NO,   \
+        NO,  NO,  NO,            NO,                      NO,  NO,  NO,  NO    ),
 };
 
 static struct key_info def_key_info[KEY_NUM];
@@ -195,15 +217,18 @@ static void key_info_update(uint32_t *raw_data, struct key_info *info)
             if (info[i].val != KEY_DOWN) {
                 info[i].code = def_key_code_layout[layer][i];
                 info[i].val = KEY_DOWN;
-                pr_info("key down: layer=%d, index=%d, code=0x%02x\r\n", layer, i, info[i].code);
+                info[i].action = def_action_layout[layer][i];
+                //pr_info("key down: layer=%d, index=%d, code=0x%02x, action=%d\r\n", layer, i, info[i].code, info[i].action);
                 if (((layer == FN_LAYER) && (def_key_code_layout[DEF_LAYER][i] == KC_FN)) ||
                     ((layer == PN_LAYER) && (def_key_code_layout[DEF_LAYER][i] == KC_PN))) {
                     info[i].code = def_key_code_layout[DEF_LAYER][i];
+                    info[i].action = def_action_layout[DEF_LAYER][i];
                 }
             }
         } else {
             info[i].code = KC_NO;
             info[i].val = KEY_UP;
+            info[i].action = KA_NO;
         }
     }
 }
@@ -290,6 +315,20 @@ static void key_hid_data_update(struct key_info *info, uint8_t *hid_data)
         memcpy(&hid_data[2 + bck_num], data_new, 6 - bck_num);
 }
 
+static void key_action(struct key_info *info)
+{
+    int i;
+
+    for (i = 0; i < 64; i++) {
+        if (info[i].val != KEY_DOWN)
+            continue;
+        if (info[i].action == KA_NO)
+            continue;
+
+        key_action_run(info[i].action);
+    }
+}
+
 static void key_task_entry(__maybe_unused void* parameter)
 {
     uint8_t hid_data[8] = { 0 };
@@ -312,6 +351,7 @@ static void key_task_entry(__maybe_unused void* parameter)
         if (update) {
             update = false;
             key_info_update(key_raw_data, def_key_info);
+            key_action(def_key_info);
             key_hid_data_update(def_key_info, hid_data);
             for (i = 0; i < 8; i++) {
                 if (hid_data[i] != hid_data_old[i]) {
@@ -321,9 +361,6 @@ static void key_task_entry(__maybe_unused void* parameter)
             }
             if (update) {
                 update = false;
-                pr_info("hid data = 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x\r\n",
-                    hid_data[0], hid_data[1], hid_data[2], hid_data[3],
-                    hid_data[4], hid_data[5], hid_data[6], hid_data[7]);
                 hid_write_test(hid_data, 8);
             }
         }

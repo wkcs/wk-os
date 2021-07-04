@@ -7,3 +7,4 @@
 ##############################################
 
 obj-$(CONFIG_KEYBOARD) = keyboard.o
+obj-$(CONFIG_KEYBOARD) += key_action.o
