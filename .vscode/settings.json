@@ -12,6 +12,7 @@
         "mutex.h": "c",
         "mm.h": "c",
         "sch.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "cstdint": "cpp"
     }
 }

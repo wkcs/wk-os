@@ -356,7 +356,7 @@ static void key_task_entry(__maybe_unused void* parameter)
                 if (key_get_y_val(y) == KEY_DOWN && key_info[0][position_index[x][y]].val == KEY_DOWN)
                     key_info[0][position_index[x][y]].val = KEY_DOWN;
                 else
-                    key_info[0][position_index[x][y]].val = KEY_UP;    
+                    key_info[0][position_index[x][y]].val = KEY_UP;
             }
             key_set_x_out(x, KEY_UP);
         }

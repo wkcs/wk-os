@@ -6,4 +6,4 @@
 # Email: hqh2030@gmail.com, huqihan@live.com
 ##############################################
 
-obj-$(CONFIG_KEYBOARD) = key-keyboard.o
+obj-$(CONFIG_KEYBOARD) = keyboard.o
